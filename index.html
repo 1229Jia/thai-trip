@@ -764,9 +764,15 @@ var PH={
  'sp-chatuchak':{f:'Chatuchak_Clock_Tower_(28102254850).jpg',by:'Thomas Woodtli',lic:'CC BY-SA 2.0',lu:'https://creativecommons.org/licenses/by-sa/2.0/'},
  'sp-asiatique':{f:'Asiatique_Sky_Ferris_Wheel.jpg',by:'Moel81',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'},
  'sp-t21':{f:'Terminal_21_Pattaya_20190825_06.jpg',by:'西安兵马俑',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'},
+ 'sp-iconsiam':{f:'Approaching_Iconsiam_from_Chao_Phraya_River,_Bangkok.jpg',by:'Slyronit',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'},
+ 'sp-siam':{f:'Bangkok_Siam_square_at_night.jpg',by:'Paolobon140',lic:'CC0',lu:'https://creativecommons.org/publicdomain/zero/1.0/'},
+ 'sp-centralworld':{f:'Central_World_(I).jpg',by:'Supanut Arunoprayote',lic:'CC BY 4.0',lu:'https://creativecommons.org/licenses/by/4.0/'},
+ 'sp-songwat':{f:'ถนนทรงวาด.jpg',by:'Phoebus 28',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'},
+ 'sp-chula':{f:'Main_auditorium_of_Chulalongkorn_University_IMG_0338.jpg',by:'Carnopus',lic:'CC BY-SA 3.0',lu:'https://creativecommons.org/licenses/by-sa/3.0/'},
+ 'air':{f:'Suvarnabhumi_Airport_Terminal_E_interior_at_dusk.jpg',by:'Grendelkhan',lic:'CC BY-SA 3.0',lu:'https://creativecommons.org/licenses/by-sa/3.0/'},
  'beach':{f:'DSC_7560_Coastal_city_skyline_with_high-rise_buildings_and_numerous_boats_scattered_across_a_calm_blue_bay_on_a_clear_day.jpg',by:'PattayaPatrol',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'}
 };
-function photoOf(s){return PH[s.id||(s.mo==='sea'?'beach':'')];}
+function photoOf(s){if(s.a===AIRP&&s.k!=='flight'){return PH.air;}return PH[s.id||(s.mo==='sea'?'beach':'')];}
 function photoHtml(ph,alt){
   return '<figure class="photo"><img loading="lazy" src="https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(ph.f)+'?width=800" alt="'+esc(alt)+'" onerror="var c=this.closest(\'.tcard\');if(c){c.classList.add(\'nophoto\');}this.closest(\'figure\').remove();">'+
   '<figcaption>照片：<a href="'+CM+'File:'+encodeURIComponent(ph.f)+'" target="_blank" rel="noopener">'+esc(ph.by)+'</a>・<a href="'+ph.lu+'" target="_blank" rel="noopener">'+esc(ph.lic)+'</a>・Wikimedia Commons</figcaption></figure>';
