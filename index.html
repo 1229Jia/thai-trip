@@ -185,7 +185,8 @@ details.card ul{margin:8px 0 0;padding-left:1.2em;font-size:14px}
 .tbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .tbtns a{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:600 13px var(--sans);text-decoration:none}
 .tbtns a svg{width:15px;height:15px}
-.tcard .heart{width:36px;height:36px;margin:-6px -6px 0 0}
+.tside{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tcard .heart{width:36px;height:36px;margin:0}
 #rmap{height:300px;background:#CFE3DF}
 .route .rnote{z-index:500}
 .lpin{width:28px!important;height:28px!important;margin:-14px 0 0 -14px!important;border-radius:50%;border:2.5px solid #fff;color:#fff;font:700 13px/23px var(--sans);text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.35)}
@@ -826,7 +827,7 @@ function stopCard(s,i,d,cur){
   (s.lk||[]).forEach(function(x){btns+='<a href="'+esc(x[0])+'" target="_blank" rel="noopener">'+IC.link+esc(x[1])+'</a>';});
   var ph=photoOf(s);
   return '<li class="ts'+(s.k?' '+s.k:'')+(cur?' cur':'')+'" id="stop-'+d.id+'-'+i+'"><div class="tcol">'+(s.t?esc(s.t.split(' ')[0]):'')+'<span class="tn">'+(i+1)+'</span></div>'+
-    '<div class="tcard'+(ph?' hasphoto':'')+'">'+(ph?photoHtml(ph,s.n):'')+'<div class="tch"><div class="tcb"><div class="tags">'+tags+'</div><h4>'+esc(s.n)+'</h4>'+(s.t&&s.t.indexOf('→')>-1?'<p class="note">'+esc(s.t)+'</p>':'')+'</div>'+th+(s.id?heart(s.id):'')+'</div>'+
+    '<div class="tcard'+(ph?' hasphoto':'')+'">'+(ph?photoHtml(ph,s.n):'')+'<div class="tch"><div class="tcb"><div class="tags">'+tags+'</div><h4>'+esc(s.n)+'</h4>'+(s.t&&s.t.indexOf('→')>-1?'<p class="note">'+esc(s.t)+'</p>':'')+'</div><div class="tside">'+th+(s.id?heart(s.id):'')+'</div></div>'+
     (meta?'<div class="tmeta">'+meta+'</div>':'')+
     (s.note?'<div class="tip">'+IC.bulb+'<span>'+esc(s.note)+'</span></div>':'')+
     (s.tbc?'<div class="tip tbc">'+IC.warn+'<span>待確認：'+esc(s.tbc)+'</span></div>':'')+
