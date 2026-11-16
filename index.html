@@ -143,7 +143,8 @@ details.card ul{margin:8px 0 0;padding-left:1.2em;font-size:14px}
 @media (prefers-reduced-motion:no-preference){.chip,.heart{transition:background .15s,color .15s}}
 /* route header */
 .route{position:relative;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#CFE3DF 0%,#BFD8D3 100%);border:1px solid var(--line)}
-.route svg{display:block;width:100%;height:auto}
+.route>svg{display:block;width:100%;height:auto}
+.leaflet-attribution-flag{display:none!important}
 .route .rtl{padding:12px 16px 14px;background:#2B4A4D;color:#fff}
 .route .rtl small{display:block;font:600 11px var(--sans);letter-spacing:.2em;opacity:.85}
 .route .rtl b{display:block;font:600 24px/1.2 var(--cjk)}
@@ -776,7 +777,8 @@ function buildMap(d){
   if(!el||!window.L){return false;}
   var pts=[];d.stops.forEach(function(s,i){var ll=llOf(s);if(ll){pts.push({i:i,ll:ll,s:s});}});
   if(!pts.length){return false;}
-  LMAP=L.map(el,{scrollWheelZoom:false,zoomControl:true,attributionControl:true});
+  LMAP=L.map(el,{scrollWheelZoom:false,zoomControl:true,attributionControl:false});
+  L.control.attribution({prefix:'<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>'}).addTo(LMAP);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(LMAP);
   L.polyline(pts.map(function(p){return p.ll;}),{color:'#2F5A5C',weight:3,dashArray:'2 8',lineCap:'round'}).addTo(LMAP);
   var seen={},col=getComputedStyle(document.documentElement).getPropertyValue('--'+DAYV[d.id-1]).trim()||'#3F7A78';
