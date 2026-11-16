@@ -1,0 +1,982 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>泰國旅行手帳</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF6EB; --card:#FFFDF7; --fg:#252422; --muted:#585247; --line:#E3D9C3;
+  --siam:#3F7A78; --icon:#7A5C7E; --songwat:#B0603A; --chatuchak:#5E6B4A; --asiatique:#B0485A; --pattaya:#3D6B8C;
+  --c-cloth:#B5484A; --c-bag:#96691F; --c-shoe:#456E91; --c-vint:#7A5A3A; --c-acc:#A5547B; --c-frag:#725C8E; --c-life:#4F7D55; --c-art:#B5662A; --c-coll:#3E6A73;
+  --ok:#3F6E45; --warn:#A8531F;
+  --sage:#6B705C; --clay:#9C5632; --sea:#3F7A78; --art:#F1E9D6; --on:#F7F1E3;
+  --serif:"Cormorant Garamond","Noto Serif TC",Georgia,serif;
+  --cjk:"Noto Serif TC","Songti TC",serif;
+  --sans:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.65 var(--sans);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:14px 92px;-webkit-text-size-adjust:100%}
+.app{max-width:480px;margin:0 auto}
+h1,h2,h3,h4,p,ul,ol,dl{margin:0}
+a{color:var(--sea)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.eyebrow{font:500 11px/1.3 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.view{display:flex;flex-direction:column;gap:18px}
+.mast{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.art{background:var(--art);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+canvas{display:block;width:100%;height:auto}
+h1{font:500 46px/1.02 var(--serif);letter-spacing:-.01em;text-wrap:balance}
+h1 em{display:inline;font-style:italic;font-weight:500;color:var(--sage)}
+.sub{font:600 13px/1.3 var(--sans);letter-spacing:.3em;color:var(--sea)}
+.meta{font:500 12px/1.4 var(--sans);letter-spacing:.14em;color:var(--muted)}
+.sec{font:500 26px/1.2 var(--serif);display:flex;align-items:baseline;gap:10px}
+.sec span{font:500 13px var(--sans);color:var(--muted);letter-spacing:.08em}
+.pg{font:600 30px/1.15 var(--cjk);text-wrap:balance}
+.lead{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px}
+.entries{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.entry{display:flex;flex-direction:column;gap:8px;text-align:left;padding:0;background:none;border:0;min-width:0}
+.entry h3{font:600 20px/1.2 var(--cjk)}
+.entry span.en{font:500 11px var(--sans);letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 16px;border:1.5px solid color-mix(in srgb,var(--c,var(--muted)) 55%,transparent);background:var(--card);border-radius:22px;font:500 13px var(--sans);white-space:nowrap}
+.chip[style]::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:7px;vertical-align:middle}
+.chip[aria-pressed="true"]{background:var(--c,var(--fg));color:var(--on);border-color:var(--c,var(--fg));font-weight:700}
+.chip[aria-pressed="true"]::before{background:var(--on)}
+.dchip{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.25;padding:0 14px;border-radius:6px;border-top:5px solid var(--c);background:color-mix(in srgb,var(--c) 14%,var(--card))}
+.dchip::before{display:none!important}
+.dchip b{font:600 11px var(--sans);letter-spacing:.14em}
+.dchip small{font-size:12px;opacity:.85}
+.flt .rt{display:flex;align-items:center;gap:10px;margin:8px 0 2px}
+.flt .rt b{font:500 26px var(--serif);letter-spacing:.04em}
+.flt .rt i{flex:1;border-top:1px dashed var(--muted)}
+.flt .tm{display:flex;justify-content:space-between;font:500 13px var(--sans);font-variant-numeric:tabular-nums}
+.flt p{font-size:13px;color:var(--muted);margin-top:6px}
+.note{font-size:13px;color:var(--muted)}
+.dayhead{display:flex;flex-direction:column;gap:4px;border-top:6px solid var(--c);padding-top:10px}
+.dayhead .eyebrow{color:var(--c);font-weight:700}
+.dayhead .en{font:italic 500 20px var(--serif);color:var(--muted)}
+.car{font:500 12px var(--sans);letter-spacing:.1em;color:var(--sage)}
+.tl{list-style:none;padding:0;margin:0}
+.stop{display:grid;grid-template-columns:28px minmax(0,1fr) 44px;gap:10px;position:relative;padding-bottom:16px}
+.stop::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:color-mix(in srgb,var(--c,var(--line)) 35%,transparent)}
+.stop:last-child::before{display:none}
+.dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--c,var(--clay));color:var(--c,var(--clay));display:grid;place-items:center;font:700 12px var(--sans);background:var(--bg)}
+.stop.flight .dot{background:var(--c,var(--sea));color:var(--on)}
+.sb{padding-top:2px;min-width:0}
+.sb h4{font:600 17px/1.35 var(--cjk)}
+.sb p{font-size:13px;color:var(--muted)}
+.sb .tbc{color:var(--clay)}
+.time{display:block;font:600 12px var(--sans);letter-spacing:.08em;color:var(--c,var(--sea));font-variant-numeric:tabular-nums}
+.tg{margin-top:4px;display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:inline-block;font:500 11px/1.6 var(--sans);padding:0 8px;border:1px solid var(--line);border-radius:99px;color:var(--muted)}
+.pill.ok{color:var(--ok);border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent);font-weight:600}
+.pill.tbc{color:var(--warn);border-color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent);font-weight:600}
+.heart{width:44px;height:44px;display:grid;place-items:center;background:none;border:0;color:var(--muted);flex:none}
+.heart[aria-pressed="true"]{color:var(--clay)}
+.heart[aria-pressed="true"] svg{fill:currentColor}
+details.card summary{cursor:pointer;font:600 15px var(--sans);min-height:28px}
+details.card ul{margin:8px 0 0;padding-left:1.2em;font-size:14px}
+.search{width:100%;height:46px;padding:0 14px;border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:4px;font:16px var(--sans)}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{min-height:44px;background:transparent;border:0;font:500 13px var(--sans);letter-spacing:.06em}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.filters{display:flex;flex-direction:column;gap:2px}
+.flabel{font:500 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.map{border:1px solid var(--line);border-radius:4px;background:var(--card);padding:6px}
+.map svg{display:block;width:100%;height:auto}
+.river{fill:none;stroke:var(--sea);stroke-opacity:.3;stroke-width:24;stroke-linecap:round}
+.inset{fill:none;stroke:var(--muted);stroke-dasharray:4 4}
+.pin{cursor:pointer}
+.pin circle{fill:var(--clay)}
+.pin[data-reg="siam"] circle{fill:var(--siam)}
+.pin[data-reg="icon"] circle{fill:var(--icon)}
+.pin[data-reg="songwat"] circle{fill:var(--songwat)}
+.pin[data-reg="chatuchak"] circle{fill:var(--chatuchak)}
+.pin[data-reg="asiatique"] circle{fill:var(--asiatique)}
+.pin[data-reg="pattaya"] circle{fill:var(--pattaya)}
+.pin[aria-pressed="true"] circle{stroke:var(--fg);stroke-width:3}
+.pc{fill:var(--on);font:600 13px var(--sans);text-anchor:middle}
+.pl{fill:var(--fg);font:500 11px var(--sans);text-anchor:middle}
+.wl{fill:var(--sea);font:italic 500 12px var(--serif)}
+.mapnote{fill:var(--muted);font:10px var(--sans)}
+.count{font:500 12px var(--sans);color:var(--muted);letter-spacing:.06em}
+.list{display:flex;flex-direction:column;gap:12px}
+.place .ph{display:flex;align-items:flex-start;gap:10px}
+.place .pt{flex:1}
+.th{flex:none;width:72px;height:72px;border-radius:3px;overflow:hidden;border:2px solid var(--c,var(--line))}
+.th canvas,.th img{display:block;width:100%;height:100%;object-fit:cover}
+.place h3{font:600 18px/1.3 var(--sans);overflow-wrap:anywhere}
+.place .ph>div{min-width:0}
+.place .eyebrow{color:var(--c,var(--muted));font-weight:700}
+.sbm{display:flex;gap:10px;align-items:flex-start}
+.sbt{min-width:0;flex:1}
+.sbm .th{width:64px;height:64px}
+.sb .addr{font-size:12px;color:var(--fg);margin-top:3px;overflow-wrap:anywhere}
+.sb .addr b{display:inline-block;min-width:3em;margin-right:6px;color:var(--c);font-weight:700}
+.sbt .row{margin-top:4px}
+.tps{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tp{font:600 11px/1.7 var(--sans);padding:0 8px;border-radius:99px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.tp.sp{color:var(--fg);background:transparent;border:1px dashed var(--muted);font-weight:500}
+.card.flt{border-top:5px solid var(--sea)}
+.card.stay{border-top:5px solid var(--chatuchak)}
+.place{border-top:4px solid var(--c,var(--line))}
+.place .d{font-size:14px;margin-top:6px}
+.kv{display:grid;grid-template-columns:4.6em minmax(0,1fr);gap:2px 10px;margin:10px 0;font-size:13px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:13px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:4px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;margin:0 auto;width:100%;max-width:480px;display:grid;grid-template-columns:repeat(5,1fr);
+  background:var(--bg);border-top:1px solid var(--line);z-index:20;
+  padding:4px max(4px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px))}
+.tabbar a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:52px;
+  font:500 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.tabbar a[aria-current="page"]{color:var(--clay)}
+.tabbar svg{width:22px;height:22px}
+.bd{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--clay);color:var(--on);font:600 10px/16px var(--sans);text-align:center;padding:0 4px}
+@media (prefers-reduced-motion:no-preference){.chip,.heart{transition:background .15s,color .15s}}
+/* route header */
+.route{position:relative;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#CFE3DF 0%,#BFD8D3 100%);border:1px solid var(--line)}
+.route svg{display:block;width:100%;height:auto}
+.route .rtl{padding:12px 16px 14px;background:#2B4A4D;color:#fff}
+.route .rtl small{display:block;font:600 11px var(--sans);letter-spacing:.2em;opacity:.85}
+.route .rtl b{display:block;font:600 24px/1.2 var(--cjk)}
+.route .rnote{position:absolute;top:8px;right:8px;font:500 11px var(--sans);background:rgba(37,36,34,.62);color:#fff;padding:3px 10px;border-radius:99px}
+.rpin text{font:700 13px var(--sans);fill:#fff;text-anchor:middle}
+.rlab{font:600 13px var(--sans);fill:#1d3438;paint-order:stroke;stroke:#E6F0EE;stroke-width:3px}
+/* now banner */
+.nowbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:600 13px var(--sans);color:var(--fg);background:color-mix(in srgb,var(--sun,#DDB07A) 30%,var(--card));border:1px solid color-mix(in srgb,#C9A24A 50%,transparent);border-radius:8px;padding:8px 12px}
+.nowbar i{width:9px;height:9px;border-radius:50%;background:#2E9C8F;box-shadow:0 0 0 3px rgba(46,156,143,.22);flex:none}
+.nowbar button{border:0;background:none;color:var(--sea);font:700 13px var(--sans);text-decoration:underline;padding:0}
+/* timeline cards */
+.tl2{list-style:none;margin:0;padding:0;position:relative}
+.ts{display:grid;grid-template-columns:58px minmax(0,1fr);gap:0;position:relative;padding-bottom:16px}
+.ts::before{content:"";position:absolute;left:58px;top:10px;bottom:0;width:2px;background:color-mix(in srgb,var(--c,var(--sea)) 40%,transparent);transform:translateX(-50%)}
+.ts:last-child::before{display:none}
+.tcol{text-align:right;font:600 11px/1.2 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums;padding:5px 18px 0 0;position:relative}
+.tcol .tn{position:absolute;right:-11px;top:0;width:22px;height:22px;border-radius:50%;background:var(--bg);border:2px solid var(--c,var(--sea));color:var(--c,var(--sea));display:grid;place-items:center;font:700 11px var(--sans);z-index:1}
+.ts.cur .tcol .tn{background:#2E9C8F;border-color:#2E9C8F;color:#fff}
+.tcard{margin-left:20px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(37,36,34,.06);min-width:0}
+.ts.cur .tcard{border:2px solid #2E9C8F;box-shadow:0 0 0 4px rgba(46,156,143,.12)}
+.ts.flight .tcard{background:color-mix(in srgb,var(--sea) 8%,var(--card))}
+.tch{display:flex;gap:10px;align-items:flex-start}
+.tch .th{width:56px;height:56px;border-radius:8px}
+.tcb{min-width:0;flex:1}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.tag{font:700 11px/1.8 var(--sans);padding:0 9px;border-radius:6px;background:var(--c,var(--sea));color:#fff}
+.tag.now{background:#DDF1EC;color:#22796F}
+.tag.bk{background:#F6E3A6;color:#6B5310}
+.tag.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.tcard h4{font:700 18px/1.3 var(--cjk);overflow-wrap:anywhere}
+.tmeta{display:flex;flex-direction:column;gap:3px;margin-top:8px;font-size:13px;color:var(--fg)}
+.tmeta div{display:flex;gap:7px;align-items:flex-start;overflow-wrap:anywhere}
+.tmeta svg{flex:none;width:15px;height:15px;margin-top:3px;color:var(--muted)}
+.tip{margin-top:10px;display:flex;gap:8px;background:#FBF3DC;border:1px solid #F0DFA8;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6}
+.tip.tbc{background:color-mix(in srgb,var(--warn) 9%,var(--card));border-color:color-mix(in srgb,var(--warn) 35%,transparent);color:var(--warn)}
+.tip svg{flex:none;width:16px;height:16px;margin-top:2px;color:#B8901F}
+.tip.tbc svg{color:var(--warn)}
+.tbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tbtns a{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);font:600 13px var(--sans);text-decoration:none}
+.tbtns a svg{width:15px;height:15px}
+.tcard .heart{width:36px;height:36px;margin:-6px -6px 0 0}
+#rmap{height:300px;background:#CFE3DF}
+.route .rnote{z-index:500}
+.lpin{width:28px!important;height:28px!important;margin:-14px 0 0 -14px!important;border-radius:50%;border:2.5px solid #fff;color:#fff;font:700 13px/23px var(--sans);text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.leaflet-container{font-family:var(--sans)}
+.photo{margin:-14px -14px 12px;border-radius:13px 13px 0 0;overflow:hidden;background:var(--art)}
+.photo img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.photo figcaption{font:500 11px/1.5 var(--sans);color:var(--muted);padding:6px 12px;background:var(--card);border-bottom:1px solid var(--line)}
+.photo figcaption a{color:var(--muted)}
+.tcard.hasphoto .tch .th{display:none}
+.tcard.hasphoto.nophoto .tch .th{display:block}
+</style>
+
+<div class="app">
+<main>
+
+<section id="v-home" class="view">
+  <header class="mast"><span class="eyebrow">泰國旅行手帳</span><span class="eyebrow">2026 年 12 月 11–16 日</span></header>
+  <div class="art"><canvas data-motif="prang" data-seed="3" width="640" height="720" aria-label="厚塗油畫風格的鄭王廟"></canvas></div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <h1>泰國</h1>
+    <p class="sub">曼谷 ＋ 芭達雅</p>
+    <p class="meta">6 天 5 夜 · 全程包車</p>
+  </div>
+  <div class="entries">
+    <button class="entry" data-go="itinerary" data-day="1">
+      <div class="art"><canvas data-motif="skyline" data-seed="5" width="480" height="480" aria-hidden="true"></canvas></div>
+      <h3>曼谷</h3><span class="en">第 1 天抵達</span>
+    </button>
+    <button class="entry" data-go="itinerary" data-day="4">
+      <div class="art"><canvas data-motif="sea" data-seed="9" width="480" height="480" aria-hidden="true"></canvas></div>
+      <h3>芭達雅</h3><span class="en">第 4 天一日往返</span>
+    </button>
+  </div>
+  <div>
+    <h2 class="sec">每日行程 <span>Days</span></h2>
+    <div class="chips" id="home-days"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 class="sec">航班 <span>Flights</span></h2>
+    <div class="card flt">
+      <span class="eyebrow">去程 · 12/11 週五</span>
+      <div class="rt"><b>TPE</b><i></i><b>BKK</b></div>
+      <div class="tm"><span>07:00</span><span>09:50</span></div>
+      <p>中華航空 CI833 · 桃園 → 曼谷素汪那普 · 直飛 3 小時 50 分</p>
+    </div>
+    <div class="card flt">
+      <span class="eyebrow">回程 · 12/16 週三</span>
+      <div class="rt"><b>BKK</b><i></i><b>TPE</b></div>
+      <div class="tm"><span>17:50</span><span>22:25</span></div>
+      <p>中華航空 CI836 · 曼谷素汪那普 → 桃園 · 直飛 3 小時 35 分</p>
+    </div>
+    <p class="note">航班時間以航空公司最新通知及實際機票為準。</p>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 class="sec">住宿 <span>Stay</span></h2>
+    <div class="card stay">
+      <span class="eyebrow">曼谷 Airbnb · 12/11 → 12/16</span>
+      <p style="margin-top:6px">全程住同一間曼谷 Airbnb。12/14 芭達雅當日往返，不在芭達雅住宿。</p>
+      <p style="margin-top:6px">Soi Ekkamai 3, Watthana, Krung Thep Maha Nakhon 10110</p>
+      <p class="note" style="margin-top:6px">入住與退房時間、聯絡方式：<span class="pill tbc">待補</span></p>
+      <p style="margin-top:8px"><a href="https://www.airbnb.com.tw/rooms/1180012620563087717?unique_share_id=9b363b3e-80da-4eeb-aa3b-71fa9fd8a76b&amp;viralityEntryPoint=1&amp;s=76" target="_blank" rel="noopener">查看 Airbnb 房源</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="v-itinerary" class="view" hidden>
+  <header class="mast"><span class="eyebrow">行程</span><span class="eyebrow">12/11 – 12/16</span></header>
+  <h1 class="pg">每日行程</h1>
+  <div class="chips" id="day-chips" role="group" aria-label="選擇日期"></div>
+  <div id="day-body" class="view"></div>
+  <details class="card">
+    <summary>待確認事項</summary>
+    <ul>
+      <li>12/11 按摩：代訂中，訂好後補上店名</li>
+      <li>12/12 大城動物園是哪一間；Save One Go（KPO 店）完整門牌地址</li>
+      <li>12/13 Endless Holiday 是什麼店、營業時間；Kuay Jab Mr.Joe 的現行價格；Mr.Joe（南邊）到 Ari（北邊）車程較長</li>
+      <li>12/14 往返芭達雅的車程與回程時間；海邊要去哪裡；Seafood Station 是否需預約與門牌；6996 成人秀的預約</li>
+      <li>12/15「朱拉隆功」指的是哪個地點</li>
+      <li>12/16 民宿退房時間與行李安排</li>
+    </ul>
+  </details>
+</section>
+
+<section id="v-explore" class="view" hidden>
+  <header class="mast"><span class="eyebrow">探索</span><span class="eyebrow">購物資料庫</span></header>
+  <div class="art"><canvas data-motif="bag" data-seed="21" width="640" height="360" aria-hidden="true"></canvas></div>
+  <h1 class="pg">探索</h1>
+  <p class="lead">依行程會經過的區域整理的購物資料庫，約 100 個店家與逛街區域，可依地區、商品與風格篩選。與每日行程分開，不會自動排入行程。卡片上的圖是示意插畫，不是店家實景。商場內店家的營業時間依商場時間填寫，個別櫃位可能不同；標示「待確認」的店址、營業時間與品牌組合，出發前請再核對。</p>
+  <input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家">
+  <div class="filters">
+    <span class="flabel">地區</span>
+    <div class="chips" id="ex-regs"></div>
+    <span class="flabel">商品</span>
+    <div class="chips" id="ex-cats"></div>
+    <span class="flabel">風格</span>
+    <div class="chips" id="ex-sty"></div>
+  </div>
+  <div class="seg" role="group" aria-label="顯示模式">
+    <button data-mode="list" aria-pressed="true">列表模式</button>
+    <button data-mode="map" aria-pressed="false">地圖模式</button>
+  </div>
+  <div class="map" id="ex-map" hidden>
+    <svg viewBox="0 0 360 300" role="img" aria-label="曼谷購物區域示意圖">
+      <path class="river" d="M262 0C246 58 196 78 200 128S160 188 180 238S196 286 190 300"/>
+      <text class="wl" x="206" y="102">昭披耶河</text>
+      <g class="pin" data-reg="chatuchak" transform="translate(268,40)" tabindex="0" role="button" aria-label="洽圖洽"><circle r="16"/><text class="pc" dy=".35em">0</text><text class="pl" y="31">洽圖洽</text></g>
+      <g class="pin" data-reg="siam" transform="translate(272,126)" tabindex="0" role="button" aria-label="暹羅廣場"><circle r="16"/><text class="pc" dy=".35em">0</text><text class="pl" y="31">暹羅</text></g>
+      <g class="pin" data-reg="songwat" transform="translate(224,192)" tabindex="0" role="button" aria-label="嵩越路"><circle r="16"/><text class="pc" dy=".35em">0</text><text class="pl" y="31">嵩越路</text></g>
+      <g class="pin" data-reg="icon" transform="translate(136,206)" tabindex="0" role="button" aria-label="ICONSIAM"><circle r="16"/><text class="pc" dy=".35em">0</text><text class="pl" y="31">ICONSIAM</text></g>
+      <g class="pin" data-reg="asiatique" transform="translate(216,262)" tabindex="0" role="button" aria-label="河濱夜市"><circle r="16"/><text class="pc" dy=".35em">0</text><text class="pl" y="31">河濱夜市</text></g>
+      <rect class="inset" x="256" y="218" width="96" height="74" rx="4"/>
+      <g class="pin" data-reg="pattaya" transform="translate(304,246)" tabindex="0" role="button" aria-label="芭達雅"><circle r="16"/><text class="pc" dy=".35em">0</text><text class="pl" y="31">芭達雅</text></g>
+      <text class="mapnote" x="8" y="292">示意圖，位置僅供參考，非精確地圖</text>
+    </svg>
+  </div>
+  <p class="count" id="ex-count"></p>
+  <div class="list" id="ex-list"></div>
+</section>
+
+<section id="v-food" class="view" hidden>
+  <header class="mast"><span class="eyebrow">美食</span><span class="eyebrow">餐廳資料庫</span></header>
+  <div class="art"><canvas data-motif="bowl" data-seed="31" width="640" height="360" aria-hidden="true"></canvas></div>
+  <h1 class="pg">美食</h1>
+  <p class="lead">獨立的美食資料庫，不屬於每日行程。價格、營業時間與外送平台尚未逐店查核，確認前一律標示「待確認」，米其林收錄狀態請以最新年度指南為準。</p>
+  <input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳">
+  <div class="chips" id="fo-cats"></div>
+  <p class="count" id="fo-count"></p>
+  <div class="list" id="fo-list"></div>
+</section>
+
+<section id="v-saved" class="view" hidden>
+  <header class="mast"><span class="eyebrow">收藏</span><span class="eyebrow" id="sv-count">0 項</span></header>
+  <h1 class="pg">收藏</h1>
+  <p class="lead">收藏的資料只存在這個瀏覽器，換裝置不會同步。</p>
+  <div class="chips" id="sv-tabs"></div>
+  <div class="list" id="sv-list"></div>
+</section>
+
+</main>
+</div>
+
+<nav class="tabbar" aria-label="主要導覽">
+  <a href="#home" data-nav="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>首頁</a>
+  <a href="#itinerary" data-nav="itinerary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M11 6h9M11 18h9"/></svg>行程</a>
+  <a href="#explore" data-nav="explore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>探索</a>
+  <a href="#food" data-nav="food"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 7 0 0 1-18 0z"/><path d="M8 7c0-1.5 1-1.5 1-3M13 7c0-1.5 1-1.5 1-3"/></svg>美食</a>
+  <a href="#saved" data-nav="saved"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>收藏<span class="bd" id="bd" hidden>0</span></a>
+</nav>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+
+/* ---------- impasto painter ---------- */
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function hex2rgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255];}
+function shade(h,t){var c=hex2rgb(h),m=t<0?0:255,a=Math.abs(t);return 'rgb('+Math.round(c[0]+(m-c[0])*a)+','+Math.round(c[1]+(m-c[1])*a)+','+Math.round(c[2]+(m-c[2])*a)+')';}
+var Rc=function(x1,y1,x2,y2,c,a){return {p:[[x1,y1],[x2,y1],[x2,y2],[x1,y2]],c:c,a:a};};
+var Ci=function(x,y,r,c){return {e:[x,y,r,r],c:c};};
+var El=function(x,y,rx,ry,c){return {e:[x,y,rx,ry],c:c};};
+var Pg=function(p,c,a){return {p:p,c:c,a:a};};
+var CL={clay:'#C07F5C',sea:'#3F7A78',sky:'#8DB4AE',deep:'#2F5A5C',sage:'#6B705C',gold:'#C9A24A',sun:'#DDB07A',cream:'#EFE5D0',ink:'#252422',brick:'#A9573D'};
+var ACC=CL.clay;
+var MOTIFS={
+  prang:function(){return [
+    Rc(8,86,92,94,CL.sea,0),Rc(14,90,86,93,CL.sky,0),Rc(14,72,86,85,CL.clay,0),
+    Pg([[24,36],[29,50],[33,72],[15,72],[19,50]],'#D9CFB9',80),Pg([[76,36],[81,50],[85,72],[67,72],[71,50]],'#D9CFB9',100),
+    Pg([[50,8],[55,24],[61,44],[66,72],[34,72],[39,44],[45,24]],'#E9E1CF',90),
+    Rc(40,48,60,52,CL.sea,0),Rc(43,32,57,35,CL.sage,0),Ci(50,62,4.5,CL.clay),Rc(46,66,54,72,CL.ink,90),
+    Pg([[50,1],[53,10],[47,10]],CL.gold,90)];},
+  skyline:function(){return [
+    Ci(72,26,12,CL.sun),
+    Rc(14,48,30,84,CL.sage,90),Rc(32,34,46,84,CL.clay,90),Pg([[35,34],[39,18],[43,34]],CL.clay,90),
+    Rc(48,52,62,84,CL.sea,90),Rc(64,42,78,84,CL.gold,90),Rc(80,58,92,84,'#A97B5E',90),
+    Rc(8,84,92,94,CL.sea,0),Rc(12,88,60,91,CL.sky,0)];},
+  stupa:function(){return [
+    Ci(80,22,8,'#E8C26A'),Rc(8,82,92,92,CL.sage,0),
+    Rc(10,70,32,84,CL.brick,0),Rc(68,66,90,84,CL.brick,0),
+    Pg([[50,8],[54,28],[63,50],[72,78],[28,78],[37,50],[46,28]],'#B3563A',90),
+    Rc(41,52,59,56,'#8C3F2A',0),Rc(44,38,56,41,'#8C3F2A',0),Ci(50,10,3,CL.gold),Rc(45,62,55,78,CL.ink,90)];},
+  sea:function(){return [
+    Ci(50,38,15,'#E0894A'),Rc(8,50,92,86,CL.sea,0),
+    Rc(14,58,52,62,CL.sky,0),Rc(46,70,86,74,CL.sky,0),Rc(20,78,60,82,CL.deep,0),
+    Pg([[36,62],[66,62],[60,72],[42,72]],CL.ink,0),Pg([[49,28],[49,60],[37,60]],'#F2EBDD',80),Pg([[52,36],[52,60],[63,60]],'#E9D8B0',100)];},
+  market:function(){var a=[],i;
+    for(i=0;i<6;i++){a.push(Rc(14+i*12,30,26+i*12,48,i%2?CL.cream:CL.clay,90));}
+    a.push(Ci(24,14,5,CL.sun),Ci(50,12,5,CL.clay),Ci(76,14,5,CL.sun),Rc(14,48,86,53,CL.ink,0),Rc(10,70,90,86,'#8A6A4F',0),
+      Ci(28,64,5,CL.sage),Ci(44,64,5,CL.gold),Ci(60,64,5,CL.clay),Ci(76,64,5,CL.sea));return a;},
+  bowl:function(){return [
+    Rc(38,80,62,87,CL.deep,0),Pg([[16,48],[84,48],[74,80],[26,80]],CL.sea,90),
+    El(50,48,34,7,CL.sky),El(50,48,31,5.5,'#D9953F'),El(50,46,22,4,'#EAD28A'),Ci(40,44,2.8,'#B8433A'),El(60,44,5,2.4,'#6F9A5E')];},
+  dress:function(){return [
+    Rc(40,10,43,26,CL.ink,90),Rc(57,10,60,26,CL.ink,90),
+    Pg([[38,24],[62,24],[56,44],[74,88],[26,88],[44,44]],ACC,90),Rc(43,42,57,46,CL.ink,0),Rc(30,80,70,86,shadeHex(ACC),0)];},
+  shoe:function(){return [
+    Pg([[12,58],[30,38],[54,44],[72,56],[90,62],[90,76],[12,76]],ACC,0),Rc(12,76,90,83,CL.ink,0),Ci(32,48,5,CL.cream),Ci(74,64,3,CL.gold)];},
+  hanger:function(){return [
+    Rc(48,10,52,26,CL.ink,90),Ci(50,10,4,CL.gold),
+    Pg([[30,30],[50,40],[70,30],[90,46],[78,58],[70,52],[70,88],[30,88],[30,52],[22,58],[10,46]],ACC,60),Pg([[42,32],[50,42],[58,32],[50,36]],CL.cream,0)];},
+  jewel:function(){var a=[],i,x,y;
+    for(i=0;i<9;i++){x=18+i*8;y=20+Math.pow(i-4,2)*3.2;a.push(Ci(x,y,3.4,i%2?CL.gold:CL.cream));}
+    a.push(Pg([[50,46],[58,60],[50,76],[42,60]],ACC,90),Ci(50,86,4,CL.gold));return a;},
+  perfume:function(){return [
+    Rc(40,10,60,26,CL.ink,90),Rc(46,26,54,36,CL.gold,90),Rc(30,36,70,86,ACC,90),Rc(38,52,62,72,CL.cream,0),Rc(30,82,70,88,CL.ink,0)];},
+  vase:function(){return [
+    Rc(48,10,50,34,CL.sage,90),Rc(36,16,38,36,CL.sage,90),Ci(49,10,5,CL.sun),Ci(37,16,4,CL.cream),
+    Pg([[42,36],[58,36],[56,48],[72,64],[66,88],[34,88],[28,64],[44,48]],ACC,90)];},
+  frame:function(){return [
+    Rc(16,16,84,84,CL.ink,0),Rc(23,23,77,77,CL.cream,0),Ci(50,48,13,ACC),Pg([[23,77],[44,52],[60,77]],CL.sage,60),Ci(66,38,5,CL.sun)];},
+  record:function(){return [
+    Rc(10,14,64,86,CL.sea,90),Ci(62,50,34,CL.ink),Ci(62,50,12,ACC),Ci(62,50,2.5,CL.cream),Rc(18,24,48,30,CL.cream,0)];},
+  house:function(){return [
+    Pg([[50,12],[88,44],[12,44]],ACC,0),Rc(22,44,78,88,CL.cream,90),Rc(44,60,58,88,CL.ink,90),Rc(28,52,38,62,CL.sky,0),Rc(64,52,74,62,CL.sky,0)];},
+  lion:function(){return [
+    Ci(32,26,8,CL.brick),Ci(68,26,8,CL.brick),Ci(50,50,34,CL.brick),Ci(50,54,22,CL.sun),Ci(41,48,3,CL.ink),Ci(59,48,3,CL.ink),Pg([[44,60],[56,60],[50,68]],CL.ink,90)];},
+  lotus:function(){return [
+    Pg([[30,32],[48,76],[24,66],[16,46]],ACC,60),Pg([[70,32],[52,76],[76,66],[84,46]],ACC,120),Pg([[50,20],[62,60],[50,78],[38,60]],CL.sun,90),Rc(12,78,88,88,CL.sea,0)];},
+  plane:function(){return [
+    El(24,80,12,4,'#DDE7EA'),El(76,22,12,4,'#DDE7EA'),
+    Pg([[48,48],[60,48],[50,28],[42,28]],'#C9C0AE',90),Pg([[16,48],[10,30],[22,30],[28,47]],CL.sea,90),
+    El(50,50,36,6.5,'#E9E1CF'),Rc(22,51,80,53.5,CL.sea,0),Pg([[46,52],[62,52],[44,76],[34,76]],'#C9C0AE',90),Ci(84,50,3,CL.clay)];},
+  bag:function(){return [
+    Pg([[38,38],[38,22],[62,22],[62,38],[57,38],[57,28],[43,28],[43,38]],CL.ink,90),
+    Pg([[26,38],[74,38],[80,86],[20,86]],CL.clay,90),Rc(20,74,80,80,'#8C4A2C',0),Ci(50,58,8,CL.cream)];}
+};
+function shadeHex(h){return shade(h,-.35);}
+function paint(cv){
+  if(!cv||cv.dataset.done)return;
+  var mk=MOTIFS[cv.dataset.motif];if(!mk||!cv.getContext)return;
+  ACC=[CL.clay,CL.sea,CL.sage,CL.gold,'#8C5A8A','#C77D6A'][(+cv.dataset.v||0)%6];
+  cv.dataset.done='1';
+  var ctx=cv.getContext('2d'),W=cv.width,H=cv.height,R=rng(cv.dataset.seed?+cv.dataset.seed:7),i;
+  ctx.fillStyle=cv.dataset.bg||'#F3ECDD';ctx.fillRect(0,0,W,H);
+  for(i=0;i<W*H/260;i++){
+    var fx=R()*W,fy=R()*H,fl=3+R()*9,fa=R()*6.28;
+    ctx.strokeStyle=R()<.5?'rgba(120,100,70,.07)':'rgba(255,255,255,.35)';ctx.lineWidth=.6;
+    ctx.beginPath();ctx.moveTo(fx,fy);ctx.lineTo(fx+Math.cos(fa)*fl,fy+Math.sin(fa)*fl);ctx.stroke();
+  }
+  var S=Math.min(W,H)*(W<=200?.84:.58),k=S/100,ox=(W-S)/2,oy=(H-S)/2;
+  var X=function(x){return ox+x*k;},Y=function(y){return oy+y*k;};
+  mk().forEach(function(s){
+    var c=s.c,P=new Path2D(),x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
+    if(s.e){var e=s.e;P.ellipse(X(e[0]),Y(e[1]),e[2]*k,e[3]*k,0,0,6.2832);x1=X(e[0]-e[2]);x2=X(e[0]+e[2]);y1=Y(e[1]-e[3]);y2=Y(e[1]+e[3]);}
+    else{
+      s.p.forEach(function(q,n){
+        var px=X(q[0])+(R()-.5)*3,py=Y(q[1])+(R()-.5)*3;
+        if(n){P.lineTo(px,py);}else{P.moveTo(px,py);}
+        x1=Math.min(x1,px);x2=Math.max(x2,px);y1=Math.min(y1,py);y2=Math.max(y2,py);
+      });
+      P.closePath();
+    }
+    ctx.save();ctx.fillStyle=c;ctx.fill(P);ctx.clip(P);
+    var bw=x2-x1,bh=y2-y1,L=S*.16,w=S*.055,base=s.a!=null?s.a:(bh>bw?90:0);
+    var n2=Math.min(420,Math.ceil(bw*bh/(L*w)*2.4)+6);
+    ctx.lineCap='round';
+    for(var j=0;j<n2;j++){
+      var px2=x1+R()*bw,py2=y1+R()*bh,ang=(base+(R()-.5)*50)*Math.PI/180,len=L*(.55+R()*.7),wd=w*(.6+R()*.8);
+      var dx=Math.cos(ang)*len/2,dy=Math.sin(ang)*len/2,nx=-Math.sin(ang),ny=Math.cos(ang);
+      ctx.globalAlpha=1;ctx.strokeStyle=shade(c,(R()-.45)*.4);ctx.lineWidth=wd;
+      ctx.beginPath();ctx.moveTo(px2-dx,py2-dy);ctx.lineTo(px2+dx,py2+dy);ctx.stroke();
+      ctx.globalAlpha=.45;ctx.strokeStyle=shade(c,.4);ctx.lineWidth=wd*.2;
+      ctx.beginPath();ctx.moveTo(px2-dx-nx*wd*.28,py2-dy-ny*wd*.28);ctx.lineTo(px2+dx-nx*wd*.28,py2+dy-ny*wd*.28);ctx.stroke();
+      ctx.globalAlpha=.3;ctx.strokeStyle=shade(c,-.4);
+      ctx.beginPath();ctx.moveTo(px2-dx+nx*wd*.34,py2-dy+ny*wd*.34);ctx.lineTo(px2+dx+nx*wd*.34,py2+dy+ny*wd*.34);ctx.stroke();
+    }
+    ctx.globalAlpha=.35;ctx.lineWidth=3;ctx.strokeStyle=shade(c,-.3);ctx.stroke(P);
+    ctx.restore();
+  });
+}
+
+/* ---------- data: itinerary ---------- */
+var HOME='Soi Ekkamai 3, Watthana, Krung Thep Maha Nakhon 10110';
+var HQ='Soi Ekkamai 3 Watthana Bangkok';
+var AIRP='Suvarnabhumi Airport, 999 Moo 1, Nong Prue, Bang Phli, Samut Prakan 10540';
+var DAYS=[
+ {id:1,date:'12/11',dow:'週五',zh:'抵達曼谷・市區活動',en:'Arrival in Bangkok',motif:'skyline',stops:[
+  {k:'flight',mo:'plane',t:'07:00 → 09:50',n:'CI833 桃園 TPE → 曼谷 BKK',note:'中華航空，直飛 3 小時 50 分，上午 9:50 抵達'},
+  {mo:'plane',n:'BKK 素汪那普機場接機',note:'包車接機',a:AIRP,q:'Suvarnabhumi Airport'},
+  {id:'sp-siam',mo:'dress',n:'暹羅廣場 Siam Square',note:'街區型商圈，各店營業時間不同。旁邊的 Siam Center 每日 10:00–22:00',a:'Rama I Rd, Pathum Wan, Bangkok 10330',q:'Siam Square Bangkok'},
+  {id:'sp-iconsiam',mo:'skyline',n:'ICONSIAM 百貨',note:'與暹羅廣場之間的交通時間另外安排。電話 +66 2 495 7000',a:'299 Charoen Nakhon Rd, Khlong Ton Sai, Khlong San, Bangkok 10600',hr:'每日 10:00–22:00，免費入場（假日可能調整）',q:'ICONSIAM'},
+  {mo:'lotus',n:'按摩',bk:'代訂中',note:'代訂中，訂好後補上店名與地址'},
+  {id:'sp-train',mo:'market',n:'Train Night Market Srinagarindra 火車夜市',a:'Srinakarin Soi 51（Seacon Square 後方），Nong Bon, Prawet, Bangkok 10250',hr:'週四至週日約 17:00–24:00，12/11 週五有營業；晚間 19:00 後最熱鬧',q:'Train Night Market Srinagarindra',lk:[['https://www.thaiholidayguide.com/attraction/train-night-market-srinakarin/','資料來源']],tbc:'各攤位營業時間不同，出發前確認'},
+  {mo:'house',n:'返回民宿',a:HOME,q:HQ}]},
+ {id:2,date:'12/12',dow:'週六',zh:'大城府一日遊',en:'A Day in Ayutthaya',motif:'stupa',note:'百萬爺爺建議週末 09:00 前抵達，目前先吃船麵再前往，到達時人潮可能較多。',stops:[
+  {t:'08:30',mo:'house',n:'民宿出發',a:HOME,q:HQ},
+  {id:'sp-palek',ty:'food',mo:'bowl',n:'Pa Lek Boat Noodle 船麵',note:'米其林收錄的大城船麵，電話 +66 89 804 7418',a:'Bang Ian Rd, Tha Wasukri, Phra Nakhon Si Ayutthaya 13000',hr:'週六 08:30–17:00（週三公休）',q:'Pa Lek Boat Noodles Ayutthaya',lk:[['https://guide.michelin.com/th/th/phra-nakhon-si-syutthaya-region/phra-nakhon-si-ayutthaya/restaurant/pa-lek-boat-noodles','米其林頁面']],tbc:'出發前電話確認有營業'},
+  {id:'sp-baiwan',mo:'stupa',n:'百萬爺爺 พ่อแก่เงินล้าน',note:'供奉神像，臉部貼金箔祈福。求財、中獎的說法屬信仰，並非可驗證的保證。',a:'Thammauthayan Suan Pa Singhawatthananusorn（ธรรมอุทยานสวนป่าสิงหวัฒนานุสรณ์），Bang Phra Khru, Nakhon Luang, Phra Nakhon Si Ayutthaya',hr:'08:00–17:00，特別儀式依園區公告',q:'Phor Kae Ngern Lan Nakhon Luang Ayutthaya',lk:[['https://www.ktc.co.th/article/travel-stories/thailand/th/phor-kae-ngern-lan','資料來源']],tbc:'儀式內容與費用出發前向官方確認'},
+  {id:'sp-zoo',mo:'lion',n:'大城動物園',note:'暫定為 Sriayuthaya Lion Park（大城獅子動物園）。餵食點每籃約 50 銖，電話 035 952 999。另有園內付費體驗。',a:'91 Tambon Nong Khanak, Tha Ruea, Phra Nakhon Si Ayutthaya 13130',hr:'每日 08:30–17:00',q:'Sriayuthaya Lion Park',lk:[['https://share.google/dP4n0SEdK9G1h3ecq','你提供的 Google 連結'],['https://www.visitthailandtoday.com/activities-tours/ayutthaya/sriayuthaya-lion-park','資料來源']],tbc:'我打不開你的連結，無法確認是不是這一間。另一個可能是大城市區的 Weird Animal Zoo（爬蟲動物園，2017 年資料僅週末開放）。門票與表演場次出發前確認'},
+  {id:'sp-saveone',mo:'market',n:'Save One Go Market 夜市',note:'曼谷的 Sai Mai 分店是 Saveone GO KPO，在 BTS KPO Junction（Khu Khot）站附近，不在大城府，適合返程途中安排',a:'Saveone GO KPO，BTS KPO Junction 站附近，Sai Mai, Bangkok',hr:'每日 16:00–24:00',q:'Saveone GO KPO Sai Mai Bangkok',lk:[['https://en.thairath.co.th/money/business_marketing/marketing_trends/2911685','分店資料'],['https://www.tripniceday.com/en/place/ตลาดเซฟวันโก','資料來源']],tbc:'完整門牌地址待確認'},
+  {mo:'lotus',ll:[13.7255,100.5715],n:'One More Thai Massage 按摩（Phrom Phong 店）',note:'選 Phrom Phong 店：離 Ekkamai 民宿只差兩站 BTS，比 Chit Lom 店近。只收現金',a:'123 Sukhumvit 26, Klongton, Klongtoey, Bangkok 10110',hr:'週一至五 10:00–23:00、週六日 10:00–24:00（Expedia；Klook 另列週六日 10:00–23:00）',q:'One More Thai Massage Phrom Phong',lk:[['https://www.agoda.com/travel-guides/thailand/bangkok/experience-bliss-one-more-thai-massage-in-phrom-phong','地址來源']],tbc:'兩個來源的營業時間不同，出發前確認'},
+  {mo:'house',n:'返回民宿',a:HOME,q:HQ}]},
+ {id:3,date:'12/13',dow:'週日',zh:'洽圖洽・鄭王廟・河濱夜市',en:'Chatuchak & the River',motif:'prang',note:'洽圖洽、鄭王廟、河濱夜市分散在曼谷不同區域，移動較多，可能需要調整先後順序或縮短停留時間。Mr.Joe 在南邊，Endless Holiday 在北邊的 Ari，這段車程較長；Ari 離洽圖洽只有幾站 BTS。',stops:[
+  {t:'09:30',mo:'house',n:'民宿出發',a:HOME,q:HQ},
+  {id:'sp-joe',ty:'food',mo:'bowl',n:'Kuay Jab Mr.Joe 脆皮燒肉麵、粿條',note:'網站所列價格：特製碗約 60 銖，加脆皮豬肉約 55 銖',a:'313/7 Soi Chan 42-44, Wat Phraya Krai, Bang Kho Laem, Bangkok 10120',hr:'每日 08:30–16:00',q:'Kuay Jab Mr.Joe Bangkok',lk:[['https://eatingthaifood.com/thai-crispy-pork-belly-mr-joe','資料來源']],tbc:'現行價格出發前確認'},
+  {id:'sp-endless',mo:'frame',n:'Endless Holiday',note:'位在 Ari 區的 Soi Ari（Phahonyothin Soi 7），巷口就是 BTS Ari 站',a:'52, 1 Phahonyothin Soi 7, Phaya Thai, Bangkok 10400',q:'Endless Holiday Ari Bangkok',tbc:'店家類型與營業時間待確認'},
+  {id:'sp-chatuchak',mo:'market',n:'洽圖洽週末市集 Chatuchak',note:'週日市集；建議預留 3–4 小時。免費入場',a:'587/10 Kamphaeng Phet 2 Rd, Chatuchak, Bangkok 10900',hr:'週六、週日 09:00–18:00（12/13 為週日）',q:'Chatuchak Weekend Market'},
+  {id:'sp-wararun',mo:'prang',n:'鄭王廟 Wat Arun',note:'留意服裝規定。外國遊客門票 200 銖，現場購票',a:'158 Thanon Wang Doem, Wat Arun, Bangkok Yai, Bangkok 10600',hr:'每日 08:00–18:00，約 17:30 停止入場',q:'Wat Arun Bangkok'},
+  {id:'sp-asiatique',mo:'skyline',n:'河濱夜市 Asiatique',note:'多數攤位與區域傍晚後才熱鬧，建議晚上去',a:'2194 Charoen Krung Rd, Wat Phraya Krai, Bang Kho Laem, Bangkok 10120',hr:'全區約 10:00 或 11:00 至 24:00（各來源寫法不同，個別店家另計）',q:'Asiatique The Riverfront'},
+  {mo:'house',n:'返回民宿',a:HOME,q:HQ}]},
+ {id:4,date:'12/14',dow:'週一',zh:'芭達雅一日往返',en:'Pattaya, Out and Back',motif:'sea',note:'曼谷與芭達雅當天來回，不在芭達雅住宿。',stops:[
+  {t:'10:00',mo:'house',n:'民宿出發，包車前往芭達雅',a:HOME,q:HQ,tbc:'車程時間待確認'},
+  {id:'sp-t21',mo:'plane',n:'Terminal 21 Pattaya 21 航站百貨',a:'777 Moo 6, Muang Pattaya, Bang Lamung, Chon Buri 20150',hr:'週一至週四 11:00–22:00，週五至週日 11:00–23:00（12/14 為週一）',q:'Terminal 21 Pattaya',lk:[['https://www.visitthailandtoday.com/markets-shopping/pattaya/terminal-21-pattaya','資料來源']]},
+  {mo:'sea',ll:[12.930,100.876],n:'海邊走走',todo:true,note:'可能想去，尚未決定地點與時間'},
+  {id:'sp-seafood',ty:'food',mo:'bowl',n:'Seafood Station Pattaya 海鮮餐廳',note:'海鮮自助吧（吃到飽），電話 063-950-9525',a:'Pattaya 火車站附近的鐵道路旁，Bang Lamung, Chon Buri（查不到門牌）',hr:'每日 16:00–22:00',q:'Seafood Station Pattaya',lk:[['https://www.tripniceday.com/en/place/seafood-station-at-pattaya','資料來源']],tbc:'是否需預約待確認'},
+  {id:'sp-69',t:'18:30',mo:'frame',n:'6996 成人秀',note:'Pelago 票券頁寫：集合點在 Terminal 21 Pattaya 4 號門對面，需滿 18 歲並攜帶護照',a:'185 N Pattaya Rd, Muang Pattaya, Bang Lamung, Chon Buri 20150',hr:'18:00–22:30 連續場次，每場約 1 小時',q:'6996 Show Pattaya',lk:[['https://pelago.com/en/activity/p7q5gmgd5-6996-show-pattaya-thailand-pattaya','票券頁面']],tbc:'預約方式與入場規定出發前確認'},
+  {mo:'house',n:'包車返回曼谷',tbc:'回程時間待確認，看秀結束後預留返程車程'},
+  {mo:'house',n:'返回民宿',a:HOME,q:HQ}]},
+ {id:5,date:'12/15',dow:'週二',zh:'嵩越路・朱拉隆功',en:'Song Wat & Chula',motif:'market',stops:[
+  {t:'10:30',mo:'house',n:'民宿出發',a:HOME,q:HQ},
+  {id:'sp-songwat',mo:'market',n:'嵩越路 Song Wat Road',note:'自由探索時段。整條街沒有統一營業時間，多數店家約 10:00–19:00；個別店家見探索頁',a:'Song Wat Rd, Samphanthawong, Bangkok 10100',q:'Song Wat Road Bangkok'},
+  {id:'sp-chula',mo:'stupa',n:'朱拉隆功',a:'暫定：Chulalongkorn University, Phaya Thai Rd, Wang Mai, Pathum Wan, Bangkok 10330',q:'Chulalongkorn University',tbc:'是朱拉隆功大學周邊或其他地點，待確認'},
+  {mo:'house',n:'返回民宿',a:HOME,q:HQ}]},
+ {id:6,date:'12/16',dow:'週三',zh:'CentralWorld・返台',en:'Homeward',motif:'plane',stops:[
+  {t:'10:30',mo:'house',n:'民宿出發',a:HOME,q:HQ,tbc:'退房與行李安排依房東規定確認'},
+  {id:'sp-centralworld',mo:'bag',n:'CentralWorld 曼谷中央世界',note:'購物與午餐。電話 +66 (0)2 640 7000',a:'999/9 Rama I Rd, Pathum Wan, Bangkok 10330',hr:'每日 10:00–22:00',q:'CentralWorld Bangkok'},
+  {t:'15:00',mo:'plane',n:'抵達素汪那普機場 BKK',note:'CI836 於 17:50 起飛，預留辦理登機與塞車緩衝',a:AIRP,q:'Suvarnabhumi Airport'},
+  {k:'flight',mo:'plane',t:'17:50 → 22:25',n:'CI836 曼谷 BKK → 桃園 TPE',note:'中華航空，直飛 3 小時 35 分'}]}
+];
+
+/* ---------- data: explore ---------- */
+var REG={
+ siam:{zh:'暹羅廣場',en:'Siam Square',map:'Siam Square Bangkok'},
+ icon:{zh:'ICONSIAM',en:'ICONSIAM',map:'ICONSIAM Bangkok'},
+ songwat:{zh:'嵩越路',en:'Song Wat Road',map:'Song Wat Road Bangkok'},
+ chatuchak:{zh:'洽圖洽',en:'Chatuchak',map:'Chatuchak Weekend Market Bangkok'},
+ asiatique:{zh:'河濱夜市',en:'Asiatique',map:'Asiatique The Riverfront Bangkok'},
+ pattaya:{zh:'芭達雅',en:'Pattaya',map:'Terminal 21 Pattaya'}
+};
+var CAT={cloth:'服飾 Clothing',bag:'包包 Bags',shoe:'鞋子 Shoes',vint:'古著 Vintage',acc:'飾品 Accessories',frag:'香氛 Fragrance',life:'生活選物 Lifestyle',art:'文創設計 Art & Design',coll:'黑膠與收藏 Records'};
+var CATZH={cloth:'服飾',bag:'包包',shoe:'鞋子',vint:'古著',acc:'飾品',frag:'香氛',life:'生活選物',art:'文創設計',coll:'黑膠與收藏'};
+/* 商場與市集時間 */
+var H_SC='依商場 每日 10:00–22:00（Siam Center，各櫃位可能不同）';
+var H_SD='依商場 每日 10:00–22:00（Siam Discovery，各櫃位可能不同）';
+var H_SQ1='依商場 約 10:00–22:00（Siam Square One，各店可能不同）';
+var H_IC='依商場 每日 10:00–22:00（ICONSIAM，各櫃位可能不同）';
+var H_T21='依商場 週一至四 11:00–22:00、週五至日 11:00–23:00（各櫃位可能不同）';
+var H_CZ='週六、週日約 09:00–18:00（市集時間，各攤不同）';
+var H_SOUL='依 Soul Songwat 10:00–22:00（各店可能不同）';
+var S=function(id,n,r,loc,c,d,st,x){var o={id:'s-'+id,n:n,r:r,loc:loc,c:c.split(' '),d:d,st:st,p:'待確認',h:'待確認'};if(x){for(var k in x){o[k]=x[k];}}return o;};
+var SC='https://www.siamcenter.co.th/en/directory',T21='https://www.terminal21.co.th/pattaya/category/fashion/';
+var SHOPS=[
+ S('fablab','FABLAB','siam','Siam Center 1F','cloth bag shoe acc','泰國女裝、包包、鞋子、飾品，集合多個泰國線上品牌與新銳設計師。','ok',{web:SC,wl:'商場目錄',h:H_SC}),
+ S('absolute','Absolute Siam Store','siam','Siam Center 1F，979 Rama I Rd','cloth bag acc life art','泰國設計師服飾、配件、生活選物與創意商品。多品牌概念店，品牌組合會輪替。','ok',{web:SC,wl:'商場目錄',h:H_SC}),
+ S('frank','Frank.','siam','Siam Center 1F','cloth life art acc','泰國設計師服飾、家居、藝術品與配件的策展型店舖。','ok',{web:SC,wl:'商場目錄',h:H_SC}),
+ S('daddy','Daddy and the Muscle Academy','siam','Siam Center 1F（先前資料另列 Siam Square Soi 2，以商場目錄為準）','cloth acc life','可愛、趣味、日系感的服飾與文創小物。','ok',{web:SC,wl:'商場目錄',h:H_SC}),
+ S('puff-siam','PUFF Shoes','siam','Siam Center M Floor','shoe','泰國鞋履品牌，輕量柔軟的平底鞋與涼鞋，偏可愛簡約日常。','ok',{ph:'+66 2 028 7790',web:'https://puffshoesofficial.com/en/our-stores/',wl:'官方門市清單',h:H_SC}),
+ S('matter','MATTER MAKERS','siam','Siam Square One 1–2F','cloth bag acc','泰國街頭潮流服飾、包包、飾品與聯名商品。','ok',{h:H_SQ1}),
+ S('tres','TRES.','siam','23 Siam Square Soi 5, Pathum Wan, Bangkok 10330','cloth bag shoe acc','泰國設計師多品牌集合店，三層樓的女裝、包包、鞋與飾品。甜美、韓系、Y2K，適合一次比較多個小品牌。','ok',{p:'約 THB 350–2,500（待確認）',h:'週一至五 12:00–21:00，週六日 11:00–21:00（Time Out）',ph:'+66 99 810 5564',ig:'https://www.instagram.com/tresfashion.co/',web:'https://www.timeout.com/bangkok/shopping/tres',wl:'Time Out'}),
+ S('garcon-siam','Garçon Dept.','siam','236/6–7 Siam Square Soi 2','cloth acc life','泰國品牌選品、街頭服飾、配件與生活小物。','tbc'),
+ S('loft','LOFT EYES','siam','Loft Eyes Siam Flagship，236/3–4 Siam Square Soi 2（Thong Lo 另有分店）','cloth bag shoe acc','泰國設計師服裝、鞋、包與珠寶飾品，偏簡約、有設計感。','ok',{p:'THB 500 起，部分較高（待確認）',h:'每日 11:00–21:00（Time Out）',ig:'https://www.instagram.com/lofteyes/',web:'https://www.timeout.com/bangkok/things-to-do/siam-square-your-ultimate-neighbourhood-guide',wl:'Time Out'}),
+ S('asap','ASAPBKK','siam','Siam Square Soi 3, Pathum Wan, Bangkok 10330','cloth shoe bag acc','泰國本土小眾選物，圖案 T-shirt、芭蕾平底鞋、包包與配件。','ok',{h:'每日 12:00–22:00（官方網站，出發前再確認）',ph:'+66 63 989 4017',web:'https://asapofficial.com/'}),
+ S('blulagoon','Blulagoon','siam','Siam Square Soi 2，2F，門牌待確認','vint cloth','設計師品牌與古著選品，Vintage、Y2K。','tbc',{ig:'https://www.instagram.com/blulagoon__/'}),
+ S('olddaybloom','Old Day Bloom','siam','Siam Square Soi 2，238 號 2F','acc life','可愛風格禮品、飾品與生活小物，另有咖啡空間。服飾品項不保證。','tbc'),
+ S('yvis','YVIS','siam','Siam Square Soi 2、Siam Center 等門市，以官方門市查詢為準','acc','泰國飾品品牌，耳環、項鍊、手鍊、戒指與太陽眼鏡。ICONSIAM 也有門市線索。','ok',{web:'https://yvis.co/pages/stores',wl:'官方門市查詢',h:'Siam Center 櫃依商場 10:00–22:00；街邊店待確認'}),
+ S('matchbox','matchbox grande','siam','430/33 Siam Square Soi 7','cloth acc shoe','年輕女裝，韓系、Y2K、色彩鮮明。','tbc'),
+ S('valichain','Valichain','siam','Siam Center M Floor','acc','日常珠寶、耳環、手鍊與簡約飾品。當期櫃位待確認。','tbc',{h:H_SC}),
+ S('sleeping','SLEEPING CLOUD','siam','Siam Center 1F','cloth','睡衣、居家服與柔軟日常服。當期陳列待確認。','tbc',{h:H_SC}),
+ S('lovebug','LOVE BUG','siam','Absolute Siam Store（Siam Center 1F）內','shoe acc','可客製鞋款與髮夾，偏甜美可愛。當期商品待確認。','tbc',{h:H_SC}),
+ S('puff-icon','PUFF Shoes','icon','ICONSIAM 2F（Siam Takashimaya Zone）及 5F','shoe','泰國鞋履品牌，日常鞋款與涼鞋。樓層以官方門市頁為準。','ok',{ph:'+66 2 028 7790',web:'https://puffshoesofficial.com/en/our-stores/',wl:'官方門市清單',h:H_IC}),
+ S('naraya','NaRaYa','icon','ICONSIAM G Floor，299 Charoen Nakhon Rd','bag acc life','布包、肩背包、化妝包、收納袋、旅行小包與泰絲系列。','tbc',{h:H_IC}),
+ S('iconcraft','ICONCRAFT','icon','ICONSIAM 4F','life art acc','泰國工藝、設計師與創作者商品的集合空間，品牌與攤位會輪替。','tbc',{h:H_IC}),
+ S('sooksiam','SOOKSIAM','icon','ICONSIAM G Floor','life art','泰國各地特色商品、手工藝與伴手禮。','tbc',{h:H_IC}),
+ S('wat','WAT About Siam','icon','ICONCRAFT 4F，ICONSIAM','life art','泰國工藝與設計選物。屬寄售／選品通路，不是獨立旗艦店。','ok',{web:'https://wataboutsiam.com/pages/our-stores',wl:'官方門市頁',h:H_IC}),
+ S('garcon-sw','Garçon Dept. Song Wat','songwat','817 Song Wat Rd, Chakkrawat, Samphanthawong, Bangkok 10100','cloth acc life art','泰國獨立品牌選品、帽子、包包、明信片與設計小物，報導提到店內有 70 多個品牌。','tbc',{h:'每日約 10:00–19:00（待確認）',ph:'+66 64 549 4242'}),
+ S('frank-sw','FRANK. SONG WAT','songwat','1462 Song Wat Rd（地址待確認）','cloth acc life','集合多個泰國獨立品牌的選物空間。','tbc'),
+ S('oyster','Oyster & Things','songwat','1194 Song Wat Rd（另有資料寫 1196）','life art','貝殼造型陶瓷、餐具、飾品與復古家飾。','tbc',{h:'待確認（另有一間在 Sukhumvit 36，Time Out 記載週一公休）'}),
+ S('cinnamon','Road of Cinnamon','songwat','1326 Song Wat Rd, Samphanthawong, Bangkok 10100','life art','泰國各地手工藝、編織品、陶器與紀念品，也賣肉桂。','ok',{h:'每日 10:00–20:00',web:'https://preparetravelplans.com/best-things-to-do-on-song-wat-road',wl:'資料來源'}),
+ S('saan','SAAN Song Wat','songwat','837 Song Wat Rd, Samphanthawong, Bangkok 10100','life art','泰國手工藝、香皂、護手霜與生活小物。','ok',{h:'每日 10:00–19:00（Time Out）',web:'https://www.timeout.com/bangkok/things-to-do/saan-songwat',wl:'Time Out'}),
+ S('copenn','Copenn.','songwat','1452 Song Wat Rd, Samphanthawong, Bangkok 10100','frag','泰國香氛品牌，香水、香氛石、蠟燭與室內香氛。','ok',{h:'每日 11:00–19:00',web:'https://touristbangkok.com/neighborhoods/chinatown-bangkok-citywalk-guides/',wl:'資料來源'}),
+ S('antidotes','Antidotes','songwat','1362 Song Wat Rd（地址待確認）','frag','香水與特色香氛選品。','tbc'),
+ S('onest','onest','songwat','1198 Song Wat Rd（地址待確認）','frag life','香氛與居家清潔保養品，香味偏輕盈。','tbc'),
+ S('analog','Analog Space & Vintage Shop','songwat','1452 Song Wat Rd 周邊（店址與營業狀態待確認）','vint life','百年老建築改造的古著共同空間，底片相機、古著、黑膠與復古家飾。','tbc'),
+ S('pastperfect','Past Perfect','songwat','1003/1–2 Song Wat Rd（地址待確認）','vint cloth','復古服飾與二手單品。','tbc'),
+ S('houseofvintage','House of Vintage','songwat','Soul Songwat 2F，1300 Song Wat Rd','vint cloth','復古服裝與二手單品。精確店位待確認。','tbc',{h:H_SOUL}),
+ S('nilene','Nilene Vintage','songwat','1063/5 Song Wat Rd（地址待確認）','vint cloth','二手衣與復古服飾。修改服務待核實。','tbc'),
+ S('kodangs','KODANGS','songwat','880 Song Wat Rd（地址待確認）','cloth','泰國街頭風格設計師服裝。','tbc'),
+ S('tudi','Tudi','songwat','Song Wat Road，門牌待確認','acc','造型眼鏡與時尚鏡框。','tbc',{ig:'https://www.instagram.com/tudieyewear/'}),
+ S('clay','Clay Songwat','songwat','1176 Song Wat Rd（地址與體驗方式待確認）','art life','手工陶器與陶藝體驗。','tbc'),
+ S('galerie','Galerie Monument','songwat','919 Song Wat Rd, Chakkrawat, Samphanthawong, Bangkok 10100','art','當代藝術展覽與藝文空間，展覽免費。','ok',{h:'展覽期間 10:00–19:00（依當期展覽）',web:'https://www.timeout.com/bangkok/things-to-do/galerie-monument-songwat',wl:'Time Out'}),
+ S('play','PLAY art house','songwat','993 Song Wat Rd, Chakkawat, Samphanthawong, Bangkok 10100','art','新銳藝術家展覽與創意空間，免費入場。','ok',{h:'週二至四 11:00–16:00，週五至日 11:00–19:00，週一休',web:'https://www.timeout.com/bangkok/art/play-art-house',wl:'Time Out'}),
+ S('pasaya','PASAYA Lifestyle Shop','songwat','973 Samphanthawong, Bangkok 10100（Song Wat 與唐人街一帶）','bag life','泰國紡織品牌生活選物，布包、絲質包、手作布品與禮物。','tbc'),
+ S('cz-design','Section 2–4 設計服飾區','chatuchak','Chatuchak Weekend Market','cloth bag acc','年輕設計、服飾、配件，部分古著與選物。這是逛街區域，不是單一店家。','tbc',{type:'zone',h:H_CZ,web:'https://www.chatuchakmarket.org/sections/',wl:'官方分區'}),
+ S('cz-vintage','Section 5–6 古著牛仔區','chatuchak','Chatuchak Weekend Market','vint cloth shoe','二手衣、牛仔褲、復古服飾與鞋款。檢查污漬、破損與拉鍊，古著不一定能試穿。','tbc',{type:'zone',h:H_CZ,web:'https://www.chatuchakmarket.org/sections/',wl:'官方分區'}),
+ S('cz-art','Section 7 藝術區','chatuchak','Chatuchak Weekend Market','art','畫作、插畫、版畫與藝術家小物。','tbc',{type:'zone',h:H_CZ,web:'https://www.chatuchakmarket.org/sections/',wl:'官方分區'}),
+ S('cz-craft','Section 8–11 手工藝與香品區','chatuchak','Chatuchak Weekend Market','life frag art acc','手工藝、編織、香品與手作飾品，適合找特色伴手禮。','tbc',{type:'zone',h:H_CZ,web:'https://www.chatuchakmarket.org/sections/',wl:'官方分區'}),
+ S('perfect-cz','Perfect Combination','chatuchak','洽圖洽市集內，MRT Kamphaeng Phet 站 2 號出口旁','shoe bag','手工皮鞋、皮革包與皮革配件。','tbc',{h:'週六、週日 10:00–18:00（BK Magazine，資料年份較舊）',ph:'083-066-5960',web:'https://bk.asia-city.com/node/73900',wl:'資料來源'}),
+ S('matsuri','Matsuri まつり','chatuchak','Section 21，stalls 219–221，587/10 Kamphaeng Phet 2 Rd','cloth','自製／手作感服飾，日系、可愛、休閒，款式量少。週末限定。','tbc',{h:H_CZ}),
+ S('blackcactus','Black Cactus','chatuchak','Project 4, Soi 1, Room 321','cloth acc','泰國設計圖案服飾、帽子與有個性的設計小物。只列週末營業線索。','tbc',{h:H_CZ}),
+ S('perfect-asia','Perfect Combination @Asiatique','asiatique','Asiatique Warehouse 7，2194/98 Wat Phraya Krai, Bang Kho Laem 10120','shoe bag','泰國手工皮鞋、Nappa 皮革鞋款與相關配件。鞋款庫存出發前確認。','tbc',{h:'約 15:15–23:45（待確認）'}),
+ S('matter-p','MATTER MAKERS','pattaya','Terminal 21 Pattaya GF，G034','cloth bag acc','泰國街頭潮流服飾與配件。','ok',{web:T21,wl:'商場目錄',h:H_T21}),
+ S('merge','Merge','pattaya','Terminal 21 Pattaya GF，KIG008、009、022、023','cloth acc','服飾與配件。','ok',{web:T21,wl:'商場目錄',h:H_T21}),
+ S('lyn','LYN','pattaya','Terminal 21 Pattaya GF，G003','bag shoe acc','泰國包包、鞋履與女性配件。','ok',{web:'https://www.terminal21.co.th/pattaya/category/fashion-apparel/',wl:'商場目錄',h:H_T21}),
+ S('jaspal','Jaspal','pattaya','Terminal 21 Pattaya GF，G030–G033','cloth bag shoe acc','泰國大型時尚品牌，服飾、包包、鞋與配件。','ok',{web:'https://www.terminal21.co.th/pattaya/category/key-tenant/',wl:'商場目錄',h:H_T21}),
+ S('cps','CPS','pattaya','Terminal 21 Pattaya GF，G006','cloth','泰國休閒時尚服飾。','ok',{web:'https://www.terminal21.co.th/pattaya/category/fashion-apparel/',wl:'商場目錄',h:H_T21}),
+ S('gq','GQ','pattaya','Terminal 21 Pattaya MF，M008','cloth','泰國男裝、機能與日常服飾，不是甜美女裝主力。','ok',{web:'https://www.terminal21.co.th/pattaya/category/fashion-apparel/',wl:'商場目錄',h:H_T21}),
+ S('subdued','Subdued','pattaya','Terminal 21 Pattaya GF，G017','cloth','女裝與日常穿搭。非泰國本土品牌，列為一般商場備案。','ok',{web:'https://www.terminal21.co.th/pattaya/category/fashion-apparel/',wl:'商場目錄',h:H_T21}),
+ /* 你的檔案中，第一版漏列的店 */
+ S('mitr','MITR','siam','Siam Paragon 新店（Time Out 列 451 Rama I Rd, Pathum Wan）；Siam Square Soi 3 門市現況待確認','cloth acc','泰國女裝品牌，亞麻、印花、泳裝，風格清新、度假、浪漫。','tbc',{h:'Siam Paragon 店每日 10:00–22:00（Time Out）',ig:'https://www.instagram.com/mitr/',web:'https://www.timeout.com/bangkok/things-to-do/mitr',wl:'Time Out'}),
+ S('unfound','Unfound Projects','siam','LIDO CONNECT 2F（Siam Square Soi 2 與 Soi 3 之間）','cloth acc','泰國街頭設計品牌選品，服飾與配件，偏街頭潮流。','tbc',{h:'LIDO CONNECT 12:00–23:00（Time Out，店家可能不同）',ig:'https://www.instagram.com/unfoundprojects/'}),
+ S('everyday','Everyday & Friends','siam','約 258/5–6 Siam Square Soi 3（待確認）','frag life art','文青生活感選物店，香氛、設計小物與生活用品。','tbc'),
+ S('summer','Summer Dayyy','siam','Siam 區門市位置待確認','cloth bag acc','泰國度假風品牌，泳裝、編織包與配件，風格清新、波希米亞。','tbc',{ig:'https://www.instagram.com/summerdayyy.bkk/'}),
+ S('sos','SOS Sense of Style','siam','17–18 Soi Siam Square 6, Pathum Wan, Bangkok 10330（旗艦店）','cloth bag acc shoe','泰國第一間以女裝為主的多品牌選品店，女裝、包包、飾品與鞋款。','ok',{h:'每日 12:00–21:00（Time Out）',web:'https://www.timeout.com/bangkok/shopping/sos-flagship-store-in-siam-square',wl:'Time Out'}),
+ S('khong','Khong Suay','songwat','1452 Song Wat Rd 附近／Analog Space 周邊（待確認）','vint life coll','復古家飾、老物件與收藏品。','tbc'),
+ S('sitin','Sit in Soi','songwat','Song Wat 巷弄，地址待確認','vint cloth','二手服飾、設計單品與咖啡，文藝 Vintage 風。','tbc'),
+ S('ress','RESS Studio','songwat','Song Wat Road，門牌待確認','cloth art','前衛、藝術感的設計師服裝。','tbc'),
+ S('getback','Get Back and Jude Records','songwat','Song Wat 巷弄，地址待確認','coll vint','黑膠、老玩具、底片相機與復古物件。','tbc'),
+ S('doublegoose','Double Goose Concept Space','songwat','Song Wat 倉庫巷弄，地址待確認','cloth','泰國服飾品牌空間，經典 T-shirt 與客製熱壓印製。','tbc'),
+ S('three0six','30_6','songwat','Soul Songwat，1300 Song Wat Rd（精確店位待確認）','cloth bag acc life frag','生活風格選物：服飾、包包、眼鏡、擴香、耳環，偏韓系簡約。','tbc',{h:H_SOUL}),
+ S('alice','Alice&Co.','songwat','Soul Songwat，1300 Song Wat Rd（精確店位待確認）','cloth life','咖啡與多品牌選物，服飾與生活選品。','tbc',{h:H_SOUL}),
+ S('yugana','Yugana Store','songwat','Song Wat Rd，門牌待確認','vint shoe cloth','Vintage 選品，復古服裝、皮鞋與靴子。','tbc'),
+ S('fabricity','Fabricity','songwat','469 Song Wat Rd','art life','布料、數位印花與布料設計。','tbc'),
+ S('soul','Soul Songwat','songwat','1300 Song Wat Rd, Samphanthawong, Bangkok 10100','vint life cloth','百年倉庫改造的複合空間，樓上以古著、獨立服飾與選物為主，樓下有餐飲。','ok',{type:'zone',h:'每日 10:00–22:00（各店可能不同）',ph:'082 206 1908',web:'https://www.phuket101.net/bangkok/soul-songwat/',wl:'資料來源'}),
+ /* Siam Center 活動品牌名單，未確認常設門市 */
+ S('darlin','DARLIN','siam','Siam Center（常設位置待確認）','shoe acc','女鞋、可客製鞋款與水晶裝飾。','tbc',{ev:1,h:H_SC}),
+ S('greyhound','Greyhound Original／Smileyhound','siam','Siam Center（常設位置待確認）','cloth','泰國設計師服飾，休閒與街頭風格。','tbc',{ev:1,h:H_SC}),
+ S('kloset','Kloset Etcetera','siam','Siam Center（常設位置待確認）','cloth','女性設計師服飾，印花、裝飾細節、甜美復古。','tbc',{ev:1,h:H_SC}),
+ S('ob','O&B','siam','Siam Center（常設位置待確認）','shoe bag acc','女鞋、包款與配件。','tbc',{ev:1,h:H_SC}),
+ S('pomelo','Pomelo','siam','Siam Center（常設位置待確認）','cloth bag acc','女裝、包包與配件。','tbc',{ev:1,h:H_SC}),
+ S('silhouette','Silhouette','siam','Siam Center（常設位置待確認）','shoe acc','鞋履與時尚配件，商品類型需現場確認。','tbc',{ev:1,h:H_SC}),
+ S('wara','Wara Jeans','siam','Siam Center（常設位置待確認）','cloth','牛仔服飾。','tbc',{ev:1,h:H_SC}),
+ S('standoil','Stand Oil','siam','Siam Center（常設位置待確認）','bag acc','包包與配件。韓國品牌，非泰國本土。','tbc',{ev:1,h:H_SC}),
+ /* 新查到的店 */
+ S('ods','ODS (Objects of Desire Store)','siam','Siam Discovery 3F，989 Rama I Rd，緊鄰 Siam Center','life','超過 130 個品牌的家居與生活選物，內有咖啡空間。','tbc',{h:H_SD,web:'https://tourist.onesiam.com/?p=8145',wl:'資料來源'}),
+ S('ravipa','Ravipa','icon','ICONCRAFT 選品品牌（ICONSIAM 4–5F）','acc','泰國珠寶品牌。是否常設櫃位待確認。','tbc',{h:H_IC,web:'https://www.timeout.com/bangkok/shopping/gift-ideas-festive-season-iconcraft',wl:'資料來源'}),
+ S('khaihllo','KHAIHLLO','icon','ICONCRAFT 選品品牌（ICONSIAM 4–5F）','acc','中性風耳環與項鍊。是否常設待確認。','tbc',{h:H_IC,web:'https://www.timeout.com/bangkok/shopping/gift-ideas-festive-season-iconcraft',wl:'資料來源'}),
+ S('kakkatoon','KAKKATOON','icon','ICONCRAFT 選品品牌（ICONSIAM 4–5F）','bag acc','卡通圖案口罩、罐頭造型包與項鍊，趣味設計。是否常設待確認。','tbc',{h:H_IC,web:'https://www.timeout.com/bangkok/shopping/gift-ideas-festive-season-iconcraft',wl:'資料來源'}),
+ S('sculpture','SCULPTURE','icon','ICONCRAFT 選品品牌（ICONSIAM 4–5F）','bag','以安全帶製作的肩背包。是否常設待確認。','tbc',{h:H_IC,web:'https://www.timeout.com/bangkok/shopping/gift-ideas-festive-season-iconcraft',wl:'資料來源'}),
+ S('anona','ANONA','icon','ICONCRAFT 選品品牌（ICONSIAM 4–5F）','frag life','手工大豆蠟燭與精油擴香。是否常設待確認，帶上飛機前確認容量規定。','tbc',{h:H_IC,web:'https://www.timeout.com/bangkok/shopping/gift-ideas-festive-season-iconcraft',wl:'資料來源'}),
+ S('mojirachai','Mo Jirachai','icon','ICONCRAFT 選品品牌（ICONSIAM 4–5F）','art life','手繪鍍金陶瓷杯盤，把現代藝術結合傳統五彩瓷。易碎，攜帶需包裝。','tbc',{h:H_IC,web:'https://www.timeout.com/bangkok/shopping/gift-ideas-festive-season-iconcraft',wl:'資料來源'}),
+ S('common-t','Common-T','chatuchak','Chatuchak Section 2, Soi 3（資料年份待確認）','cloth bag acc','T-shirt、Polo、背心，另有包包、帽子與皮革小配件。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('plain','Plain&Pattern','chatuchak','Chatuchak Section 4, Soi 50/1, Room 192（待確認）','shoe cloth','平底鞋、T-shirt、棉質洋裝與亞麻上衣、洋裝。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('backyard','In the Backyard（店名待確認）','chatuchak','Chatuchak Section 4, Soi 2, Room 225（待確認）','acc','復古風飾品，自然與童話主題的耳環與墜飾。資料來源標註店名不確定。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('labyrinth','Labyrinth','chatuchak','Chatuchak Section 3, Soi 2（待確認）','acc','手鍊、項鍊、相盒墜飾、手環與戒指。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('chuan','Chuan Pissamai','chatuchak','Chatuchak Section 3, Room 125–126（待確認）','acc shoe bag','髮帶、帽子、花朵圖案鞋款、包包與配件。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('paobay','Pao Bay Fan','chatuchak','Chatuchak Section 2, Room 257，主要道路旁（待確認）','bag','手工一點一款的包包，包括手繪款。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('mazmoizelle','Mazmoizelle','chatuchak','Chatuchak Section 3, Soi 43（待確認）','bag life','軟木與皮革郵差包、書包、零錢包、護照套、錢包與筆記本。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('tomato','Tomato','chatuchak','Chatuchak Section 3, Room 5（待確認）','shoe cloth','牛仔褲、船鞋、短靴、牛津鞋與樂福鞋。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('sleeveless','The Sleeveless Garden','chatuchak','Chatuchak Section 4, Soi 47/1, Room 18（待確認）','bag','真皮包款，包括書包與托特包。','tbc',{web:'https://bk.asia-city.com/node/40606',wl:'資料來源',h:H_CZ}),
+ S('ponystone','Pony Stone','siam','Siam Square Soi 2','cloth','前衛風服飾，破損 T-shirt、亮片長洋裝、破損牛仔褲。資料來自 2016 年文章，現況待確認。','tbc',{web:'https://www.timeout.com/bangkok/shopping/the-ten-best-shops-in-siam-square',wl:'資料來源（2016）'}),
+ S('cocue','Cocue','siam','Siam 區（門牌待確認）','vint cloth acc','來自韓國與日本的二手服飾與配件，街頭風。2016 年文章，現況待確認。','tbc',{web:'https://www.timeout.com/bangkok/shopping/the-ten-best-shops-in-siam-square',wl:'資料來源（2016）'}),
+ S('todaytomorrow','Today Tomorrow Forever','siam','Siam Square Soi 1, Pathumwan, Bangkok 10330','vint cloth','復古服飾，絲網印刷襯衫、睡袍與復古牛仔褲。','tbc',{h:'每日 12:00–20:00（Time Out，現況待確認）',web:'https://www.timeout.com/bangkok/shopping/today-tomorrow-forever',wl:'Time Out'}),
+ S('mosstories','Mosstories','siam','Siam 區（門牌待確認）','acc cloth','手工項鍊與飾品，加上簡約基本款服飾。2016 年文章，現況待確認。','tbc',{web:'https://www.timeout.com/bangkok/shopping/the-ten-best-shops-in-siam-square',wl:'資料來源（2016）'}),
+ S('himma','Himma','siam','Siam 區（門牌待確認）','cloth','街頭風品牌，設計時尚、價格實惠。2016 年文章，現況待確認。','tbc',{web:'https://www.timeout.com/bangkok/shopping/the-ten-best-shops-in-siam-square',wl:'資料來源（2016）'})
+];
+var STYN={kr:'韓系簡約',jp:'日系文藝',y2k:'Vintage／Y2K',th:'泰國設計師',street:'街頭潮流',resort:'度假風'};
+var STY={
+ kr:['tres','loft','tudi','three0six','matchbox'],
+ jp:['tres','daddy','everyday','saan'],
+ y2k:['blulagoon','tres','daddy','analog','pastperfect','nilene','houseofvintage','matchbox','cocue','todaytomorrow','yugana'],
+ th:['loft','garcon-siam','frank','kodangs','ress','fablab','absolute','frank-sw','garcon-sw','matter','matter-p','tres','kloset','greyhound'],
+ street:['garcon-siam','kodangs','doublegoose','matter','matter-p','unfound','greyhound','himma','ponystone'],
+ resort:['mitr','summer']
+};
+var PHOTOS={};/* 之後放店家照片：{ 's-tres':'data:image/jpeg;base64,...' } */
+function hash(s){var h=0,i;for(i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}return Math.abs(h)%1000+1;}
+var MCAT={cloth:'dress',bag:'bag',shoe:'shoe',vint:'hanger',acc:'jewel',frag:'perfume',life:'vase',art:'frame',coll:'record'};
+var REGBG={siam:'#CFE0DB',icon:'#DDD0DC',songwat:'#EBCDB8',chatuchak:'#D5DCC4',asiatique:'#EBCDD0',pattaya:'#CAD9E3'};
+var FCATC={queue:'--c-cloth',thai:'--c-bag',seafood:'--pattaya',street:'--c-vint',cafe:'--c-frag',dessert:'--c-acc',night:'--icon'};
+var DAYV=['siam','songwat','icon','pattaya','chatuchak','asiatique'];
+function thumb(id,m,bg){
+  if(PHOTOS[id]){return '<div class="th"><img src="'+PHOTOS[id]+'" alt=""></div>';}
+  var h=hash(id);
+  return '<div class="th art"><canvas data-motif="'+m+'" data-seed="'+h+'" data-v="'+(h%6)+'" data-bg="'+(bg||'#F3ECDD')+'" width="144" height="144" aria-hidden="true"></canvas></div>';
+}
+var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){paint(e.target);io.unobserve(e.target);}});},{rootMargin:'300px'}):null;
+function lazy(root){$$('canvas[data-motif]',root).forEach(function(c){if(c.dataset.done)return;if(io){io.observe(c);}else{paint(c);}});}
+
+/* ---------- data: food ---------- */
+var FCAT={queue:'排隊名店 Queue',thai:'泰國料理 Thai',seafood:'海鮮 Seafood',street:'街邊小吃 Street',cafe:'咖啡廳 Cafe',dessert:'甜點 Dessert',night:'夜市美食 Night Market'};
+var FCATZH={queue:'排隊名店',thai:'泰國料理',seafood:'海鮮',street:'街邊小吃',cafe:'咖啡廳',dessert:'甜點',night:'夜市美食'};
+var F=function(id,n,area,addr,c,d,x){var o={id:'f-'+id,n:n,area:area,addr:addr||'待確認',c:c.split(' '),d:d,p:'待確認',h:'待確認',dl:'tbc'};if(x){for(var k in x){o[k]=x[k];}}return o;};
+var FOODS=[
+ F('jayfai','Jay Fai เจ๊ไฝ','舊城區','待確認','queue seafood street','蟹肉蛋包、醉炒河粉。米其林星級街頭料理，非常熱門，可能久候。',{p:'高預算體驗型，價格待確認',dl:'dine'}),
+ F('thipsamai','Thipsamai ทิพย์สมัย','舊城區','待確認','queue thai street','蛋包式泰式炒河粉名店，晚餐時段常見排隊。'),
+ F('herehai','Here Hai','Ekkamai','待確認','queue seafood','蟹肉炒飯與蟹肉料理。'),
+ F('rung','Rung Rueang Pork Noodles','Phrom Phong','待確認','thai street','泰式酸辣豬肉湯麵，午餐熱門。'),
+ F('kpanich','K. Panich','舊城區','待確認','dessert','芒果糯米飯，傳統泰式甜點老店。'),
+ F('fataLu','Pad Thai Fai Ta Lu','舊城區','待確認','thai street','炒河粉與炭烤風味料理。'),
+ F('wattana','Wattana Panich','Ekkamai','待確認','thai street','牛肉湯麵，湯頭長時間熬煮。'),
+ F('nhong','Nhong Rim Klong','Ekkamai','待確認','seafood thai','蟹肉煎蛋與海鮮料理。'),
+ F('kolunh','Kolun.h','舊城區','待確認','thai','海南風味米粉、燉豬肉。曾被列為米其林必比登推薦，請核對最新年度。'),
+ F('somsak','Somsak Pu Ob','Khlong San','待確認','seafood thai','螃蟹粉絲煲。曾被列為米其林必比登推薦，請核對最新年度。'),
+ F('urai','Urai Braised Goose','Song Wat','Song Wat Rd，門牌待核實','thai street','潮州滷鵝與鵝肉飯。曾被列為米其林必比登推薦，請核對最新年度。',{dl:'dine'}),
+ F('apsorn','Krua Apsorn','Dusit','待確認','thai','泰式炒蛋與咖哩，家常菜。'),
+ F('naiek','Nai Ek Roll Noodles','Chinatown','待確認','street night','胡椒豬肉粿汁。'),
+ F('limngow','Lim Lao Ngow','Song Wat','299–301 Song Sawat Rd','street thai','手工魚丸麵與魚丸餛飩。'),
+ F('khaosan','Khao San Sek','Song Wat','1121–1123 Song Wat Rd','thai','現代泰式料理，主廚餐廳。'),
+ F('naam','NAAM 1608','Song Wat','1608 Song Wat Rd','thai','傳統泰式料理，河畔景觀用餐。'),
+ F('goutes','Goûtes at Songwat','Song Wat','981/10 Song Wat Rd','cafe dessert','特色派、甜點與咖啡。'),
+ F('pista','Pista&','Song Wat','Song Wat Rd，門牌待確認','cafe dessert','開心果奶與開心果甜點。'),
+ F('arteasia','Arteasia Desserts & Cafe','Song Wat','947 Song Wat Rd，2F','cafe dessert','特色甜點與咖啡。'),
+ F('oldbread','The Old Breadshop','Song Wat','847 Song Wat Rd','cafe','老屋麵包、烘焙與咖啡。'),
+ F('gulong','Gu Long Bao','Song Wat','983 Song Wat Rd','street','潮州手工包子。'),
+ F('naiyong','Nai Yong Noodle','Song Wat','142 Song Wat Rd','street thai','鴨肉湯麵，可能提早售完。'),
+ F('khaokhamoo','Khao Kha Moo (Tha Nam Sawatdee)','Song Wat','1484/1 Song Wat Rd','street thai','泰式滷豬腳飯。'),
+ F('yaowarat-sea','Yaowarat 街頭海鮮攤','Yaowarat','待確認','seafood night street','烤蝦、海鮮與炒蟹。多數以現場用餐為主，個別店家待查。',{dl:'dine'}),
+ F('yaowarat-sweet','Yaowarat 甜點攤','Yaowarat','待確認','dessert night street','烤麵包與泰式甜品。個別店家待查。'),
+ F('seafoodstation','SEAFOOD STATION','Pattaya','待確認','seafood','海鮮餐廳。店址及是否需預約待確認。')
+];
+
+/* ---------- state ---------- */
+var saved=new Set();
+try{var raw=localStorage.getItem('tdiary-saved-v1');if(raw){saved=new Set(JSON.parse(raw));}}catch(e){}
+function persist(){try{localStorage.setItem('tdiary-saved-v1',JSON.stringify(Array.from(saved)));}catch(e){}}
+var VIEWS=['home','itinerary','explore','food','saved'];
+var st={day:1,ex:{reg:'all',cat:'all',sty:'all',q:'',mode:'list'},fo:{cat:'all',q:''},sv:'all'};
+
+/* ---------- lookup for saved ---------- */
+var ALL={};
+DAYS.forEach(function(d){d.stops.forEach(function(s){if(s.id){ALL[s.id]={kind:'spot',ty:s.ty==='food'?'food':'spot',o:s,d:d};}});});
+SHOPS.forEach(function(s){ALL[s.id]={kind:'shop',ty:s.type==='zone'?'other':'shop',o:s};});
+FOODS.forEach(function(f){ALL[f.id]={kind:'food',ty:f.c.indexOf('cafe')>-1?'cafe':'food',o:f};});
+var STABS=[['all','全部'],['spot','景點'],['shop','商店'],['food','餐廳'],['cafe','咖啡廳'],['other','其他']];
+
+/* ---------- renderers ---------- */
+function heart(id){return '<button class="heart" data-save="'+esc(id)+'" aria-pressed="'+(saved.has(id)?'true':'false')+'" aria-label="收藏"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>';}
+function mapsUrl(q){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+function link(h,t){return '<a href="'+esc(h)+'" target="_blank" rel="noopener">'+esc(t)+'</a>';}
+function dayChip(d,go){return '<button class="chip dchip" style="--c:var(--'+DAYV[d.id-1]+')" '+(go?'data-go="itinerary" ':'')+'data-day="'+d.id+'"'+(go?'':' aria-pressed="false"')+'><b>第 '+d.id+' 天</b><small>'+d.date+'</small></button>';}
+function stopHtml(s,i,d){
+  var extra='';
+  if(s.tbc){extra+='<div class="tg"><span class="pill tbc">待確認</span></div><p class="tbc">'+esc(s.tbc)+'</p>';}
+  if(s.todo){extra+='<div class="tg"><span class="pill tbc">待安排</span></div>';}
+  var th=thumb(s.id||('x-'+d.id+'-'+i),s.mo||'frame',REGBG[DAYV[d.id-1]]);
+  var rows='';
+  if(s.a){rows+='<p class="addr"><b>地址</b>'+esc(s.a)+'</p>';}
+  if(s.hr){rows+='<p class="addr"><b>時間</b>'+esc(s.hr)+'</p>';}
+  var lk=(s.lk||[]).slice();
+  if(s.a||s.q){lk.unshift([mapsUrl((s.q||s.n)+' '+(s.a||'')),'Google Maps 搜尋']);}
+  var links=lk.length?'<p class="row">'+lk.map(function(x){return '<a href="'+esc(x[0])+'" target="_blank" rel="noopener">'+esc(x[1])+'</a>';}).join('')+'</p>':'';
+  return '<li class="stop'+(s.k?' '+s.k:'')+'"><span class="dot">'+(i+1)+'</span><div class="sb"><div class="sbm">'+th+'<div class="sbt">'+(s.t?'<span class="time">'+esc(s.t)+'</span>':'')+'<h4>'+esc(s.n)+'</h4>'+(s.note?'<p>'+esc(s.note)+'</p>':'')+rows+links+extra+'</div></div></div><div>'+(s.id?heart(s.id):'')+'</div></li>';
+}
+/* ---------- route diagram, now marker, timeline cards ---------- */
+var LL={'sp-siam':[13.7445,100.5335],'sp-iconsiam':[13.7267,100.5105],'sp-train':[13.6935,100.6475],'sp-palek':[14.355,100.575],'sp-baiwan':[14.46,100.61],'sp-zoo':[14.53,100.70],'sp-saveone':[13.94,100.646],'sp-joe':[13.705,100.525],'sp-endless':[13.7795,100.5445],'sp-chatuchak':[13.7999,100.5502],'sp-wararun':[13.7437,100.4884],'sp-asiatique':[13.7046,100.5034],'sp-t21':[12.9505,100.8888],'sp-seafood':[12.925,100.905],'sp-69':[12.951,100.892],'sp-songwat':[13.7385,100.5080],'sp-chula':[13.7384,100.5320],'sp-centralworld':[13.7469,100.5397]};
+var LL_HOME=[13.7225,100.585],LL_AIR=[13.690,100.750];
+function llOf(s){if(s.ll)return s.ll;if(s.id&&LL[s.id])return LL[s.id];if(s.a===HOME)return LL_HOME;if(s.a===AIRP)return LL_AIR;return null;}
+var SHORT={'sp-siam':'暹羅','sp-iconsiam':'ICONSIAM','sp-train':'火車夜市','sp-palek':'船麵','sp-baiwan':'百萬爺爺','sp-zoo':'動物園','sp-saveone':'Save One','sp-joe':'Mr.Joe','sp-endless':'Ari','sp-chatuchak':'洽圖洽','sp-wararun':'鄭王廟','sp-asiatique':'河濱夜市','sp-t21':'T21','sp-seafood':'海鮮','sp-69':'6996','sp-songwat':'嵩越路','sp-chula':'朱拉','sp-centralworld':'CentralWorld'};
+function routeSvg(d){
+  var pts=[];
+  d.stops.forEach(function(s,i){var ll=llOf(s);if(ll){pts.push({i:i,ll:ll,s:s});}});
+  var W=640,H=340,P=40,BOT=50;
+  if(!pts.length){return '';}
+  var core=pts.filter(function(p){return p.ll!==LL_HOME&&p.ll!==LL_AIR;});if(core.length<2){core=pts;}
+  var cA=core.map(function(p){return p.ll[0];}),cO=core.map(function(p){return p.ll[1];});
+  var far=(Math.max.apply(null,cA)-Math.min.apply(null,cA)<0.4)&&pts.some(function(p){return Math.abs(p.ll[0]-cA[0])>0.6;});
+  var bb=far?core:pts;
+  var la=bb.map(function(p){return p.ll[0];}),lo=bb.map(function(p){return p.ll[1];});
+  var mnA=Math.min.apply(null,la),mxA=Math.max.apply(null,la),mnO=Math.min.apply(null,lo),mxO=Math.max.apply(null,lo);
+  var cx=Math.cos((mnA+mxA)/2*Math.PI/180),sx=(mxO-mnO)*cx||.01,sy=(mxA-mnA)||.01;
+  var sc=Math.min((W-2*P-60)/sx,(H-P-BOT)/sy);
+  var ox=(W-60-sx*sc)/2,oy=P+((H-P-BOT)-sy*sc)/2;
+  pts.forEach(function(p){p.x=ox+(p.ll[1]-mnO)*cx*sc;p.y=oy+(mxA-p.ll[0])*sc;if(far&&bb.indexOf(p)<0){p.off=1;p.x=Math.max(30,Math.min(W-90,p.x));p.y=Math.max(26,Math.min(H-30,p.y));}});
+  /* nudge overlapping pins */
+  pts.forEach(function(p,k){for(var j=0;j<k;j++){var q=pts[j];if(Math.abs(q.x-p.x)<20&&Math.abs(q.y-p.y)<20&&!(q.ll===p.ll)){p.x+=18;p.y-=10;}}});
+  var seen={},line=pts.map(function(p){return p.x.toFixed(1)+','+p.y.toFixed(1);}).join(' ');
+  var g='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="第 '+d.id+' 天路線示意圖">'+
+    '<path d="M0 '+(H-70)+' Q160 '+(H-95)+' 320 '+(H-72)+' T640 '+(H-80)+' V'+H+' H0Z" fill="#A9CCC6" opacity=".55"/>'+
+    '<polyline points="'+line+'" fill="none" stroke="#2F5A5C" stroke-width="2.5" stroke-dasharray="2 7" stroke-linecap="round"/>';
+  pts.forEach(function(p){
+    var key=p.ll.join(','),home=(p.ll===LL_HOME);
+    if(home&&seen[key]){return;}seen[key]=1;
+    var col=home?'#6B705C':(p.ll===LL_AIR?'#3F7A78':'var(--'+DAYV[d.id-1]+')');
+    var lab=home?(p.off?'民宿（曼谷，圖外）':'民宿'):(p.ll===LL_AIR?'機場':(SHORT[p.s.id]||(p.s.n.length>6?p.s.n.slice(0,6):p.s.n)));
+    g+='<g class="rpin" data-goto="'+p.i+'" style="cursor:pointer"><circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="13" fill="'+col+'" stroke="#fff" stroke-width="2.5"/><text x="'+p.x.toFixed(1)+'" y="'+(p.y+4).toFixed(1)+'">'+(home?'⌂':(p.i+1))+'</text></g>'+
+      '<text class="rlab" x="'+(p.x+17).toFixed(1)+'" y="'+(p.y+4).toFixed(1)+'">'+esc(lab)+'</text>';
+  });
+  return g+'</svg>';
+}
+var CM='https://commons.wikimedia.org/wiki/';
+var PH={
+ 'sp-wararun':{f:'Templo_Wat_Arun,_Bangkok,_Tailandia,_2013-08-22,_DD_37.jpg',by:'Diego Delso',lic:'CC BY-SA 3.0',lu:'https://creativecommons.org/licenses/by-sa/3.0/'},
+ 'sp-chatuchak':{f:'Chatuchak_Clock_Tower_(28102254850).jpg',by:'Thomas Woodtli',lic:'CC BY-SA 2.0',lu:'https://creativecommons.org/licenses/by-sa/2.0/'},
+ 'sp-asiatique':{f:'Asiatique_Sky_Ferris_Wheel.jpg',by:'Moel81',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'},
+ 'sp-t21':{f:'Terminal_21_Pattaya_20190825_06.jpg',by:'西安兵马俑',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'},
+ 'beach':{f:'DSC_7560_Coastal_city_skyline_with_high-rise_buildings_and_numerous_boats_scattered_across_a_calm_blue_bay_on_a_clear_day.jpg',by:'PattayaPatrol',lic:'CC BY-SA 4.0',lu:'https://creativecommons.org/licenses/by-sa/4.0/'}
+};
+function photoOf(s){return PH[s.id||(s.mo==='sea'?'beach':'')];}
+function photoHtml(ph,alt){
+  return '<figure class="photo"><img loading="lazy" src="https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(ph.f)+'?width=800" alt="'+esc(alt)+'" onerror="var c=this.closest(\'.tcard\');if(c){c.classList.add(\'nophoto\');}this.closest(\'figure\').remove();">'+
+  '<figcaption>照片：<a href="'+CM+'File:'+encodeURIComponent(ph.f)+'" target="_blank" rel="noopener">'+esc(ph.by)+'</a>・<a href="'+ph.lu+'" target="_blank" rel="noopener">'+esc(ph.lic)+'</a>・Wikimedia Commons</figcaption></figure>';
+}
+var LMAP=null;
+function buildMap(d){
+  var el=document.getElementById('rmap');
+  if(LMAP){try{LMAP.remove();}catch(e){}LMAP=null;}
+  if(!el||!window.L){return false;}
+  var pts=[];d.stops.forEach(function(s,i){var ll=llOf(s);if(ll){pts.push({i:i,ll:ll,s:s});}});
+  if(!pts.length){return false;}
+  LMAP=L.map(el,{scrollWheelZoom:false,zoomControl:true,attributionControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(LMAP);
+  L.polyline(pts.map(function(p){return p.ll;}),{color:'#2F5A5C',weight:3,dashArray:'2 8',lineCap:'round'}).addTo(LMAP);
+  var seen={},col=getComputedStyle(document.documentElement).getPropertyValue('--'+DAYV[d.id-1]).trim()||'#3F7A78';
+  pts.forEach(function(p){
+    var home=p.ll===LL_HOME,key=p.ll.join(',');if(home&&seen[key]){return;}seen[key]=1;
+    var c=home?'#6B705C':(p.ll===LL_AIR?'#3F7A78':col);
+    var m=L.marker(p.ll,{icon:L.divIcon({className:'',html:'<div class="lpin" style="background:'+c+'">'+(home?'⌂':(p.i+1))+'</div>',iconSize:[28,28]})}).addTo(LMAP);
+    m.bindTooltip(home?'民宿':p.s.n,{direction:'top',offset:[0,-14]});
+    m.on('click',function(){scrollStop(p.i);});
+  });
+  var core=pts.filter(function(p){return p.ll!==LL_HOME&&p.ll!==LL_AIR;});
+  var cA=core.map(function(p){return p.ll[0];});
+  var far=core.length>1&&(Math.max.apply(null,cA)-Math.min.apply(null,cA)<0.4)&&pts.some(function(p){return Math.abs(p.ll[0]-cA[0])>0.6;});
+  var bb=(far?core:pts).map(function(p){return p.ll;});
+  if(bb.length===1){LMAP.setView(bb[0],14);}else{LMAP.fitBounds(bb,{padding:[36,36]});}
+  setTimeout(function(){if(LMAP){LMAP.invalidateSize();}},200);
+  return true;
+}
+var TRIP0=Date.UTC(2026,11,11);
+function bkkNow(){var n=new Date(Date.now()+7*3600e3);return {day:Math.floor((Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate())-TRIP0)/864e5)+1,min:n.getUTCHours()*60+n.getUTCMinutes(),hm:('0'+n.getUTCHours()).slice(-2)+':'+('0'+n.getUTCMinutes()).slice(-2)};}
+function tmin(s){var m=/(\d{1,2}):(\d{2})/.exec(s.t||'');return m?(+m[1])*60+(+m[2]):null;}
+function curIndex(d){var n=bkkNow();if(n.day!==d.id)return -1;var c=-1;d.stops.forEach(function(s,i){var t=tmin(s);if(t!=null&&t<=n.min){c=i;}});if(c<0)return -1;var nx=d.stops[c+1];if(nx&&tmin(nx)==null&&n.min-tmin(d.stops[c])>120){return -2;}return c;}
+function kindOf(s){
+  if(s.k==='flight')return ['航班','var(--sea)'];
+  if(s.mo==='house')return [s.n.indexOf('民宿')>-1&&s.n.indexOf('出發')<0?'住宿':'移動','#6B705C'];
+  if(s.mo==='plane'&&s.id!=='sp-t21')return ['機場','var(--sea)'];
+  if(s.ty==='food')return ['餐廳','#B5662A'];
+  if(s.mo==='lotus')return ['按摩','#7A5C7E'];
+  if(s.mo==='market'||s.mo==='dress'||s.mo==='bag'||s.id==='sp-t21'||s.id==='sp-iconsiam')return ['購物','#B0485A'];
+  return ['景點','#3D6B8C'];
+}
+var IC={pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+ clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ bulb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
+ warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17v.5"/></svg>',
+ link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>'};
+function stopCard(s,i,d,cur){
+  var k=kindOf(s),th=thumb(s.id||('x-'+d.id+'-'+i),s.mo||'frame',REGBG[DAYV[d.id-1]]);
+  var tags='<span class="tag" style="background:'+k[1]+'">'+k[0]+'</span>'+(cur?'<span class="tag now">目前行程</span>':'')+(s.bk?'<span class="tag bk">'+esc(s.bk)+'</span>':'')+(s.todo?'<span class="tag warn">待安排</span>':'');
+  var meta='';
+  if(s.a){meta+='<div>'+IC.pin+'<span>'+esc(s.a)+'</span></div>';}
+  if(s.hr){meta+='<div>'+IC.clock+'<span>'+esc(s.hr)+'</span></div>';}
+  var btns='';
+  if(s.a||s.q){btns+='<a href="'+esc(mapsUrl((s.q||s.n)+' '+(s.a||'')))+'" target="_blank" rel="noopener">'+IC.pin+'地圖</a>';}
+  (s.lk||[]).forEach(function(x){btns+='<a href="'+esc(x[0])+'" target="_blank" rel="noopener">'+IC.link+esc(x[1])+'</a>';});
+  var ph=photoOf(s);
+  return '<li class="ts'+(s.k?' '+s.k:'')+(cur?' cur':'')+'" id="stop-'+d.id+'-'+i+'"><div class="tcol">'+(s.t?esc(s.t.split(' ')[0]):'')+'<span class="tn">'+(i+1)+'</span></div>'+
+    '<div class="tcard'+(ph?' hasphoto':'')+'">'+(ph?photoHtml(ph,s.n):'')+'<div class="tch"><div class="tcb"><div class="tags">'+tags+'</div><h4>'+esc(s.n)+'</h4>'+(s.t&&s.t.indexOf('→')>-1?'<p class="note">'+esc(s.t)+'</p>':'')+'</div>'+th+(s.id?heart(s.id):'')+'</div>'+
+    (meta?'<div class="tmeta">'+meta+'</div>':'')+
+    (s.note?'<div class="tip">'+IC.bulb+'<span>'+esc(s.note)+'</span></div>':'')+
+    (s.tbc?'<div class="tip tbc">'+IC.warn+'<span>待確認：'+esc(s.tbc)+'</span></div>':'')+
+    (btns?'<div class="tbtns">'+btns+'</div>':'')+'</div></li>';
+}
+function nowBar(d){
+  var n=bkkNow(),ci=curIndex(d);
+  if(n.day<1)return '<div class="nowbar"><i></i>曼谷時間 '+n.hm+' · 旅程尚未開始，12/11 出發</div>';
+  if(n.day>DAYS.length)return '<div class="nowbar"><i></i>曼谷時間 '+n.hm+' · 旅程已結束</div>';
+  if(n.day!==d.id)return '<div class="nowbar"><i></i>曼谷時間 '+n.hm+' · 今天是第 '+n.day+' 天 <button data-today="1">回到今天行程</button></div>';
+  return '<div class="nowbar"><i></i>曼谷時間 '+n.hm+(ci>-1?' · <button data-gostop="'+ci+'">回到目前行程</button>':(ci===-2?' · 後面幾站沒有排時間，無法判斷目前在哪一站':' · 今天行程還沒開始'))+'</div>';
+}
+function renderDay(){
+  var d=DAYS[st.day-1],ci=curIndex(d);
+  $$('#day-chips .chip').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.day===st.day));});
+  $('#day-body').style.setProperty('--c','var(--'+DAYV[d.id-1]+')');
+  $('#day-body').innerHTML=
+    '<div class="route"><span class="rnote">點圖釘跳到該站・可縮放</span><div id="rmap"></div>'+'<div class="rtl"><small>DAY '+d.id+' · '+d.date+' '+d.dow+'</small><b>'+esc(d.zh)+'</b></div></div>'+
+    '<div class="dayhead"><span class="eyebrow">第 '+d.id+' 天 · '+d.dow+' '+d.date+'</span><p class="en">'+esc(d.en)+'</p><p class="car">交通：全程包車・地圖位置為大約位置</p></div>'+
+    '<div id="nowwrap">'+nowBar(d)+'</div>'+
+    (d.note?'<div class="tip">'+IC.bulb+'<span>'+esc(d.note)+'</span></div>':'')+
+    '<ol class="tl2" id="tlist">'+d.stops.map(function(s,i){return stopCard(s,i,d,i===ci);}).join('')+'</ol>';
+  if(!buildMap(d)){var rm=$('#rmap');if(rm){rm.outerHTML=routeSvg(d);}var rn=$('.route .rnote');if(rn){rn.textContent='示意圖・點編號跳到該站';}}
+  lazy($('#day-body'));
+}
+function scrollStop(i){var el=document.getElementById('stop-'+st.day+'-'+i);if(el&&el.scrollIntoView){try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){el.scrollIntoView();}}}
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-goto],[data-gostop],[data-today]');if(!g)return;
+  if(g.dataset.today){var n=bkkNow();setDay(n.day);var c=curIndex(DAYS[n.day-1]);if(c>-1){scrollStop(c);}return;}
+  scrollStop(+(g.dataset.goto!=null?g.dataset.goto:g.dataset.gostop));
+});
+setInterval(function(){if((location.hash||'').slice(1)!=='itinerary'){return;}var d=DAYS[st.day-1],ci=curIndex(d),nw=$('#nowwrap'),tl=$('#tlist');if(nw){nw.innerHTML=nowBar(d);}if(tl){tl.innerHTML=d.stops.map(function(s,i){return stopCard(s,i,d,i===ci);}).join('');lazy(tl);}},60000);
+function shopCard(s){
+  var r=REG[s.r],tags=s.c.map(function(k){return CATZH[k];}).join(' · ');
+  var links=[link(mapsUrl(s.n+' '+r.map),'Google Maps 搜尋')];
+  if(s.web){links.push(link(s.web,s.wl||'官方網站'));}
+  if(s.ig){links.push(link(s.ig,'Instagram'));}
+  var sm=s.type==='zone'?'market':MCAT[s.c[0]];
+  var sty=Object.keys(STY).filter(function(k){return STY[k].indexOf(s.id.slice(2))>-1;}).map(function(k){return STYN[k];});
+  return '<article class="card place" style="--c:var(--'+s.r+')"><div class="ph">'+thumb(s.id,sm,REGBG[s.r])+'<div class="pt"><span class="eyebrow">'+esc(r.zh===r.en?r.en:r.zh+' '+r.en)+(s.type==='zone'?' · 逛街區域':'')+'</span><h3>'+esc(s.n)+'</h3><div class="tps">'+s.c.map(function(k){return '<span class="tp" style="--c:var(--c-'+k+')">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tp sp">'+esc(t)+'</span>';}).join('')+'</div></div>'+heart(s.id)+'</div>'+
+    '<p class="d">'+esc(s.d)+'</p>'+
+    '<dl class="kv"><dt>位置</dt><dd>'+esc(s.loc)+'</dd><dt>價格</dt><dd>'+esc(s.p)+'</dd><dt>營業時間</dt><dd>'+esc(s.h)+'</dd>'+(s.ph?'<dt>電話</dt><dd>'+esc(s.ph)+'</dd>':'')+'</dl>'+
+    '<div class="row"><span class="pill '+(s.st==='ok'?'ok':'tbc')+'">'+(s.st==='ok'?'有資料來源可對應':'待確認')+'</span>'+(s.ev?'<span class="pill tbc">活動品牌名單，未確認常設</span>':'')+links.join('')+'</div></article>';
+}
+function foodCard(f){
+  var tags=f.c.map(function(k){return FCATZH[k];}).join(' · ');
+  var dl=f.dl==='dine'?'建議現場吃（外送待確認）':'待確認';
+  return '<article class="card place" style="--c:var('+FCATC[f.c[0]]+')"><div class="ph">'+thumb(f.id,'bowl','#EBD5B8')+'<div class="pt"><span class="eyebrow">'+esc(f.area)+'</span><h3>'+esc(f.n)+'</h3><div class="tps">'+f.c.map(function(k){return '<span class="tp" style="--c:var('+FCATC[k]+')">'+esc(FCATZH[k])+'</span>';}).join('')+'</div></div>'+heart(f.id)+'</div>'+
+    '<p class="d">'+esc(f.d)+'</p>'+
+    '<dl class="kv"><dt>地址</dt><dd>'+esc(f.addr)+'</dd><dt>價格</dt><dd>'+esc(f.p)+'</dd><dt>營業時間</dt><dd>'+esc(f.h)+'</dd><dt>外送</dt><dd>'+esc(dl)+'</dd></dl>'+
+    '<div class="row"><span class="pill tbc">資料待確認</span>'+link(mapsUrl(f.n+' '+(f.area==='Pattaya'?'Pattaya':'Bangkok')),'Google Maps 搜尋')+'</div></article>';
+}
+function spotCard(o){
+  var s=o.o,d=o.d;
+  return '<article class="card place"><div class="ph"><div><span class="eyebrow">第 '+d.id+' 天 · '+d.date+' · 行程景點</span><h3>'+esc(s.n)+'</h3></div>'+heart(s.id)+'</div>'+(s.note?'<p class="d">'+esc(s.note)+'</p>':'')+(s.a?'<p class="d" style="margin-top:6px">'+esc(s.a)+'</p>':'')+(s.hr?'<p class="d" style="margin-top:6px">'+esc(s.hr)+'</p>':'')+(s.tbc?'<p class="note tbc" style="margin-top:6px;color:var(--clay)">待確認：'+esc(s.tbc)+'</p>':'')+'</article>';
+}
+function exFilter(ignoreReg){
+  var q=st.ex.q.trim().toLowerCase();
+  return SHOPS.filter(function(s){
+    return (ignoreReg||st.ex.reg==='all'||s.r===st.ex.reg)&&(st.ex.cat==='all'||s.c.indexOf(st.ex.cat)>-1)&&
+      (st.ex.sty==='all'||(STY[st.ex.sty]||[]).indexOf(s.id.slice(2))>-1)&&
+      (!q||(s.n+' '+s.loc+' '+s.d+' '+REG[s.r].zh+' '+REG[s.r].en+' '+s.c.map(function(k){return CAT[k];}).join(' ')).toLowerCase().indexOf(q)>-1);
+  });
+}
+function renderExplore(){
+  var list=exFilter(false),counts={};
+  Object.keys(REG).forEach(function(k){counts[k]=0;});
+  exFilter(true).forEach(function(s){counts[s.r]++;});
+  $('#ex-count').textContent=list.length+' 個結果';
+  $('#ex-list').innerHTML=list.length?list.map(shopCard).join(''):'<div class="empty">沒有符合的店家。換個地區或商品分類試試。</div>';
+  $$('#ex-map .pin').forEach(function(p){p.querySelector('.pc').textContent=counts[p.dataset.reg];p.setAttribute('aria-pressed',String(st.ex.reg===p.dataset.reg));});
+  $$('#ex-regs .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.reg===st.ex.reg));});
+  $$('#ex-cats .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.cat===st.ex.cat));});
+  $('#ex-map').hidden=st.ex.mode!=='map';
+  $$('[data-mode]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===st.ex.mode));});
+  $$('#ex-sty .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.sty===st.ex.sty));});
+  lazy($('#ex-list'));
+}
+function renderFood(){
+  var q=st.fo.q.trim().toLowerCase();
+  var list=FOODS.filter(function(f){return (st.fo.cat==='all'||f.c.indexOf(st.fo.cat)>-1)&&(!q||(f.n+' '+f.area+' '+f.d+' '+f.addr).toLowerCase().indexOf(q)>-1);});
+  $('#fo-count').textContent=list.length+' 個結果';
+  $('#fo-list').innerHTML=list.length?list.map(foodCard).join(''):'<div class="empty">沒有符合的餐廳。</div>';
+  $$('#fo-cats .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.fcat===st.fo.cat));});
+  lazy($('#fo-list'));
+}
+function renderSaved(){
+  var ids=Array.from(saved).filter(function(id){return ALL[id];});
+  $('#sv-count').textContent=ids.length+' 項';
+  var list=ids.filter(function(id){return st.sv==='all'||ALL[id].ty===st.sv;});
+  $('#sv-list').innerHTML=list.length?list.map(function(id){var o=ALL[id];return o.kind==='shop'?shopCard(o.o):o.kind==='food'?foodCard(o.o):spotCard(o);}).join(''):
+    '<div class="empty">'+(ids.length?'這個分類還沒有收藏。':'還沒有收藏。在行程、探索或美食頁點愛心，就會出現在這裡。')+'</div>';
+  $$('#sv-tabs .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.stab===st.sv));});
+  lazy($('#sv-list'));
+  var bd=$('#bd');bd.textContent=ids.length;bd.hidden=!ids.length;
+}
+
+/* ---------- navigation ---------- */
+function show(v){
+  VIEWS.forEach(function(x){$('#v-'+x).hidden=x!==v;});
+  $$('.tabbar a').forEach(function(a){if(a.dataset.nav===v){a.setAttribute('aria-current','page');}else{a.removeAttribute('aria-current');}});
+  if(v==='saved'){renderSaved();}
+  if(v==='itinerary'){var y0=0;renderDay();}
+  window.scrollTo(0,0);
+}
+function route(){var h=(location.hash||'').slice(1);if(VIEWS.indexOf(h)<0){h='home';}show(h);}
+function go(v){if((location.hash||'').slice(1)===v){show(v);}else{location.hash=v;}}
+function setDay(n){st.day=n;renderDay();var b=$('#day-chips [data-day="'+n+'"]');if(b&&b.scrollIntoView){try{b.scrollIntoView({inline:'center',block:'nearest'});}catch(e){}}}
+function toggleSave(id){
+  if(saved.has(id)){saved.delete(id);}else{saved.add(id);}
+  persist();
+  $$('[data-save="'+id+'"]').forEach(function(b){b.setAttribute('aria-pressed',String(saved.has(id)));});
+  var cur=(location.hash||'').slice(1);
+  if(cur==='saved'){renderSaved();}else{var ids=Array.from(saved).filter(function(i){return ALL[i];});var bd=$('#bd');bd.textContent=ids.length;bd.hidden=!ids.length;}
+}
+
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-save],[data-go],[data-day],[data-reg],[data-cat],[data-mode],[data-fcat],[data-stab],[data-sty]');
+  if(!t)return;
+  if(t.dataset.save){toggleSave(t.dataset.save);return;}
+  if(t.dataset.go){if(t.dataset.day){setDay(+t.dataset.day);}go(t.dataset.go);return;}
+  if(t.dataset.day){setDay(+t.dataset.day);return;}
+  if(t.dataset.reg){st.ex.reg=(t.classList.contains('pin')&&st.ex.reg===t.dataset.reg)?'all':t.dataset.reg;renderExplore();return;}
+  if(t.dataset.cat){st.ex.cat=t.dataset.cat;renderExplore();return;}
+  if(t.dataset.sty){st.ex.sty=t.dataset.sty;renderExplore();return;}
+  if(t.dataset.mode){st.ex.mode=t.dataset.mode;renderExplore();return;}
+  if(t.dataset.fcat){st.fo.cat=t.dataset.fcat;renderFood();return;}
+  if(t.dataset.stab){st.sv=t.dataset.stab;renderSaved();return;}
+});
+document.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.classList&&e.target.classList.contains('pin')){
+    e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  }
+});
+$('#ex-q').addEventListener('input',function(e){st.ex.q=e.target.value;renderExplore();});
+$('#fo-q').addEventListener('input',function(e){st.fo.q=e.target.value;renderFood();});
+window.addEventListener('hashchange',route);
+
+/* ---------- init ---------- */
+document.documentElement.lang='zh-Hant';
+$('#home-days').innerHTML=DAYS.map(function(d){return dayChip(d,true);}).join('');
+$('#day-chips').innerHTML=DAYS.map(function(d){return dayChip(d,false);}).join('');
+$('#ex-regs').innerHTML='<button class="chip" data-reg="all" aria-pressed="true">全部</button>'+Object.keys(REG).map(function(k){return '<button class="chip" data-reg="'+k+'" style="--c:var(--'+k+')" aria-pressed="false">'+esc(REG[k].zh+(REG[k].zh===REG[k].en?'':' '+REG[k].en))+'</button>';}).join('');
+$('#ex-cats').innerHTML='<button class="chip" data-cat="all" aria-pressed="true">全部</button>'+Object.keys(CAT).map(function(k){return '<button class="chip" data-cat="'+k+'" style="--c:var(--c-'+k+')" aria-pressed="false">'+esc(CAT[k])+'</button>';}).join('');
+$('#fo-cats').innerHTML='<button class="chip" data-fcat="all" aria-pressed="true">全部</button>'+Object.keys(FCAT).map(function(k){return '<button class="chip" data-fcat="'+k+'" style="--c:var('+FCATC[k]+')" aria-pressed="false">'+esc(FCAT[k])+'</button>';}).join('');
+$('#ex-sty').innerHTML='<button class="chip" data-sty="all" aria-pressed="true">全部</button>'+Object.keys(STYN).map(function(k){return '<button class="chip" data-sty="'+k+'" aria-pressed="false">'+esc(STYN[k])+'</button>';}).join('');
+$('#sv-tabs').innerHTML=STABS.map(function(t){return '<button class="chip" data-stab="'+t[0]+'" aria-pressed="'+(t[0]==='all')+'">'+t[1]+'</button>';}).join('');
+$$('canvas[data-motif]').forEach(paint);
+(function(){var n=bkkNow();if(n.day>=1&&n.day<=DAYS.length){st.day=n.day;}})();
+renderDay();renderExplore();renderFood();renderSaved();
+route();
+})();
+</script>
+
+</body></html>
