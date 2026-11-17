@@ -553,6 +553,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .fld input[type=time]::-webkit-date-and-time-value{text-align:left}
 .dlg header button:focus:not(:focus-visible),.dlg button:focus:not(:focus-visible){outline:none}
 .dlg form{overflow-x:hidden}
+.dlg header button{outline:none!important;-webkit-tap-highlight-color:transparent}.dlg header button:focus-visible{background:#EEF1F5;border-radius:10px}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -2221,7 +2222,7 @@ var DLG=null;
 function openDlg(title,body,foot,onsubmit){
   var f=$('#dlgform');
   f.innerHTML='<header>'+title+'<button type="button" class="del" data-dlgclose="1" aria-label="關閉">×</button></header><div class="bd2">'+body+'</div><footer>'+foot+'</footer>';
-  DLG=onsubmit;var d=$('#dlg');try{d.showModal();}catch(e){d.setAttribute('open','');}
+  DLG=onsubmit;var d=$('#dlg');try{d.showModal();}catch(e){d.setAttribute('open','');}try{var hb=d.querySelector('header button');if(hb&&document.activeElement===hb)hb.blur();}catch(e){}
 }
 function closeDlg(){var d=$('#dlg');try{d.close();}catch(e){d.removeAttribute('open');}DLG=null;}
 function opts(obj,sel){return Object.keys(obj).map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+esc(obj[k].zh||obj[k][0]||obj[k])+'</option>';}).join('');}
