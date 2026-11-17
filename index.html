@@ -479,7 +479,10 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 /* ---------- 配色：重點色＋每天的顏色＋分類標籤 ---------- */
 :root{--hot:#C8553D;--hot-d:#A9432F;--hot-l:#F8E6E1}
 .btn{background:var(--hot);border-color:var(--hot)}
-.btn:hover{background:var(--hot-d);border-color:var(--hot-d)}
+@media (hover:hover){.btn:not(.w):not(.c):not(.g):hover{background:var(--hot-d);border-color:var(--hot-d)}.btn.w:hover,.btn.g:hover{background:#F6F7F9}.btn.c:hover{background:#FBF1EF}}
+.btn.c{background:#fff;color:#A0443B;border-color:#E3C9C5}
+.btn.c[data-armed]{background:#B83A2E;border-color:#B83A2E;color:#fff}
+.btn[disabled]{opacity:.45;pointer-events:none}
 .btn.w,.btn.g{background:#fff;color:var(--ink);border-color:var(--hair2)}
 .nav a[aria-current="page"]{background:var(--hot);border-color:var(--hot);color:#fff}
 .chip[aria-pressed="true"],.mini.on{background:var(--hot);border-color:var(--hot);color:#fff}
