@@ -528,6 +528,10 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 #dtools{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none}
 #dtools .btn{flex:1 0 auto;min-height:42px;padding:0 12px;font-size:14px;white-space:nowrap;gap:5px}
 #dtools .btn svg{width:16px;height:16px}
+.phpick{display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:4px}
+.phpick #phprev img{width:72px;height:72px;object-fit:cover;border-radius:12px;display:block}
+.phbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1.5px dashed var(--hair2);border-radius:12px;color:var(--muted);font-size:14px;background:#fff}
+.phbtn svg{width:16px;height:16px}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -2280,8 +2284,8 @@ function shopCard(s){
   if(s.web){links.push('<a class="mini" href="'+esc(s.web)+'" target="_blank" rel="noopener">'+ic('link')+esc(s.wl||'官方網站')+'</a>');}
   if(s.ig){links.push('<a class="mini" href="'+esc(s.ig)+'" target="_blank" rel="noopener">'+ic('link')+'Instagram</a>');}
   var sty=Object.keys(STY).filter(function(k){return STY[k].indexOf(s.id.slice(2))>-1;}).map(function(k){return STYN[k];});
-  var hasPh=(typeof PHOTOS!=='undefined'&&PHOTOS[s.id]);
-  var th=hasPh?'<img loading="lazy" decoding="async" alt="" src="img/'+s.id+'.jpg" onerror="this.remove()">':icon(s.type==='zone'?'market':MCAT[s.c[0]]);
+  var hasPh=(typeof PHOTOS!=='undefined'&&PHOTOS[s.id]),cph=thumbOf(s);
+  var th=hasPh?'<img loading="lazy" decoding="async" alt="" src="img/'+s.id+'.jpg" onerror="this.remove()">':(cph?'<img alt="" src="'+cph+'">':icon(s.type==='zone'?'market':MCAT[s.c[0]]));
   var rf=saved.has(s.id)?refItem(s.id):null;
   var flag=(s.st&&s.st!=='ok')?stTag(s.st):'';
   return '<article class="card place cpt'+(saved.has(s.id)?' on':'')+'">'+
@@ -2293,15 +2297,15 @@ function shopCard(s){
         '<div class="tags">'+s.c.map(function(k){return '<span class="tag k-'+k+'">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tag t-sty">'+esc(t)+'</span>';}).join('')+(s.cu?'<span class="tag t-cu">👥 '+esc(s.by||'朋友')+' 推薦</span>':'')+flag+'</div>'+
         (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
       '</div></summary>'+
-      '<div class="body">'+(hasPh?pimg(s.id):'')+'<p class="d">'+esc(s.d)+'</p><dl class="kv"><dt>位置</dt><dd>'+esc(s.loc)+'</dd>'+(s.p&&s.p!=='待確認'?'<dt>價格</dt><dd>'+esc(s.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(s.h)+'</dd>'+(s.ph?'<dt>電話</dt><dd>'+esc(s.ph)+'</dd>':'')+'</dl>'+
+      '<div class="body">'+(hasPh?pimg(s.id):(cph?'<div class="pimg"><img alt="" src="'+cph+'"></div>':''))+'<p class="d">'+esc(s.d)+'</p><dl class="kv"><dt>位置</dt><dd>'+esc(s.loc)+'</dd>'+(s.p&&s.p!=='待確認'?'<dt>價格</dt><dd>'+esc(s.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(s.h)+'</dd>'+(s.ph?'<dt>電話</dt><dd>'+esc(s.ph)+'</dd>':'')+'</dl>'+
       '<div class="row" style="margin-top:10px">'+(s.ev?'<span class="tag t-tbc">活動品牌，未確認常設</span>':'')+links.join('')+'</div>'+custBar(s)+addNote(s.id)+'</div>'+
     '</details>'+heart(s.id)+'</article>';
 }
 document.addEventListener('toggle',function(e){var d=e.target;if(d&&d.dataset&&d.dataset.sid){if(d.open)EXOPEN.add(d.dataset.sid);else EXOPEN.delete(d.dataset.sid);}},true);
 function pimg(id){return (typeof PHOTOS!=='undefined'&&PHOTOS[id])?'<div class="pimg"><img loading="lazy" decoding="async" alt="" src="img/'+id+'.jpg" onerror="this.parentNode.remove()"></div>':'';}
 function foodCard(f){
-  var hasPh=(typeof PHOTOS!=='undefined'&&PHOTOS[f.id]);
-  var th=hasPh?'<img loading="lazy" decoding="async" alt="" src="img/'+f.id+'.jpg" onerror="this.remove()">':icon('bowl');
+  var hasPh=(typeof PHOTOS!=='undefined'&&PHOTOS[f.id]),cph=thumbOf(f);
+  var th=hasPh?'<img loading="lazy" decoding="async" alt="" src="img/'+f.id+'.jpg" onerror="this.remove()">':(cph?'<img alt="" src="'+cph+'">':icon('bowl'));
   var rf=saved.has(f.id)?refItem(f.id):null,flag=(f.st&&f.st!=='ok')?stTag(f.st):'';
   return '<article class="card place cpt'+(saved.has(f.id)?' on':'')+'">'+
     '<details data-sid="'+esc(f.id)+'"'+(EXOPEN.has(f.id)?' open':'')+'><summary>'+
@@ -2312,13 +2316,18 @@ function foodCard(f){
         '<div class="tags">'+f.c.map(function(k){return '<span class="tag f-'+k+'">'+esc(FCATZH[k])+'</span>';}).join('')+(f.dv?'<span class="tag t-dl">🛵 可外送</span>':'')+(f.cu?'<span class="tag t-cu">👥 '+esc(f.by||'朋友')+' 推薦</span>':'')+flag+'</div>'+
         (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
       '</div></summary>'+
-      '<div class="body">'+(hasPh?pimg(f.id):'')+'<p class="d">'+esc(f.d)+'</p><dl class="kv"><dt>地址</dt><dd>'+esc(f.addr)+'</dd>'+(f.p&&f.p!=='待確認'?'<dt>價格</dt><dd>'+esc(f.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(f.h)+'</dd>'+(f.dv?'<dt>外送</dt><dd>'+esc(f.dv===true?'可外送':f.dv)+'</dd>':'')+'</dl>'+
+      '<div class="body">'+(hasPh?pimg(f.id):(cph?'<div class="pimg"><img alt="" src="'+cph+'"></div>':''))+'<p class="d">'+esc(f.d)+'</p><dl class="kv"><dt>地址</dt><dd>'+esc(f.addr)+'</dd>'+(f.p&&f.p!=='待確認'?'<dt>價格</dt><dd>'+esc(f.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(f.h)+'</dd>'+(f.dv?'<dt>外送</dt><dd>'+esc(f.dv===true?'可外送':f.dv)+'</dd>':'')+'</dl>'+
       '<div class="row" style="margin-top:10px">'+(f.web?'<a class="mini" href="'+esc(f.web)+'" target="_blank" rel="noopener">'+ic('link')+'資料來源</a>':'')+'<a class="mini" href="'+esc(mapsUrl(f.n+' '+(f.area==='Pattaya'?'Pattaya':'Bangkok')))+'" target="_blank" rel="noopener">'+ic('pin')+'地圖</a></div>'+custBar(f)+addNote(f.id)+'</div>'+
     '</details>'+heart(f.id)+'</article>';
 }
 
 /* ---------- 朋友新增的店家（存在共用行程資料 trip.cust） ---------- */
-var CUSTIDS=[];
+var PENDPH=null;var CUSTIDS=[],CLOUD=null,PHC={},PHL={};
+function phGet(cid){if(PHC[cid])return PHC[cid];try{var v=localStorage.getItem('tdiary-ph-'+cid);if(v){PHC[cid]=v;return v;}}catch(e){}
+  if(CLOUD&&!PHL[cid]){PHL[cid]=1;CLOUD.getPhoto(cid,function(d){if(d){PHC[cid]=d;try{localStorage.setItem('tdiary-ph-'+cid,d);}catch(e){}refreshLists();}});}return null;}
+function phPut(cid,d){PHC[cid]=d;try{localStorage.setItem('tdiary-ph-'+cid,d);}catch(e){}if(CLOUD)CLOUD.putPhoto(cid,d);}
+function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var M=720,w=im.width,h=im.height,s=Math.min(1,M/Math.max(w,h));var cv=document.createElement('canvas');cv.width=Math.round(w*s);cv.height=Math.round(h*s);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);var q=.72,d=cv.toDataURL('image/jpeg',q);while(d.length>180000&&q>.4){q-=.1;d=cv.toDataURL('image/jpeg',q);}cb(d);};im.onerror=function(){cb(null);};im.src=r.result;};r.readAsDataURL(file);}
+function thumbOf(o){if(!o.cu||!o.cuph)return null;return phGet(o.cu);}
 var SREG=[['siam','暹羅廣場（D1）'],['icon','ICONSIAM（D1）'],['chatuchak','洽圖洽（D3）'],['asiatique','河濱夜市 Asiatique（D3）'],['pattaya','芭達雅（D4）'],['songwat','嵩越路（D5）']];
 var FREG=[['Song Wat','嵩越路'],['Chinatown','唐人街・耀華力'],['Khlong San','ICONSIAM 一帶'],['Ekkamai','Ekkamai（民宿附近）'],['Phrom Phong','Phrom Phong'],['舊城區','舊城區'],['Pattaya','芭達雅']];
 function applyCust(){
@@ -2326,9 +2335,9 @@ function applyCust(){
   for(var i=SHOPS.length-1;i>=0;i--){if(SHOPS[i].cu)SHOPS.splice(i,1);}
   for(i=FOODS.length-1;i>=0;i--){if(FOODS[i].cu)FOODS.splice(i,1);}
   (trip.cust||[]).forEach(function(c){
-    if(c.kind==='food'){var f={id:'f-'+c.id,cu:c.id,by:c.by,n:c.n,area:c.area||'Song Wat',addr:c.loc||'',c:[c.cat||'street'],d:c.note||'朋友推薦，資料待補。',h:c.h||'營業時間未確認',p:'',st:'ok',web:c.gm||''};
+    if(c.kind==='food'){var f={id:'f-'+c.id,cu:c.id,cuph:c.ph,by:c.by,n:c.n,area:c.area||'Song Wat',addr:c.loc||'',c:[c.cat||'street'],d:c.note||'朋友推薦，資料待補。',h:c.h||'營業時間未確認',p:'',st:'ok',web:c.gm||''};
       FOODS.push(f);ALL[f.id]={kind:'food',ty:f.c.indexOf('cafe')>-1?'cafe':'food',o:f};CUSTIDS.push(f.id);}
-    else{var s={id:'s-'+c.id,cu:c.id,by:c.by,n:c.n,r:REG[c.r]?c.r:'siam',loc:c.loc||'',c:[c.cat||'cloth'],d:c.note||'朋友推薦，資料待補。',h:c.h||'營業時間未確認',p:'',st:'ok',web:c.gm||'',wl:'Google 地圖'};
+    else{var s={id:'s-'+c.id,cu:c.id,cuph:c.ph,by:c.by,n:c.n,r:REG[c.r]?c.r:'siam',loc:c.loc||'',c:[c.cat||'cloth'],d:c.note||'朋友推薦，資料待補。',h:c.h||'營業時間未確認',p:'',st:'ok',web:c.gm||'',wl:'Google 地圖'};
       if(!s.loc)s.loc=REG[s.r].zh;SHOPS.push(s);ALL[s.id]={kind:'shop',ty:'shop',o:s};CUSTIDS.push(s.id);}
   });
 }
@@ -2356,6 +2365,7 @@ function openCustEditor(kind,cid){
     '<label class="fld full">店名<input name="n" required value="'+esc(o.n)+'" placeholder="例如：XXX Vintage"></label>'+
     '<label class="fld">'+(food?'區域':'在哪裡逛')+'<select name="reg">'+opts(regSel,food?o.area:o.r)+'</select></label>'+
     '<label class="fld">類別<select name="cat">'+opts(catSel,o.cat)+'</select></label>'+
+    '<div class="fld full">照片（選填）<label class="phpick"><input type="file" name="phf" accept="image/*" hidden><span id="phprev">'+((c&&c.ph&&phGet(c.id))?'<img src="'+phGet(c.id)+'" alt="">':'')+'</span><span class="phbtn">'+ic('plus')+((c&&c.ph)?'換一張':'加照片')+'</span></label></div>'+
     '<label class="fld full">位置／地址（選填）<input name="loc" value="'+esc(o.loc||'')+'" placeholder="例如：Siam Square Soi 3"></label>'+
     '<label class="fld full">為什麼想去（選填）<textarea name="note" placeholder="例如：IG 看到的，包包很便宜">'+esc(c?o.note||'':'')+'</textarea></label>'+
     '<label class="fld full">你的名字<input name="by" required value="'+esc(o.by||'')+'" placeholder="讓大家知道是誰推薦的"></label>'+
@@ -2363,13 +2373,15 @@ function openCustEditor(kind,cid){
   var foot=(c?'<button type="button" class="btn c" data-dlgdel="1">刪除</button>':'')+'<span class="sp"></span><button type="button" class="btn w" data-dlgclose="1">取消</button><button type="submit" class="btn">'+(c?'儲存':'新增')+'</button>';
   openDlg(c?'編輯朋友推薦':(food?'新增餐廳':'新增店家'),body,foot,function(fd,act){
     trip.cust=trip.cust||[];
-    if(act==='del'){trip.cust=trip.cust.filter(function(x){return x!==c;});var sid=(food?'f-':'s-')+c.id;if(saved.has(sid)){saved.delete(sid);persistSaved();syncExtras();}applyCust();saveTrip();refreshLists();toast('已刪除「'+c.n+'」');return true;}
+    if(act==='del'){trip.cust=trip.cust.filter(function(x){return x!==c;});if(c.ph&&CLOUD)CLOUD.delPhoto(c.id);var sid=(food?'f-':'s-')+c.id;if(saved.has(sid)){saved.delete(sid);persistSaved();syncExtras();}applyCust();saveTrip();refreshLists();toast('已刪除「'+c.n+'」');return true;}
     var n=(fd.get('n')||'').trim();if(!n)return false;var by=(fd.get('by')||'').trim();try{localStorage.setItem('tdiary-myname',by);}catch(e){}
     var x=c||{id:'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),kind:kind};
     x.n=n;x.cat=fd.get('cat');if(food)x.area=fd.get('reg');else x.r=fd.get('reg');
     ['loc','gm','note'].forEach(function(k){var v=(fd.get(k)||'').trim();if(v)x[k]=v;else delete x[k];});x.by=by;
+    var pf=fd.get('phf');if(PENDPH){x.ph=1;phPut(x.id,PENDPH);PENDPH=null;}
     if(!c)trip.cust.push(x);applyCust();saveTrip();refreshLists();toast(c?'已更新':'已新增「'+n+'」，大家都看得到了');return true;
   });
+  PENDPH=null;var pfi=$('#dlgform [name=phf]');if(pfi){pfi.addEventListener('change',function(){var f=pfi.files&&pfi.files[0];if(!f)return;$('#phprev').innerHTML='<span class="small muted">處理中…</span>';shrink(f,function(d){if(!d){$('#phprev').innerHTML='<span class="small muted">讀不到這張照片</span>';return;}PENDPH=d;$('#phprev').innerHTML='<img src="'+d+'" alt="">';});});}
   var gi=$('#dlgform [name=gm]');if(gi){gi.addEventListener('input',function(){var r=parseLink(gi.value),fm=$('#dlgform'),msg=[];
     if(r.n&&!fm.n.value.trim()){fm.n.value=r.n;msg.push('已帶入店名');}
     if(r.ll){var k=nearest(r.ll,food?FREGLL:SREGLL);if(k){fm.reg.value=k;msg.push('已判斷區域');}}
@@ -2625,7 +2637,9 @@ setInterval(function(){updateNow();if(VIEW==='itinerary'){$('#nowwrap').innerHTM
       var y=window.scrollY;renderStay();renderView(false);window.scrollTo(0,y);}catch(e){}}
   badge('連線中…');
   js('https://www.gstatic.com/firebasejs/'+V+'/firebase-app-compat.js',function(){js('https://www.gstatic.com/firebasejs/'+V+'/firebase-firestore-compat.js',function(){
-    try{firebase.initializeApp(CFG);ref=firebase.firestore().collection('trips').doc('main');}catch(e){badge('離線・只存在這台裝置');return;}
+    try{firebase.initializeApp(CFG);var db=firebase.firestore();ref=db.collection('trips').doc('main');
+      CLOUD={putPhoto:function(id,d){db.collection('photos').doc(id).set({d:d}).catch(function(){badge('照片上傳失敗');});},delPhoto:function(id){db.collection('photos').doc(id).delete().catch(function(){});},getPhoto:function(id,cb){db.collection('photos').doc(id).get().then(function(s){cb(s.exists?s.data().d:null);}).catch(function(){cb(null);});}};
+      refreshLists();}catch(e){badge('離線・只存在這台裝置');return;}
     ref.get().then(function(d){
       if(d.exists&&d.data().data){apply(d.data().data);ready=true;badge('✓ 已同步');}
       else{ready=true;push();}
