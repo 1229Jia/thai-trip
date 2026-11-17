@@ -471,6 +471,26 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .dprev{list-style:none;margin:-4px 0 12px;padding:10px 14px;background:#fff;border:var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);display:grid;gap:6px}
 .dprev li{display:flex;gap:10px;font-size:14px;line-height:1.5}.dprev .t{color:var(--muted);font-variant-numeric:tabular-nums;flex:none;width:44px}.dprev li.fav .n{color:#B5523F}
 .dprevf{margin:-6px 0 14px;text-align:right}
+/* ---------- 配色：重點色＋每天的顏色＋分類標籤 ---------- */
+:root{--hot:#C8553D;--hot-d:#A9432F;--hot-l:#F8E6E1}
+.btn{background:var(--hot);border-color:var(--hot)}
+.btn:hover{background:var(--hot-d);border-color:var(--hot-d)}
+.btn.w,.btn.g{background:#fff;color:var(--ink);border-color:var(--hair2)}
+.nav a[aria-current="page"]{background:var(--hot);border-color:var(--hot);color:#fff}
+.chip[aria-pressed="true"],.mini.on{background:var(--hot);border-color:var(--hot);color:#fff}
+.heart[aria-pressed="true"]{background:var(--hot);border-color:var(--hot);color:#fff}
+.drow button{background:var(--cl,#fff);border-color:transparent}
+.drow button b{color:var(--ink);opacity:.7}
+.drow button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:var(--ink);box-shadow:inset 0 0 0 2px rgba(31,42,54,.55);font-weight:600}
+.drow button[aria-pressed="true"] b{color:var(--ink);opacity:.85}
+.dgh{background:var(--cl,#fff);border-color:transparent;box-shadow:inset 6px 0 0 var(--c)}
+.dgh .mini{background:#fff}
+#dhead .tag{color:var(--ink);font-weight:600}
+.tag.k-cloth{background:#F6E3E0;color:#8A3A2C}.tag.k-bag{background:#F4EAD7;color:#7A5A22}.tag.k-shoe{background:#E3ECF5;color:#2F5276}
+.tag.k-vint{background:#EDE4D8;color:#6A4E2E}.tag.k-acc{background:#F3E6F0;color:#7D3E6C}.tag.k-frag{background:#ECE8F6;color:#5A4B8A}
+.tag.k-life{background:#E4F0E6;color:#3D6B47}.tag.k-art{background:#FDF0D8;color:#86601B}.tag.k-coll{background:#E6EEF0;color:#3C5D66}.tag.k-toy{background:#FCE5EC;color:#9A3557}
+.tag.f-queue{background:#F8E6E1;color:#8A3A2C}.tag.f-thai{background:#E4F0E6;color:#3D6B47}.tag.f-seafood{background:#E3ECF5;color:#2F5276}
+.tag.f-street{background:#FDF0D8;color:#86601B}.tag.f-cafe{background:#EDE4D8;color:#6A4E2E}.tag.f-dessert{background:#FCE5EC;color:#9A3557}.tag.f-night{background:#ECE8F6;color:#5A4B8A}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -1745,7 +1765,7 @@ var st={day:1,ex:{day:'all',cat:'all',sty:'all',q:'',fav:false,more:false},fo:{c
 var MAPST={mode:'day',leg:null,item:null};
 function curDay(){return dayOf(st.day)||trip.days[0];}
 function renderStrip(){
-  $('#drow').innerHTML=trip.days.map(function(d,i){return '<button style="--c:'+dc(i)+'" data-day="'+d.id+'" aria-pressed="'+(st.day===d.id)+'"><b>第 '+d.id+' 天</b><span>'+d.date+'</span></button>';}).join('');
+  $('#drow').innerHTML=trip.days.map(function(d,i){return '<button style="--c:'+dc(i)+';--cl:'+dcl(i)+'" data-day="'+d.id+'" aria-pressed="'+(st.day===d.id)+'"><b>第 '+d.id+' 天</b><span>'+d.date+'</span></button>';}).join('');
   placeArt(false);
 }
 function placeArt(hop){
@@ -2226,7 +2246,7 @@ function shopCard(s){
       '<div class="pt"><h3>'+esc(s.n)+'</h3>'+
         '<div class="m1">'+esc(s.type==='zone'?'逛街區域':(s.loc||r.zh))+'</div>'+
         '<div class="m1">'+ic('clock')+'<span>'+esc(shortH(s.h))+'</span></div>'+
-        '<div class="tags">'+s.c.map(function(k){return '<span class="tag">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tag t-sty">'+esc(t)+'</span>';}).join('')+flag+'</div>'+
+        '<div class="tags">'+s.c.map(function(k){return '<span class="tag k-'+k+'">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tag t-sty">'+esc(t)+'</span>';}).join('')+flag+'</div>'+
         (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
       '</div></summary>'+
       '<div class="body">'+(hasPh?pimg(s.id):'')+'<p class="d">'+esc(s.d)+'</p><dl class="kv"><dt>位置</dt><dd>'+esc(s.loc)+'</dd>'+(s.p&&s.p!=='待確認'?'<dt>價格</dt><dd>'+esc(s.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(s.h)+'</dd>'+(s.ph?'<dt>電話</dt><dd>'+esc(s.ph)+'</dd>':'')+'</dl>'+
@@ -2245,7 +2265,7 @@ function foodCard(f){
       '<div class="pt"><h3>'+esc(f.n)+'</h3>'+
         '<div class="m1">'+esc(f.dsh||(f.d||'').split('，')[0].split('。')[0])+'</div>'+
         '<div class="m1">'+ic('clock')+'<span>'+esc(shortH(f.h))+'</span></div>'+
-        '<div class="tags">'+f.c.map(function(k){return '<span class="tag">'+esc(FCATZH[k])+'</span>';}).join('')+(f.dv?'<span class="tag t-dl">🛵 可外送</span>':'')+flag+'</div>'+
+        '<div class="tags">'+f.c.map(function(k){return '<span class="tag f-'+k+'">'+esc(FCATZH[k])+'</span>';}).join('')+(f.dv?'<span class="tag t-dl">🛵 可外送</span>':'')+flag+'</div>'+
         (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
       '</div></summary>'+
       '<div class="body">'+(hasPh?pimg(f.id):'')+'<p class="d">'+esc(f.d)+'</p><dl class="kv"><dt>地址</dt><dd>'+esc(f.addr)+'</dd>'+(f.p&&f.p!=='待確認'?'<dt>價格</dt><dd>'+esc(f.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(f.h)+'</dd>'+(f.dv?'<dt>外送</dt><dd>'+esc(f.dv===true?'可外送':f.dv)+'</dd>':'')+'</dl>'+
@@ -2261,7 +2281,7 @@ function renderExplore(){
   $('#ex-count').textContent=list.length+' 個結果';var html='';
   EXDAYS.forEach(function(dd){
     var dl=list.filter(function(s){return REGDAY[s.r]===dd[0];});if(!dl.length)return;var D=dayOf(dd[0]),i=dd[0]-1;
-    html+='<div class="dgh" style="--c:'+dc(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'');
+    html+='<div class="dgh" style="--c:'+dc(i)+';--cl:'+dcl(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'');
     Object.keys(REG).forEach(function(rk){var rl=dl.filter(function(s){return s.r===rk;});if(!rl.length)return;html+='<div class="rgh" style="--c:'+dc(i)+'"><b>'+esc(REG[rk].zh)+'</b><span>'+rl.length+' 家</span><small>D'+dd[0]+'・接在「'+esc(anchorName(ANCHOR[rk]))+'」之後</small></div>'+rl.map(shopCard).join('');});
   });
   $('#ex-list').innerHTML=html||'<div class="empty">沒有符合的店家，換個日期或分類試試。</div>';
