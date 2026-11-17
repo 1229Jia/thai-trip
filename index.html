@@ -528,7 +528,9 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 #dtools{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none}
 #dtools .btn{flex:1 0 auto;min-height:42px;padding:0 12px;font-size:14px;white-space:nowrap;gap:5px}
 #dtools .btn svg{width:16px;height:16px}
-.phpick{display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:4px}
+.phpick{display:flex;align-items:center;gap:10px;cursor:pointer;margin:4px 0 0;padding:0;align-self:flex-start}
+.phpick #phprev:empty{display:none}
+.phbtn{margin:0}
 .phpick #phprev img{width:72px;height:72px;object-fit:cover;border-radius:12px;display:block}
 .phbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1.5px dashed var(--hair2);border-radius:12px;color:var(--muted);font-size:14px;background:#fff}
 .phbtn svg{width:16px;height:16px}
@@ -2369,12 +2371,12 @@ function openCustEditor(kind,cid){
   (food?FREG:SREG).forEach(function(r){regSel[r[0]]={zh:r[1]};});
   var body='<div class="fgrid">'+
     '<label class="fld full">貼上 Google 地圖／IG／Threads 連結（會自動帶入）<input name="gm" type="url" value="'+esc(o.gm||'')+'" placeholder="https://"><small class="muted" id="gmhint"></small></label>'+
-    '<label class="fld full">店名<input name="n" required value="'+esc(o.n)+'" placeholder="例如：XXX Vintage"></label>'+
+    '<label class="fld full">店名<input name="n" required value="'+esc(o.n)+'" placeholder="'+(food?'例如：Jeh O Chula':'例如：XXX Vintage')+'"></label>'+
     '<label class="fld">'+(food?'區域':'在哪裡逛')+'<select name="reg">'+opts(regSel,food?o.area:o.r)+'</select></label>'+
     '<label class="fld">類別<select name="cat">'+opts(catSel,o.cat)+'</select></label>'+
     '<div class="fld full">照片（選填）<label class="phpick"><input type="file" name="phf" accept="image/*" hidden><span id="phprev">'+((c&&c.ph&&phGet(c.id))?'<img src="'+phGet(c.id)+'" alt="">':'')+'</span><span class="phbtn">'+ic('plus')+((c&&c.ph)?'換一張':'加照片')+'</span></label></div>'+
-    '<label class="fld full">位置／地址（選填）<input name="loc" value="'+esc(o.loc||'')+'" placeholder="例如：Siam Square Soi 3"></label>'+
-    '<label class="fld full">為什麼想去（選填）<textarea name="note" placeholder="例如：IG 看到的，包包很便宜">'+esc(c?o.note||'':'')+'</textarea></label>'+
+    '<label class="fld full">位置／地址（選填）<input name="loc" value="'+esc(o.loc||'')+'" placeholder="'+(food?'例如：Ekkamai Soi 2':'例如：Siam Square Soi 3')+'"></label>'+
+    '<label class="fld full">為什麼想去（選填）<textarea name="note" placeholder="'+(food?'例如：IG 看到的，宵夜很好吃':'例如：IG 看到的，包包很便宜')+'">'+esc(c?o.note||'':'')+'</textarea></label>'+
     '<label class="fld full">你的名字<input name="by" required value="'+esc(o.by||'')+'" placeholder="讓大家知道是誰推薦的"></label>'+
     '</div><p class="small muted">新增後所有人都看得到；要不要排進行程，各自按 ♥ 收藏。</p>';
   var foot=(c?'<button type="button" class="btn c" data-dlgdel="1">刪除</button>':'')+'<span class="sp"></span><button type="button" class="btn w" data-dlgclose="1">取消</button><button type="submit" class="btn">'+(c?'儲存':'新增')+'</button>';
