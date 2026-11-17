@@ -512,6 +512,10 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 #ex-active{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lnk{background:none;border:0;padding:0;color:var(--hot);font-size:13px;text-decoration:underline;flex:none}
 #ex-count{margin-left:auto;flex:none}
+.rgh{top:var(--top);margin:10px 0 2px;padding:6px 2px;border-left:0;background:rgba(243,245,248,.96);gap:6px}
+.rgh b{font-family:var(--font);font-weight:600;font-size:14px;color:var(--ink)}
+.rgh b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c,var(--ink));margin-right:6px;vertical-align:1px}
+.rgh span{font-size:12px}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -2308,7 +2312,7 @@ function renderExplore(){
   EXDAYS.forEach(function(dd){
     var dl=list.filter(function(s){return REGDAY[s.r]===dd[0];});if(!dl.length)return;var D=dayOf(dd[0]),i=dd[0]-1;
     html+='<div class="dgh" style="--c:'+dc(i)+';--cl:'+dcl(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'');
-    Object.keys(REG).forEach(function(rk){var rl=dl.filter(function(s){return s.r===rk;});if(!rl.length)return;html+='<div class="rgh" style="--c:'+dc(i)+'"><b>'+esc(REG[rk].zh)+'</b><span>'+rl.length+' 家</span><small>D'+dd[0]+'・接在「'+esc(anchorName(ANCHOR[rk]))+'」之後</small></div>'+rl.map(shopCard).join('');});
+    Object.keys(REG).forEach(function(rk){var rl=dl.filter(function(s){return s.r===rk;});if(!rl.length)return;html+='<div class="rgh" style="--c:'+dc(i)+'"><b>'+esc(REG[rk].zh)+'</b><span>'+rl.length+' 家</span></div>'+rl.map(shopCard).join('');});
   });
   $('#ex-list').innerHTML=html||'<div class="empty">沒有符合的店家，換個日期或分類試試。</div>';
   $$('#ex-days .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.exday===String(st.ex.day)));});
