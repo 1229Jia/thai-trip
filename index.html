@@ -2390,6 +2390,35 @@ route();
 setInterval(renderCountdown,1000);
 setInterval(function(){updateNow();if(VIEW==='itinerary'){$('#nowwrap').innerHTML=nowBar(curDay());}},15000);
 
+/* =====================================================================
+   共同編輯：Firebase Firestore（只在 GitHub Pages 版啟用）
+   ===================================================================== */
+(function(){
+  if(!LIVE)return;
+  var CFG={apiKey:"AIzaSyA4DeGrCmRtLCyTqbC3DyRKInSIhqUI-GQ",authDomain:"thai-trip-2026-2786f.firebaseapp.com",projectId:"thai-trip-2026-2786f",storageBucket:"thai-trip-2026-2786f.firebasestorage.app",messagingSenderId:"946860826582",appId:"1:946860826582:web:f305a3efe7515a4effce77"};
+  var V='10.12.2',ready=false,ref=null,me=Math.random().toString(36).slice(2),lastSent='',pushT=null;
+  function js(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){badge('離線・只存在這台裝置');};document.head.appendChild(s);}
+  function badge(t){var b=document.getElementById('syncb');if(!b){b=document.createElement('div');b.id='syncb';b.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:1100;font:12px/1 var(--font);background:rgba(255,255,255,.92);border:1px solid var(--hair);border-radius:99px;padding:6px 10px;color:var(--muted)';document.body.appendChild(b);}b.textContent=t;}
+  function snap(){return JSON.stringify({trip:trip,saved:Array.from(saved)});}
+  function push(){if(!ready||!ref)return;clearTimeout(pushT);pushT=setTimeout(function(){var s=snap();if(s===lastSent)return;lastSent=s;badge('同步中…');
+    ref.set({data:s,by:me,at:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){badge('✓ 已同步');}).catch(function(){badge('同步失敗，稍後重試');lastSent='';});},500);}
+  var _st=saveTrip,_ps=persistSaved;
+  saveTrip=function(){_st();push();};persistSaved=function(){_ps();push();};
+  function apply(s){try{var o=JSON.parse(s);if(!o||!o.trip||!Array.isArray(o.trip.days))return;
+      trip=o.trip;saved=new Set(o.saved||[]);lastSent=s;_st();_ps();
+      var dlg=document.getElementById('dlg');if(dlg&&dlg.open)return;
+      var y=window.scrollY;renderStay();renderView(false);window.scrollTo(0,y);}catch(e){}}
+  badge('連線中…');
+  js('https://www.gstatic.com/firebasejs/'+V+'/firebase-app-compat.js',function(){js('https://www.gstatic.com/firebasejs/'+V+'/firebase-firestore-compat.js',function(){
+    try{firebase.initializeApp(CFG);ref=firebase.firestore().collection('trips').doc('main');}catch(e){badge('離線・只存在這台裝置');return;}
+    ref.get().then(function(d){
+      if(d.exists&&d.data().data){apply(d.data().data);ready=true;badge('✓ 已同步');}
+      else{ready=true;push();}
+      ref.onSnapshot(function(d){if(!d.exists||d.metadata.hasPendingWrites)return;var x=d.data();if(x&&x.data&&x.by!==me&&x.data!==lastSent){apply(x.data);badge('✓ 已更新（別人剛改過）');}});
+    }).catch(function(){badge('無法連線資料庫・只存在這台裝置');});
+  });});
+})();
+
 
 })();
 </script>
