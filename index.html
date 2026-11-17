@@ -540,6 +540,10 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 #fo-areas .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .nowbar{flex-wrap:nowrap}.nowbar span{flex:1;min-width:0}
 .grp{border:0;background:#EEF1F5;color:var(--muted);padding:2px 8px}
+.hist{display:grid;gap:8px;margin-top:10px}
+.hrow{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--hair);border-radius:12px;background:#fff}
+.hrow>div{flex:1;min-width:0}.hrow b{font-weight:600;font-size:14px}.hrow small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .mini[data-armed]{background:#B83A2E;border-color:#B83A2E;color:#fff}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -701,7 +705,12 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
       <textarea class="code" id="bkText" placeholder="貼上備份文字" style="margin-top:10px"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn g" id="bkImport">從文字還原</button></div>
     </div>
-    <div class="card" style="background:var(--coral-l)">
+    <div class="card" id="histCard" hidden>
+      <h3 style="margin:0 0 4px;font-size:16px">版本紀錄</h3>
+      <p class="small muted">每次有人修改共用行程，雲端會自動存一份，保留最近 30 份。按錯或改亂了，可以回到之前的版本。</p>
+      <div id="histList" class="hist"><p class="small muted">載入中…</p></div>
+    </div>
+    <div class="card" id="resetCard" style="background:var(--coral-l)">
       <p class="small">恢復成最初的行程資料。<b>在共用網址上，所有人改過的行程、待辦、費用和朋友新增的店家都會一起被清掉</b>，請先跟大家確認。</p>
       <div class="row" style="margin-top:10px"><button class="btn c" id="bkReset">恢復預設</button></div>
     </div>
@@ -2488,7 +2497,7 @@ function renderPack(){
   $('#pkgrp').innerHTML=gs.map(function(g){return '<option>'+esc(g)+'</option>';}).join('');
   $('#pklist').innerHTML=gs.map(function(g){var l=P.filter(function(p){return p.g===g;});if(!l.length)return '';return '<h3 class="ghd">'+esc(g)+' <span class="small muted">'+l.filter(function(p){return p.done;}).length+'/'+l.length+'</span></h3><ul class="todo">'+listHtml(l,'pk')+'</ul>';}).join('');
 }
-function showLs(k){st.ls=k;['todo','pack','backup'].forEach(function(x){$('#ls-'+x).hidden=x!==k;});$$('#lsTabs .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.ls===k));});if(k==='backup'){$('#bkInfo').textContent='目前資料：'+trip.days.length+' 天、'+trip.days.reduce(function(s,d){return s+d.items.length;},0)+' 站、'+trip.costs.length+' 筆其他費用、'+saved.size+' 個收藏。';}}
+function showLs(k){st.ls=k;if(k==='backup'&&window.__loadHist)setTimeout(window.__loadHist,50);['todo','pack','backup'].forEach(function(x){$('#ls-'+x).hidden=x!==k;});$$('#lsTabs .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.ls===k));});if(k==='backup'){$('#bkInfo').textContent='目前資料：'+trip.days.length+' 天、'+trip.days.reduce(function(s,d){return s+d.items.length;},0)+' 站、'+trip.costs.length+' 筆其他費用、'+saved.size+' 個收藏。';}}
 function backupObj(){return {app:'thai-trip-diary',v:2,exported:new Date().toISOString(),trip:trip,saved:Array.from(saved)};}
 function restore(obj){
   if(!obj||!obj.trip||!Array.isArray(obj.trip.days)){toast('這不是有效的備份資料');return;}
@@ -2657,7 +2666,29 @@ setInterval(function(){updateNow();if(VIEW==='itinerary'){$('#nowwrap').innerHTM
   function base(t){var c=JSON.parse(JSON.stringify(t));delete c.pack;(c.days||[]).forEach(function(d){delete d.warn;d.items=(d.items||[]).filter(function(it){return !it.ref;});d.items.forEach(function(it){if(it.bs!=null){it.s=it.bs;it.e=it.be;delete it.bs;delete it.be;}});});return c;}
   function snap(){return JSON.stringify({trip:base(trip)});}
   function push(){if(!ready||!ref)return;clearTimeout(pushT);pushT=setTimeout(function(){var s=snap();if(s===lastSent)return;lastSent=s;badge('同步中…');
-    ref.set({data:s,by:me,at:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){badge('✓ 已同步');}).catch(function(){badge('同步失敗，稍後重試');lastSent='';});},500);}
+    ref.set({data:s,by:me,at:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){badge('✓ 已同步');saveHist(s);}).catch(function(){badge('同步失敗，稍後重試');lastSent='';});},500);}
+  var HB=null;
+  function hcol(){return firebase.firestore().collection('history');}
+  function saveHist(s){try{var now=Date.now(),id='h'+Math.floor(now/180000);
+    hcol().doc(id).set({data:s,by:(myName()||'某人'),t:now}).then(function(){
+      hcol().orderBy('t','desc').get().then(function(q){q.docs.slice(30).forEach(function(d){d.ref.delete().catch(function(){});});if(VIEW==='lists'&&st.ls==='backup')loadHist();}).catch(function(){});
+    }).catch(function(){});}catch(e){}}
+  function sumOf(s){try{var t=JSON.parse(s).trip,n=0;t.days.forEach(function(d){n+=d.items.length;});return n+' 站・'+((t.todos||[]).length)+' 待辦・'+((t.costs||[]).length)+' 筆費用・'+((t.cust||[]).length)+' 間朋友推薦';}catch(e){return '';}}
+  function fmtT(t){var d=new Date(t),p=function(x){return ('0'+x).slice(-2);};return (d.getMonth()+1)+'/'+d.getDate()+' '+p(d.getHours())+':'+p(d.getMinutes());}
+  window.__loadHist=loadHist;
+  function loadHist(){var box=document.getElementById('histList');if(!box||!ref)return;
+    hcol().orderBy('t','desc').limit(30).get().then(function(q){HB={};if(!q.docs.length){box.innerHTML='<p class="small muted">還沒有版本紀錄，下次有人修改後就會出現。</p>';return;}
+      box.innerHTML=q.docs.map(function(d,i){var x=d.data();HB[d.id]=x.data;return '<div class="hrow"><div><b>'+fmtT(x.t)+'</b>'+(i===0?'<span class="tag" style="margin-left:6px">目前</span>':'')+'<small>'+esc(x.by||'某人')+'・'+sumOf(x.data)+'</small></div>'+(i===0?'':'<button class="mini" data-histgo="'+d.id+'">回到這版</button>')+'</div>';}).join('');
+    }).catch(function(){box.innerHTML='<p class="small muted">讀不到版本紀錄（Firebase 規則還沒加 history）。</p>';});}
+  document.addEventListener('click',function(e){var b=e.target.closest('[data-histgo]');if(!b||!HB)return;
+    if(!b.dataset.armed){b.dataset.armed='1';b.textContent='再按一次確認';setTimeout(function(){if(b.isConnected){delete b.dataset.armed;b.textContent='回到這版';}},3500);return;}
+    var s=HB[b.dataset.histgo];if(!s)return;apply(s);lastSent='';ready=true;push();toast('已回到這個版本，大家的畫面也會更新');setTimeout(loadHist,1500);});
+  restore=function(obj){if(!obj){toast('這不是有效的備份資料');return;}
+    if(Array.isArray(obj.saved)){saved=new Set(obj.saved);persistSaved();}
+    if(obj.trip&&Array.isArray(obj.trip.pack)){trip.pack=obj.trip.pack;_st();}
+    syncExtras();refresh();toast('已還原你的收藏和用品清單（共用行程不受影響）');};
+  var rc=document.getElementById('resetCard');if(rc)rc.hidden=true;
+  var hc=document.getElementById('histCard');if(hc)hc.hidden=false;
   var _st=saveTrip;
   saveTrip=function(){_st();push();};
   function apply(s){try{var o=JSON.parse(s);if(!o||!o.trip||!Array.isArray(o.trip.days))return;
