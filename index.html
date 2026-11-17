@@ -491,6 +491,27 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .tag.k-life{background:#E4F0E6;color:#3D6B47}.tag.k-art{background:#FDF0D8;color:#86601B}.tag.k-coll{background:#E6EEF0;color:#3C5D66}.tag.k-toy{background:#FCE5EC;color:#9A3557}
 .tag.f-queue{background:#F8E6E1;color:#8A3A2C}.tag.f-thai{background:#E4F0E6;color:#3D6B47}.tag.f-seafood{background:#E3ECF5;color:#2F5276}
 .tag.f-street{background:#FDF0D8;color:#86601B}.tag.f-cafe{background:#EDE4D8;color:#6A4E2E}.tag.f-dessert{background:#FCE5EC;color:#9A3557}.tag.f-night{background:#ECE8F6;color:#5A4B8A}
+/* ---------- 探索篩選精簡 ---------- */
+#v-explore .exf{margin-top:4px}
+.exsearch{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.exsearch .search{flex:1;margin:0;min-height:44px}
+.fbtn{flex:none;min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--hair2);background:#fff;font-size:14px;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
+.fbtn[aria-expanded="true"]{border-color:var(--ink)}
+.fbtn i{font-style:normal;background:var(--hot);color:#fff;border-radius:99px;min-width:18px;height:18px;font-size:11px;display:inline-grid;place-items:center;padding:0 5px}
+.chip.dchip{background:var(--cl);border-color:transparent}
+.chip.dchip[aria-pressed="true"]{background:var(--c);border-color:transparent;color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px rgba(31,42,54,.5)}
+#ex-days .chip[data-exday="all"][aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.fpanel{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:10px 12px 12px;margin:4px 0 8px;box-shadow:0 8px 24px rgba(31,42,54,.06)}
+.fpanel .flabel{display:block;margin:6px 0 4px;font-size:12px;font-weight:600;color:var(--muted)}
+.chips.pw{flex-wrap:wrap;overflow:visible;padding:0 0 4px;gap:6px}
+.chips.pw .chip{min-height:32px;padding:0 11px;font-size:13px}
+.chips.pw .chip{display:inline-flex;align-items:center;gap:6px}.chips.pw .chip svg{width:16px;height:16px}.chips.pw .chip[aria-pressed="true"] svg{fill:#fff}
+.fpbar{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.exstat{display:flex;align-items:center;gap:8px;min-height:24px;margin:2px 0 6px;font-size:13px;color:var(--ink)}
+#ex-active{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lnk{background:none;border:0;padding:0;color:var(--hot);font-size:13px;text-decoration:underline;flex:none}
+#ex-count{margin-left:auto;flex:none}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -593,12 +614,17 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-explore" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="bag"></span>探索・逛街</h2>
-  <p class="small exintro">點卡片看介紹，按 ♥ 收藏會排進你自己的行程。</p>
-  <input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家">
-  <div class="exf"><span class="flabel">哪一天</span><div class="chips wrap" id="ex-days"></div>
-  <span class="flabel">買什麼</span><div class="chips wrap" id="ex-cats"></div>
-  <div id="ex-styrow" hidden><span class="flabel">風格</span><div class="chips wrap" id="ex-sty"></div></div>
-  <div class="exbar"><button class="chip" id="ex-fav" data-exfav aria-pressed="false">只看收藏</button><button class="chip ghost" id="ex-more" data-exmore aria-expanded="false">更多篩選 ▾</button><button class="chip ghost" id="ex-reset" data-exreset hidden>清除篩選</button><span class="small muted" id="ex-count"></span></div></div>
+  <div class="exf">
+  <div class="exsearch"><input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家"><button class="fbtn" id="ex-more" data-exmore aria-expanded="false">篩選</button></div>
+  <div class="chips wrap" id="ex-days"></div>
+  <div class="fpanel" id="ex-panel" hidden>
+    <span class="flabel">買什麼</span><div class="chips pw" id="ex-cats"></div>
+    <span class="flabel">風格</span><div class="chips pw" id="ex-sty"></div>
+    <span class="flabel">其他</span><div class="chips pw"><button class="chip" id="ex-fav" data-exfav aria-pressed="false">只看收藏</button></div>
+    <div class="fpbar"><button class="chip ghost" data-exreset>清除全部</button><button class="chip on" data-exmore>完成</button></div>
+  </div>
+  <div class="exstat"><span id="ex-active"></span><button class="lnk" id="ex-reset" data-exreset hidden>清除</button><span class="small muted" id="ex-count"></span></div>
+  <span id="ex-styrow" hidden></span></div>
   <div class="list" id="ex-list"></div>
 </section>
 
@@ -2278,7 +2304,7 @@ function renderExplore(){
   var q=st.ex.q.trim().toLowerCase();
   var list=SHOPS.filter(function(s){return (!st.ex.fav||saved.has(s.id))&&(st.ex.day==='all'||REGDAY[s.r]===+st.ex.day)&&(st.ex.cat==='all'||s.c.indexOf(st.ex.cat)>-1)&&(st.ex.sty==='all'||(STY[st.ex.sty]||[]).indexOf(s.id.slice(2))>-1)&&
     (!q||(s.n+' '+s.loc+' '+s.d+' '+REG[s.r].zh+' '+REG[s.r].en+' '+s.c.map(function(k){return CAT[k];}).join(' ')).toLowerCase().indexOf(q)>-1);});
-  $('#ex-count').textContent=list.length+' 個結果';var html='';
+  $('#ex-count').textContent=list.length+' 間';var html='';
   EXDAYS.forEach(function(dd){
     var dl=list.filter(function(s){return REGDAY[s.r]===dd[0];});if(!dl.length)return;var D=dayOf(dd[0]),i=dd[0]-1;
     html+='<div class="dgh" style="--c:'+dc(i)+';--cl:'+dcl(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'');
@@ -2290,9 +2316,11 @@ function renderExplore(){
   $$('#ex-sty .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.sty===st.ex.sty));});
   var nf=SHOPS.filter(function(x){return saved.has(x.id);}).length;
   $('#ex-fav').setAttribute('aria-pressed',String(!!st.ex.fav));$('#ex-fav').innerHTML=ic('heart')+'只看收藏（'+nf+'）';
-  $('#ex-more').setAttribute('aria-expanded',String(!!st.ex.more));$('#ex-more').textContent=(st.ex.more?'收起篩選 ▴':'更多篩選 ▾')+(st.ex.sty!=='all'&&!st.ex.more?'・'+STYN[st.ex.sty]:'');
-  $('#ex-styrow').hidden=!st.ex.more;
-  var act=st.ex.day!=='all'||st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q;$('#ex-reset').hidden=!act;
+  var fl=[];if(st.ex.cat!=='all')fl.push(CATZH[st.ex.cat]);if(st.ex.sty!=='all')fl.push(STYN[st.ex.sty]);if(st.ex.fav)fl.push('只看收藏');if(st.ex.q)fl.push('「'+st.ex.q+'」');
+  $('#ex-more').setAttribute('aria-expanded',String(!!st.ex.more));$('#ex-more').innerHTML='篩選'+(fl.length&&!st.ex.q?'<i>'+(fl.length)+'</i>':'')+(st.ex.more?' ▴':' ▾');
+  $('#ex-panel').hidden=!st.ex.more;
+  $('#ex-active').textContent=fl.length?fl.join('・'):'';
+  var act=st.ex.day!=='all'||st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q;$('#ex-reset').hidden=!(st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q);
 }
 function renderFood(){
   var q=st.fo.q.trim().toLowerCase(),list=FOODS.filter(function(f){return (!st.fo.fav||saved.has(f.id))&&(!st.fo.dl||f.dv)&&(st.fo.cat==='all'||f.c.indexOf(st.fo.cat)>-1)&&(!q||(f.n+' '+f.area+' '+f.d+' '+f.addr).toLowerCase().indexOf(q)>-1);});
@@ -2482,7 +2510,7 @@ load();clearPresetCosts();clearTbcTodos();clearLuggageTodo();saveTrip();syncExtr
 $('#logo').innerHTML=v40('tuktuk','a-nudge','嘟嘟車');
 $$('[data-ic]').forEach(function(el){el.outerHTML=ic(el.dataset.ic);});
 $('#heroart').innerHTML='<img class="heroimg" src="'+DAYIMG.home+'" alt="曼谷大皇宮與昭披耶河插畫">';
-$('#ex-days').innerHTML='<button class="chip" data-exday="all" aria-pressed="true">全部</button>'+EXDAYS.map(function(dd){return '<button class="chip" style="--c:'+dc(dd[0]-1)+'" data-exday="'+dd[0]+'" aria-pressed="false">D'+dd[0]+' '+esc(dd[1])+'</button>';}).join('');
+$('#ex-days').innerHTML='<button class="chip" data-exday="all" aria-pressed="true">全部</button>'+EXDAYS.map(function(dd){return '<button class="chip dchip" style="--c:'+dc(dd[0]-1)+';--cl:'+dcl(dd[0]-1)+'" data-exday="'+dd[0]+'" aria-pressed="false">D'+dd[0]+' '+esc(dd[1])+'</button>';}).join('');
 $('#ex-cats').innerHTML='<button class="chip" data-cat="all" aria-pressed="true">全部</button>'+Object.keys(CAT).map(function(k){return '<button class="chip" data-cat="'+k+'" aria-pressed="false">'+esc(CATZH[k])+'</button>';}).join('');
 $('#ex-sty').innerHTML='<button class="chip" data-sty="all" aria-pressed="true">全部</button>'+Object.keys(STYN).sort(function(x,y){return (y==='men')-(x==='men');}).map(function(k){return '<button class="chip" data-sty="'+k+'" aria-pressed="false">'+esc(STYN[k])+'</button>';}).join('');
 $('#fo-cats').innerHTML='<button class="chip" data-fcat="all" aria-pressed="true">全部</button>'+Object.keys(FCAT).map(function(k){return '<button class="chip" data-fcat="'+k+'" aria-pressed="false">'+esc(FCATZH[k])+'</button>';}).join('');
