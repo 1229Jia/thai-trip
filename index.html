@@ -516,6 +516,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .rgh b{font-family:var(--font);font-weight:600;font-size:14px;color:var(--ink)}
 .rgh b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c,var(--ink));margin-right:6px;vertical-align:1px}
 .rgh span{font-size:12px}
+.exstat[hidden]{display:none}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -2323,7 +2324,7 @@ function renderExplore(){
   var fl=[];if(st.ex.cat!=='all')fl.push(CATZH[st.ex.cat]);if(st.ex.sty!=='all')fl.push(STYN[st.ex.sty]);if(st.ex.fav)fl.push('只看收藏');if(st.ex.q)fl.push('「'+st.ex.q+'」');
   $('#ex-more').setAttribute('aria-expanded',String(!!st.ex.more));$('#ex-more').innerHTML='篩選'+(fl.length&&!st.ex.q?'<i>'+(fl.length)+'</i>':'')+(st.ex.more?' ▴':' ▾');
   $('#ex-panel').hidden=!st.ex.more;
-  $('#ex-active').textContent=fl.length?fl.join('・'):'';
+  $('#ex-active').textContent=fl.length?fl.join('・'):'';$('.exstat').hidden=!fl.length;
   var act=st.ex.day!=='all'||st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q;$('#ex-reset').hidden=!(st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q);
 }
 function renderFood(){
