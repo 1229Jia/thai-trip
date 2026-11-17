@@ -520,6 +520,9 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .addcu{display:block;width:100%;margin:4px 0 8px;min-height:40px;border:1.5px dashed var(--hair2);border-radius:12px;background:transparent;color:var(--muted);font-size:14px}
 .addcu:active{background:#fff}
 .tag.t-cu{background:#FFF1D6;color:#7A5A22}
+#dtools{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;scrollbar-width:none}
+#dtools .btn{flex:1 0 auto;min-height:42px;padding:0 12px;font-size:14px;white-space:nowrap;gap:5px}
+#dtools .btn svg{width:16px;height:16px}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -1918,8 +1921,8 @@ function renderDayHead(d){
     (nex?'<div class="tip" style="margin-bottom:12px;background:var(--waka-l)">'+ic('walk')+'<span>已排入 '+nex+' 間收藏，依距離由近到遠走一圈；暫定時間的行程已自動往後推。店家位置是商場或街段層級的估計。</span></div>':'')+
     wn.map(function(t){return '<div class="tip tbc" style="margin-bottom:12px">'+ic('warn')+'<span>'+t+'</span></div>';}).join('');
   var links=routeLinks(d);
-  $('#dtools').innerHTML=links.map(function(u,j){return '<a class="btn'+(j?' w':'')+'" href="'+esc(u)+'" target="_blank" rel="noopener">'+ic('nav')+(links.length>1?'Google 導航 '+(j+1)+'/'+links.length:'開啟當天 Google 導航')+'</a>';}).join('')+
-    '<button class="btn w" data-additem="'+d.id+'">'+ic('plus')+'新增行程</button>'+
+  $('#dtools').innerHTML=links.map(function(u,j){return '<a class="btn'+(j?' w':'')+'" href="'+esc(u)+'" target="_blank" rel="noopener">'+ic('nav')+(links.length>1?'導航 '+(j+1)+'/'+links.length:'Google 導航')+'</a>';}).join('')+
+    '<button class="btn w" data-additem="'+d.id+'">'+ic('plus')+'新增</button>'+
     '<button class="btn w" data-reorder="'+d.id+'"'+(RO&&RO.day===d.id?' disabled':'')+'>'+ic('edit')+'調整順序</button>';
   $('#nowwrap').innerHTML=nowBar(d);
 }
