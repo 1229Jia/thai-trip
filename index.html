@@ -439,6 +439,16 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .place.cpt .body{margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair2)}
 .place.cpt .body .pimg{margin:0 0 10px;border-radius:12px;aspect-ratio:16/9}
 .place.cpt .body .d{margin-top:0}
+.roon .axcol{display:none}.roon #tlist{grid-column:1/-1;width:100%}
+.ro .rolist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ro li{display:flex;align-items:center;gap:10px;background:#fff;border:var(--line);border-radius:12px;padding:10px 12px;user-select:none;-webkit-user-select:none}
+.ro li.drag{box-shadow:0 8px 24px rgba(31,42,54,.18);border-color:var(--acc);transform:scale(1.02);position:relative;z-index:2}
+.ro li.fx{background:var(--paper);color:var(--muted)}
+.ro .grip{font-size:20px;line-height:1;cursor:grab;touch-action:none;padding:6px 4px;color:var(--muted)}
+.ro .ron{width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.ro .rot{flex:1;min-width:0;display:flex;flex-direction:column}.ro .rot b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ro .rot small{color:var(--muted);font-size:12px}
+.ro .roud{display:flex;gap:4px}.ro .roud .mini{min-width:34px;justify-content:center}
+.ro .robar{display:flex;gap:8px;margin-top:12px;position:sticky;bottom:10px}.ro .robar .btn{flex:1;justify-content:center}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -1831,7 +1841,8 @@ function renderDayHead(d){
     wn.map(function(t){return '<div class="tip tbc" style="margin-bottom:12px">'+ic('warn')+'<span>'+t+'</span></div>';}).join('');
   var links=routeLinks(d);
   $('#dtools').innerHTML=links.map(function(u,j){return '<a class="btn'+(j?' w':'')+'" href="'+esc(u)+'" target="_blank" rel="noopener">'+ic('nav')+(links.length>1?'Google 導航 '+(j+1)+'/'+links.length:'開啟當天 Google 導航')+'</a>';}).join('')+
-    '<button class="btn w" data-additem="'+d.id+'">'+ic('plus')+'新增行程</button>';
+    '<button class="btn w" data-additem="'+d.id+'">'+ic('plus')+'新增行程</button>'+
+    '<button class="btn w" data-reorder="'+d.id+'"'+(RO&&RO.day===d.id?' disabled':'')+'>'+ic('edit')+'調整順序</button>';
   $('#nowwrap').innerHTML=nowBar(d);
 }
 var AX={s:0,e:1};
@@ -1849,7 +1860,44 @@ function updateNow(){
   if(el){if(n.min>=AX.s&&n.min<=AX.e){el.hidden=false;el.style.top=pct(n.min);el.firstChild.textContent=n.hm;}else{el.hidden=true;}}
   var w=$('#wknow');if(w&&WK.gs!=null){if(n.min>=WK.gs&&n.min<=WK.ge){w.hidden=false;w.style.top=(WK.hh+(n.min-WK.gs)*WK.ppm)+'px';w.firstChild.textContent=n.hm;}else{w.hidden=true;}}
 }
+var RO=null;
+function roItems(d){return sorted(d).filter(function(x){return !x.ref||x.manual;});}
+function roHtml(d){
+  var map={};d.items.forEach(function(x){map[x.id]=x;});
+  return '<div class="ro"><div class="tip" style="margin-bottom:10px">'+ic('bulb')+'<span>按住左邊的 <b>⠿</b> 上下拖曳，或用 ↑ ↓ 調整順序。按「完成」才會套用，時間會依新順序和交通時間自動重排；航班時間固定不動。收藏的店會自動跟著附近的行程排，不在這裡調整。</span></div>'+
+    '<ol class="rolist" id="rolist">'+RO.ids.map(function(id,i){var it=map[id];if(!it)return '';var fx=it.k==='flight'||it.fx;
+      return '<li data-roid="'+esc(id)+'" class="'+(fx?'fx':'')+'"><span class="grip"'+(fx?' aria-hidden="true"':' aria-label="拖曳調整順序"')+'>'+(fx?'🔒':'⠿')+'</span><span class="ron">'+(i+1)+'</span><span class="rot"><b>'+esc(it.n)+'</b><small>'+esc(it.s)+(isPoint(it)?'':'–'+esc(it.e))+(fx?'・固定時間':'')+'</small></span>'+
+        (fx?'':'<span class="roud"><button class="mini" data-romove="-1" aria-label="往上">↑</button><button class="mini" data-romove="1" aria-label="往下">↓</button></span>')+'</li>';}).join('')+'</ol>'+
+    '<div class="robar"><button class="btn" data-rodone="1">完成</button><button class="btn w" data-rocancel="1">取消</button></div></div>';
+}
+function roApply(d){
+  var map={};d.items.forEach(function(x){map[x.id]=x;});
+  var list=RO.ids.map(function(id){return map[id];}).filter(Boolean),orig=roItems(d);if(!list.length)return;
+  var t=tm(orig[0].s),prev=null,clash=[];
+  list.forEach(function(it){
+    var fx=it.k==='flight'||it.fx,dur=isPoint(it)?0:tm(it.e)-tm(it.s);
+    delete it.bs;delete it.be;
+    if(prev){t+=(prev.k==='flight'||it.k==='flight')?30:legOf(d,prev,it).dur;}
+    if(fx){if(t>tm(it.s)+1)clash.push(it.n);t=Math.max(t,tm(it.s))+dur;}
+    else{it.s=fm(t);it.e=fm(t+dur);t+=dur;}
+    prev=it;
+  });
+  return clash;
+}
+function roMove(li,dir){var ol=li.parentNode,sib=dir<0?li.previousElementSibling:li.nextElementSibling;if(!sib)return;if(dir<0)ol.insertBefore(li,sib);else ol.insertBefore(sib,li);roSync();}
+function roSync(){var ol=$('#rolist');if(!ol)return;RO.ids=$$('#rolist li').map(function(li){return li.dataset.roid;});$$('#rolist .ron').forEach(function(s,i){s.textContent=i+1;});}
+(function(){var drag=null;
+  document.addEventListener('pointerdown',function(e){var g=e.target.closest('#rolist .grip');if(!g)return;var li=g.closest('li');if(li.classList.contains('fx'))return;e.preventDefault();drag={li:li,id:e.pointerId};li.classList.add('drag');try{g.setPointerCapture(e.pointerId);}catch(x){}});
+  document.addEventListener('pointermove',function(e){if(!drag||e.pointerId!==drag.id)return;e.preventDefault();var y=e.clientY,ol=drag.li.parentNode,ls=$$('#rolist li').filter(function(x){return x!==drag.li;});
+    var before=null;for(var i=0;i<ls.length;i++){var r=ls[i].getBoundingClientRect();if(y<r.top+r.height/2){before=ls[i];break;}}
+    if(before){if(drag.li.nextElementSibling!==before)ol.insertBefore(drag.li,before);}else if(ol.lastElementChild!==drag.li){ol.appendChild(drag.li);}
+    if(y<90)window.scrollBy(0,-12);else if(y>window.innerHeight-60)window.scrollBy(0,12);},{passive:false});
+  var end=function(e){if(!drag)return;drag.li.classList.remove('drag');drag=null;roSync();};
+  document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+})();
 function renderTimeline(d){
+  document.body.classList.toggle('roon',!!(RO&&RO.day===d.id));
+  if(RO&&RO.day===d.id){$('#tlist').innerHTML=roHtml(d);return;}
   var cur=curIndexItem(d);
   $('#tlist').innerHTML=dayEntries(d).map(function(x){return x.t==='item'?itemCard(x.it,x.n,d,cur===x.it):legCard(x.L);}).join('');
   renderAxis(d);
@@ -1862,7 +1910,7 @@ function renderDay(anim){
   if(anim){['#dhead','.dmain'].forEach(function(s){var el=$(s);el.classList.remove('bounce');void el.offsetWidth;el.classList.add('bounce');});}
 }
 function setDay(n,keepScroll){
-  if(!dayOf(n))return;st.day=n;MAPST={mode:'day',leg:null,item:null};
+  if(!dayOf(n))return;RO=null;st.day=n;MAPST={mode:'day',leg:null,item:null};
   renderDay(true);placeArt(true);if(!keepScroll){window.scrollTo(0,0);}
 }
 
@@ -2311,6 +2359,14 @@ function route(){var h=(location.hash||'').slice(1);if(h==='todo'){h='lists';}if
 function go(v){if((location.hash||'').slice(1)===v){show(v);}else{location.hash=v;}}
 
 document.addEventListener('click',function(e){
+  var ro=e.target.closest('[data-reorder],[data-romove],[data-rodone],[data-rocancel]');
+  if(ro){var dd=curDay();
+    if(ro.dataset.reorder){RO={day:dd.id,ids:roItems(dd).map(function(x){return x.id;})};renderDay(false);var tl=$('#tlist');if(tl)scrollToEl(tl);return;}
+    if(ro.dataset.romove){roMove(ro.closest('li'),+ro.dataset.romove);return;}
+    if(ro.dataset.rocancel){RO=null;renderDay(false);toast('已取消，順序沒有變');return;}
+    if(ro.dataset.rodone){var before=roItems(dd).map(function(x){return x.id;}).join(),changed=before!==RO.ids.join();var cl=changed?roApply(dd):[];RO=null;if(changed){saveTrip();}renderDay(false);
+      toast(!changed?'順序沒有變':(cl&&cl.length?'已套用；「'+cl[0]+'」前面的行程會趕不上，請手動調整時間':'已套用新順序，時間已自動重排'));return;}
+  }
   var t=e.target.closest('[data-save],[data-go],[data-day],[data-exday],[data-exfav],[data-exmore],[data-exreset],[data-cat],[data-sty],[data-fcat],[data-fofav],[data-fodl],[data-stab],[data-edit],[data-editleg],[data-editcost],[data-additem],[data-mapitem],[data-mapleg],[data-mapday],[data-goitem],[data-popclose],[data-tddel],[data-pkdel],[data-ls]');
   if(!t)return;
   if(t.dataset.save){toggleSave(t.dataset.save);return;}
