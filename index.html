@@ -517,6 +517,9 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .rgh b::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c,var(--ink));margin-right:6px;vertical-align:1px}
 .rgh span{font-size:12px}
 .exstat[hidden]{display:none}
+.addcu{display:block;width:100%;margin:4px 0 8px;min-height:40px;border:1.5px dashed var(--hair2);border-radius:12px;background:transparent;color:var(--muted);font-size:14px}
+.addcu:active{background:#fff}
+.tag.t-cu{background:#FFF1D6;color:#7A5A22}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -622,6 +625,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
   <div class="exf">
   <div class="exsearch"><input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家"><button class="fbtn" id="ex-more" data-exmore aria-expanded="false">篩選</button></div>
   <div class="chips wrap" id="ex-days"></div>
+  <button class="addcu" data-cuadd="shop">＋ 新增想逛的店</button>
   <div class="fpanel" id="ex-panel" hidden>
     <span class="flabel">買什麼</span><div class="chips pw" id="ex-cats"></div>
     <span class="flabel">風格</span><div class="chips pw" id="ex-sty"></div>
@@ -638,6 +642,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
   <p class="small exintro">點卡片看介紹，按 ♥ 收藏會排進你自己的行程。營業時間出發前再確認。</p>
   <input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳">
   <div class="exf"><div class="chips wrap" id="fo-cats"></div>
+  <button class="addcu" data-cuadd="food">＋ 新增想吃的店</button>
   <div class="exbar"><button class="chip" id="fo-dl" data-fodl aria-pressed="false" hidden>可外送</button><button class="chip" id="fo-fav" data-fofav aria-pressed="false">只看收藏</button><span class="small muted" id="fo-count"></span></div></div>
   <div class="list" id="fo-list"></div>
 </section>
@@ -2277,11 +2282,11 @@ function shopCard(s){
       '<div class="pt"><h3>'+esc(s.n)+'</h3>'+
         '<div class="m1">'+esc(s.type==='zone'?'逛街區域':(s.loc||r.zh))+'</div>'+
         '<div class="m1">'+ic('clock')+'<span>'+esc(shortH(s.h))+'</span></div>'+
-        '<div class="tags">'+s.c.map(function(k){return '<span class="tag k-'+k+'">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tag t-sty">'+esc(t)+'</span>';}).join('')+flag+'</div>'+
+        '<div class="tags">'+s.c.map(function(k){return '<span class="tag k-'+k+'">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tag t-sty">'+esc(t)+'</span>';}).join('')+(s.cu?'<span class="tag t-cu">👥 '+esc(s.by||'朋友')+' 推薦</span>':'')+flag+'</div>'+
         (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
       '</div></summary>'+
       '<div class="body">'+(hasPh?pimg(s.id):'')+'<p class="d">'+esc(s.d)+'</p><dl class="kv"><dt>位置</dt><dd>'+esc(s.loc)+'</dd>'+(s.p&&s.p!=='待確認'?'<dt>價格</dt><dd>'+esc(s.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(s.h)+'</dd>'+(s.ph?'<dt>電話</dt><dd>'+esc(s.ph)+'</dd>':'')+'</dl>'+
-      '<div class="row" style="margin-top:10px">'+(s.ev?'<span class="tag t-tbc">活動品牌，未確認常設</span>':'')+links.join('')+'</div>'+addNote(s.id)+'</div>'+
+      '<div class="row" style="margin-top:10px">'+(s.ev?'<span class="tag t-tbc">活動品牌，未確認常設</span>':'')+links.join('')+'</div>'+custBar(s)+addNote(s.id)+'</div>'+
     '</details>'+heart(s.id)+'</article>';
 }
 document.addEventListener('toggle',function(e){var d=e.target;if(d&&d.dataset&&d.dataset.sid){if(d.open)EXOPEN.add(d.dataset.sid);else EXOPEN.delete(d.dataset.sid);}},true);
@@ -2296,13 +2301,76 @@ function foodCard(f){
       '<div class="pt"><h3>'+esc(f.n)+'</h3>'+
         '<div class="m1">'+esc(f.dsh||(f.d||'').split('，')[0].split('。')[0])+'</div>'+
         '<div class="m1">'+ic('clock')+'<span>'+esc(shortH(f.h))+'</span></div>'+
-        '<div class="tags">'+f.c.map(function(k){return '<span class="tag f-'+k+'">'+esc(FCATZH[k])+'</span>';}).join('')+(f.dv?'<span class="tag t-dl">🛵 可外送</span>':'')+flag+'</div>'+
+        '<div class="tags">'+f.c.map(function(k){return '<span class="tag f-'+k+'">'+esc(FCATZH[k])+'</span>';}).join('')+(f.dv?'<span class="tag t-dl">🛵 可外送</span>':'')+(f.cu?'<span class="tag t-cu">👥 '+esc(f.by||'朋友')+' 推薦</span>':'')+flag+'</div>'+
         (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
       '</div></summary>'+
       '<div class="body">'+(hasPh?pimg(f.id):'')+'<p class="d">'+esc(f.d)+'</p><dl class="kv"><dt>地址</dt><dd>'+esc(f.addr)+'</dd>'+(f.p&&f.p!=='待確認'?'<dt>價格</dt><dd>'+esc(f.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(f.h)+'</dd>'+(f.dv?'<dt>外送</dt><dd>'+esc(f.dv===true?'可外送':f.dv)+'</dd>':'')+'</dl>'+
-      '<div class="row" style="margin-top:10px">'+(f.web?'<a class="mini" href="'+esc(f.web)+'" target="_blank" rel="noopener">'+ic('link')+'資料來源</a>':'')+'<a class="mini" href="'+esc(mapsUrl(f.n+' '+(f.area==='Pattaya'?'Pattaya':'Bangkok')))+'" target="_blank" rel="noopener">'+ic('pin')+'地圖</a></div>'+addNote(f.id)+'</div>'+
+      '<div class="row" style="margin-top:10px">'+(f.web?'<a class="mini" href="'+esc(f.web)+'" target="_blank" rel="noopener">'+ic('link')+'資料來源</a>':'')+'<a class="mini" href="'+esc(mapsUrl(f.n+' '+(f.area==='Pattaya'?'Pattaya':'Bangkok')))+'" target="_blank" rel="noopener">'+ic('pin')+'地圖</a></div>'+custBar(f)+addNote(f.id)+'</div>'+
     '</details>'+heart(f.id)+'</article>';
 }
+
+/* ---------- 朋友新增的店家（存在共用行程資料 trip.cust） ---------- */
+var CUSTIDS=[];
+var SREG=[['siam','暹羅廣場（D1）'],['icon','ICONSIAM（D1）'],['chatuchak','洽圖洽（D3）'],['asiatique','河濱夜市 Asiatique（D3）'],['pattaya','芭達雅（D4）'],['songwat','嵩越路（D5）']];
+var FREG=[['Song Wat','嵩越路'],['Chinatown','唐人街・耀華力'],['Khlong San','ICONSIAM 一帶'],['Ekkamai','Ekkamai（民宿附近）'],['Phrom Phong','Phrom Phong'],['舊城區','舊城區'],['Pattaya','芭達雅']];
+function applyCust(){
+  CUSTIDS.forEach(function(id){delete ALL[id];});CUSTIDS=[];
+  for(var i=SHOPS.length-1;i>=0;i--){if(SHOPS[i].cu)SHOPS.splice(i,1);}
+  for(i=FOODS.length-1;i>=0;i--){if(FOODS[i].cu)FOODS.splice(i,1);}
+  (trip.cust||[]).forEach(function(c){
+    if(c.kind==='food'){var f={id:'f-'+c.id,cu:c.id,by:c.by,n:c.n,area:c.area||'Song Wat',addr:c.loc||'',c:[c.cat||'street'],d:c.note||'朋友推薦，資料待補。',h:c.h||'營業時間未確認',p:'',st:'ok',web:c.gm||''};
+      FOODS.push(f);ALL[f.id]={kind:'food',ty:f.c.indexOf('cafe')>-1?'cafe':'food',o:f};CUSTIDS.push(f.id);}
+    else{var s={id:'s-'+c.id,cu:c.id,by:c.by,n:c.n,r:REG[c.r]?c.r:'siam',loc:c.loc||'',c:[c.cat||'cloth'],d:c.note||'朋友推薦，資料待補。',h:c.h||'營業時間未確認',p:'',st:'ok',web:c.gm||'',wl:'Google 地圖'};
+      if(!s.loc)s.loc=REG[s.r].zh;SHOPS.push(s);ALL[s.id]={kind:'shop',ty:'shop',o:s};CUSTIDS.push(s.id);}
+  });
+}
+var SREGLL={siam:[13.7455,100.533],icon:[13.7267,100.5105],chatuchak:[13.7999,100.5502],asiatique:[13.7047,100.5033],pattaya:[12.95,100.888],songwat:[13.738,100.508]};
+var FREGLL={'Song Wat':[13.738,100.507],'Chinatown':[13.7402,100.5101],'Khlong San':[13.7267,100.5105],'Ekkamai':[13.7225,100.585],'Phrom Phong':[13.7305,100.5697],'舊城區':[13.752,100.497],'Pattaya':[12.93,100.88]};
+function parseLink(u){
+  var r={};u=(u||'').trim();if(!u)return r;
+  var m=/\/maps\/place\/([^\/@?]+)/.exec(u);if(m){try{r.n=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(e){r.n=m[1].replace(/\+/g,' ');}}
+  m=/@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(u)||/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/.exec(u)||/[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/.exec(u);if(m)r.ll=[+m[1],+m[2]];
+  m=/instagram\.com\/([A-Za-z0-9._]+)/.exec(u);if(m&&['p','reel','reels','stories','explore'].indexOf(m[1])<0)r.h=m[1];
+  m=/threads\.(?:net|com)\/@([A-Za-z0-9._]+)/.exec(u);if(m)r.h=m[1];
+  if(!r.n&&r.h)r.n=r.h.replace(/[._]+/g,' ').replace(/\b(official|bkk|bangkok|th|shop|store)\b/gi,' ').replace(/\s+/g,' ').trim()||r.h;
+  if(/maps\.app\.goo\.gl|goo\.gl\/maps/.test(u))r.short=1;
+  return r;
+}
+function nearest(ll,map){var best=null,bd=1e9;Object.keys(map).forEach(function(k){var d=hav(ll,map[k]);if(d<bd){bd=d;best=k;}});return bd<15?best:null;}
+function myName(){try{return localStorage.getItem('tdiary-myname')||'';}catch(e){return '';}}
+function openCustEditor(kind,cid){
+  var c=cid?(trip.cust||[]).filter(function(x){return x.id===cid;})[0]:null;if(cid&&!c)return;
+  var food=kind==='food',o=c||{kind:kind,n:'',cat:food?'street':'cloth',r:'siam',area:'Song Wat',loc:'',gm:'',note:'',by:myName()};
+  var catSel={},regSel={};Object.keys(food?FCATZH:CATZH).forEach(function(k){catSel[k]={zh:(food?FCATZH:CATZH)[k]};});
+  (food?FREG:SREG).forEach(function(r){regSel[r[0]]={zh:r[1]};});
+  var body='<div class="fgrid">'+
+    '<label class="fld full">貼上 Google 地圖／IG／Threads 連結（會自動帶入）<input name="gm" type="url" value="'+esc(o.gm||'')+'" placeholder="https://"><small class="muted" id="gmhint"></small></label>'+
+    '<label class="fld full">店名<input name="n" required value="'+esc(o.n)+'" placeholder="例如：XXX Vintage"></label>'+
+    '<label class="fld">'+(food?'區域':'在哪裡逛')+'<select name="reg">'+opts(regSel,food?o.area:o.r)+'</select></label>'+
+    '<label class="fld">類別<select name="cat">'+opts(catSel,o.cat)+'</select></label>'+
+    '<label class="fld full">位置／地址（選填）<input name="loc" value="'+esc(o.loc||'')+'" placeholder="例如：Siam Square Soi 3"></label>'+
+    '<label class="fld full">為什麼想去（選填）<textarea name="note" placeholder="例如：IG 看到的，包包很便宜">'+esc(c?o.note||'':'')+'</textarea></label>'+
+    '<label class="fld full">你的名字<input name="by" required value="'+esc(o.by||'')+'" placeholder="讓大家知道是誰推薦的"></label>'+
+    '</div><p class="small muted">新增後所有人都看得到；要不要排進行程，各自按 ♥ 收藏。</p>';
+  var foot=(c?'<button type="button" class="btn c" data-dlgdel="1">刪除</button>':'')+'<span class="sp"></span><button type="button" class="btn w" data-dlgclose="1">取消</button><button type="submit" class="btn">'+(c?'儲存':'新增')+'</button>';
+  openDlg(c?'編輯朋友推薦':(food?'新增餐廳':'新增店家'),body,foot,function(fd,act){
+    trip.cust=trip.cust||[];
+    if(act==='del'){trip.cust=trip.cust.filter(function(x){return x!==c;});var sid=(food?'f-':'s-')+c.id;if(saved.has(sid)){saved.delete(sid);persistSaved();syncExtras();}applyCust();saveTrip();refreshLists();toast('已刪除「'+c.n+'」');return true;}
+    var n=(fd.get('n')||'').trim();if(!n)return false;var by=(fd.get('by')||'').trim();try{localStorage.setItem('tdiary-myname',by);}catch(e){}
+    var x=c||{id:'u'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),kind:kind};
+    x.n=n;x.cat=fd.get('cat');if(food)x.area=fd.get('reg');else x.r=fd.get('reg');
+    ['loc','gm','note'].forEach(function(k){var v=(fd.get(k)||'').trim();if(v)x[k]=v;else delete x[k];});x.by=by;
+    if(!c)trip.cust.push(x);applyCust();saveTrip();refreshLists();toast(c?'已更新':'已新增「'+n+'」，大家都看得到了');return true;
+  });
+  var gi=$('#dlgform [name=gm]');if(gi){gi.addEventListener('input',function(){var r=parseLink(gi.value),fm=$('#dlgform'),msg=[];
+    if(r.n&&!fm.n.value.trim()){fm.n.value=r.n;msg.push('已帶入店名');}
+    if(r.ll){var k=nearest(r.ll,food?FREGLL:SREGLL);if(k){fm.reg.value=k;msg.push('已判斷區域');}}
+    if(r.short)msg.push('這種短網址讀不到店名，請手動填店名和區域（連結會保留，點地圖一樣打得開）');
+    else if(r.h&&!r.ll)msg.push('IG／Threads 只能帶入帳號名稱，區域和類別請自己選');
+    $('#gmhint').textContent=msg.join('・');});}
+}
+function refreshLists(){if(VIEW==='explore')renderExplore();if(VIEW==='food')renderFood();if(VIEW==='saved'&&typeof renderSaved==='function')renderSaved();}
+function custBar(o){return o.cu?'<div class="row" style="margin-top:8px"><button class="mini" data-cuedit="'+esc(o.cu)+'" data-cukind="'+(o.id.charAt(0)==='f'?'food':'shop')+'">'+ic('edit')+'編輯</button></div>':'';}
 var FAREA=[['Song Wat','嵩越路'],['Yaowarat','耀華力'],['Chinatown','唐人街'],['舊城區','舊城區'],['Khlong San','Khlong San（ICONSIAM 對岸）'],['Dusit','Dusit'],['Ekkamai','Ekkamai（民宿附近）'],['Phrom Phong','Phrom Phong'],['Pattaya','芭達雅']];
 function spotCard(o){var s=o.o,d=o.d;return '<article class="card place"><div class="ph">'+icon(s.mo||'frame')+'<div class="pt"><span class="rg">第 '+d.id+' 天・'+d.date+'・行程景點</span><h3>'+esc(s.n)+'</h3></div>'+heart(s.id)+'</div>'+(s.a?'<p class="d">'+esc(s.a)+'</p>':'')+'</article>';}
 function renderExplore(){
@@ -2437,6 +2505,8 @@ function route(){var h=(location.hash||'').slice(1);if(h==='todo'){h='lists';}if
 function go(v){if((location.hash||'').slice(1)===v){show(v);}else{location.hash=v;}}
 
 document.addEventListener('click',function(e){
+  var cu=e.target.closest('[data-cuadd],[data-cuedit]');
+  if(cu){if(cu.dataset.cuadd)openCustEditor(cu.dataset.cuadd);else openCustEditor(cu.dataset.cukind,cu.dataset.cuedit);return;}
   var dp=e.target.closest('[data-dayprev]');
   if(dp){var n=+dp.dataset.dayprev;if(EXDP.has(n))EXDP.delete(n);else EXDP.add(n);var y=window.scrollY;renderExplore();window.scrollTo(0,y);return;}
   var ro=e.target.closest('[data-reorder],[data-romove],[data-rodone],[data-rocancel]');
@@ -2511,7 +2581,7 @@ window.addEventListener('scroll',onScroll,{passive:true});
 window.addEventListener('resize',function(){if(VIEW==='itinerary'){setDsh();placeArt(false);FOCUS=-1;onScroll();}});
 
 /* ---------- init ---------- */
-load();clearPresetCosts();clearTbcTodos();clearLuggageTodo();saveTrip();syncExtras();
+load();applyCust();clearPresetCosts();clearTbcTodos();clearLuggageTodo();saveTrip();syncExtras();
 $('#logo').innerHTML=v40('tuktuk','a-nudge','嘟嘟車');
 $$('[data-ic]').forEach(function(el){el.outerHTML=ic(el.dataset.ic);});
 $('#heroart').innerHTML='<img class="heroimg" src="'+DAYIMG.home+'" alt="曼谷大皇宮與昭披耶河插畫">';
@@ -2542,7 +2612,7 @@ setInterval(function(){updateNow();if(VIEW==='itinerary'){$('#nowwrap').innerHTM
   var _st=saveTrip;
   saveTrip=function(){_st();push();};
   function apply(s){try{var o=JSON.parse(s);if(!o||!o.trip||!Array.isArray(o.trip.days))return;
-      var myPack=trip&&trip.pack;trip=base(o.trip);lastSent=JSON.stringify({trip:trip});trip.pack=myPack||(buildDefault().pack);var r=ready;ready=false;syncExtras();ready=r;
+      var myPack=trip&&trip.pack;trip=base(o.trip);lastSent=JSON.stringify({trip:trip});trip.pack=myPack||(buildDefault().pack);applyCust();var r=ready;ready=false;syncExtras();ready=r;
       var dlg=document.getElementById('dlg');if(dlg&&dlg.open)return;
       var y=window.scrollY;renderStay();renderView(false);window.scrollTo(0,y);}catch(e){}}
   badge('連線中…');
