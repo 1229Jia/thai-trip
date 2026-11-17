@@ -538,6 +538,8 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .phbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1.5px dashed var(--hair2);border-radius:12px;color:var(--muted);font-size:14px;background:#fff}
 .phbtn svg{width:16px;height:16px}
 #fo-areas .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.nowbar{flex-wrap:nowrap}.nowbar span{flex:1;min-width:0}
+.grp{border:0;background:#EEF1F5;color:var(--muted);padding:2px 8px}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -690,17 +692,17 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
   <div id="ls-backup" class="view" hidden>
     <h2 class="sec"><span data-ic="save"></span>備份與還原</h2>
     <div class="card">
-      <p class="small">行程、交通、費用、待辦、用品和收藏都存在這個瀏覽器裡。換手機或清除瀏覽資料前，先匯出備份。</p>
+      <p class="small">分享網址（GitHub 版）的行程、待辦、費用和朋友新增的店家是大家共用的，存在雲端；♥ 收藏和用品清單只存在你這支手機。想留一份紀錄可以下載備份。</p>
       <div class="row" style="margin-top:10px"><button class="btn" id="bkExport">下載備份檔</button><button class="btn w" id="bkCopy">複製備份文字</button></div>
     </div>
     <div class="card">
-      <p class="small">還原：選擇備份檔，或把備份文字貼在下面。還原會覆蓋目前資料。</p>
+      <p class="small">還原：選擇備份檔，或把備份文字貼在下面。<b>還原會覆蓋目前資料；在共用網址上，大家看到的行程也會一起被換掉。</b></p>
       <div class="row" style="margin-top:10px"><label class="btn w" style="cursor:pointer">選擇備份檔<input type="file" id="bkFile" accept=".json,application/json" hidden></label></div>
       <textarea class="code" id="bkText" placeholder="貼上備份文字" style="margin-top:10px"></textarea>
       <div class="row" style="margin-top:8px"><button class="btn g" id="bkImport">從文字還原</button></div>
     </div>
     <div class="card" style="background:var(--coral-l)">
-      <p class="small">恢復成最初的行程資料（你的修改、費用、清單和收藏都會清除）。</p>
+      <p class="small">恢復成最初的行程資料。<b>在共用網址上，所有人改過的行程、待辦、費用和朋友新增的店家都會一起被清掉</b>，請先跟大家確認。</p>
       <div class="row" style="margin-top:10px"><button class="btn c" id="bkReset">恢復預設</button></div>
     </div>
     <p class="small muted" id="bkInfo"></p>
@@ -720,7 +722,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
   <div class="card"><h3 class="sec" style="font-size:18px">依類別</h3><div class="bars" id="cByCat" style="margin-top:10px"></div></div>
   <div class="card"><h3 class="sec" style="font-size:18px">依日期</h3><div class="bars" id="cByDay" style="margin-top:10px"></div></div>
   <div class="card">
-    <h3 class="sec" style="font-size:18px">明細<small>行程與交通的金額來自行程資料，改行程會自動更新</small></h3>
+    <h3 class="sec" style="font-size:18px;flex-wrap:wrap"><span style="white-space:nowrap">明細</span><small>行程與交通的金額來自行程資料，改行程會自動更新</small></h3>
     <div style="overflow-x:auto;margin-top:8px"><table class="ctable" id="cTable"></table></div>
   </div>
   <div class="card">
@@ -1930,7 +1932,7 @@ function nowBar(d){
   var t='曼谷時間 '+n.hm;
   if(n.day>=1&&n.day<=trip.days.length&&n.day!==d.id){t+='・今天是第 '+n.day+' 天 <button class="mini" data-day="'+n.day+'">回到今天</button>';}
   else if(n.day<1){t+='・旅程還沒開始';}
-  return '<div class="nowbar"><i></i><span>'+t+(inr?'・時間軸紅線為現在時刻':'')+'</span></div>';
+  return '<div class="nowbar"><i></i><span>'+t+(inr&&n.day===d.id?'・時間軸紅線為現在時刻':'')+'</span></div>';
 }
 function renderDayHead(d){
   var i=trip.days.indexOf(d),r=dayRange(d);
