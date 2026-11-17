@@ -2362,6 +2362,9 @@ function parseLink(u){
   if(/maps\.app\.goo\.gl|goo\.gl\/maps/.test(u))r.short=1;
   return r;
 }
+function phAddr(p){var s=[(p.housenumber?p.housenumber+' ':'')+(p.street||''),p.locality||p.district,p.city].filter(function(x){return x&&x.trim();});return s.join(', ');}
+function geoRev(ll,cb){fetch('https://photon.komoot.io/reverse?lat='+ll[0]+'&lon='+ll[1]+'&lang=en').then(function(r){return r.json();}).then(function(j){var f=j.features&&j.features[0];cb(f?phAddr(f.properties):'');}).catch(function(){cb('');});}
+function geoFind(q,cb){fetch('https://photon.komoot.io/api/?q='+encodeURIComponent(q)+'&lat=13.74&lon=100.55&limit=1&lang=en').then(function(r){return r.json();}).then(function(j){var f=j.features&&j.features[0];if(!f)return cb(null);var c=f.geometry.coordinates;cb({n:f.properties.name||'',addr:phAddr(f.properties),ll:[c[1],c[0]]});}).catch(function(){cb(null);});}
 function nearest(ll,map){var best=null,bd=1e9;Object.keys(map).forEach(function(k){var d=hav(ll,map[k]);if(d<bd){bd=d;best=k;}});return bd<15?best:null;}
 function myName(){try{return localStorage.getItem('tdiary-myname')||'';}catch(e){return '';}}
 function openCustEditor(kind,cid){
@@ -2375,7 +2378,7 @@ function openCustEditor(kind,cid){
     '<label class="fld">'+(food?'區域':'在哪裡逛')+'<select name="reg">'+opts(regSel,food?o.area:o.r)+'</select></label>'+
     '<label class="fld">類別<select name="cat">'+opts(catSel,o.cat)+'</select></label>'+
     '<div class="fld full">照片（選填）<label class="phpick"><input type="file" name="phf" accept="image/*" hidden><span id="phprev">'+((c&&c.ph&&phGet(c.id))?'<img src="'+phGet(c.id)+'" alt="">':'')+'</span><span class="phbtn">'+ic('plus')+((c&&c.ph)?'換一張':'加照片')+'</span></label></div>'+
-    '<label class="fld full">位置／地址（選填）<input name="loc" value="'+esc(o.loc||'')+'" placeholder="'+(food?'例如：Ekkamai Soi 2':'例如：Siam Square Soi 3')+'"></label>'+
+    '<label class="fld full"><span style="display:flex;align-items:center;gap:8px">位置／地址（選填）<button type="button" class="mini" data-geofind="1" style="margin-left:auto">🔍 用店名找地址</button></span><input name="loc" value="'+esc(o.loc||'')+'" placeholder="'+(food?'例如：Ekkamai Soi 2':'例如：Siam Square Soi 3')+'"></label>'+
     '<label class="fld full">為什麼想去（選填）<textarea name="note" placeholder="'+(food?'例如：IG 看到的，宵夜很好吃':'例如：IG 看到的，包包很便宜')+'">'+esc(c?o.note||'':'')+'</textarea></label>'+
     '<label class="fld full">你的名字<input name="by" required value="'+esc(o.by||'')+'" placeholder="讓大家知道是誰推薦的"></label>'+
     '</div><p class="small muted">新增後所有人都看得到；要不要排進行程，各自按 ♥ 收藏。</p>';
@@ -2391,9 +2394,12 @@ function openCustEditor(kind,cid){
     if(!c)trip.cust.push(x);applyCust();saveTrip();refreshLists();toast(c?'已更新':'已新增「'+n+'」，大家都看得到了');return true;
   });
   PENDPH=null;var pfi=$('#dlgform [name=phf]');if(pfi){pfi.addEventListener('change',function(){var f=pfi.files&&pfi.files[0];if(!f)return;$('#phprev').innerHTML='<span class="small muted">處理中…</span>';shrink(f,function(d){if(!d){$('#phprev').innerHTML='<span class="small muted">讀不到這張照片</span>';return;}PENDPH=d;$('#phprev').innerHTML='<img src="'+d+'" alt="">';});});}
+  var gfb=$('#dlgform [data-geofind]');if(gfb){gfb.addEventListener('click',function(){var fm=$('#dlgform'),q=fm.n.value.trim();if(!q){toast('先填店名');return;}gfb.textContent='搜尋中…';
+    geoFind(q+' Bangkok',function(res){gfb.textContent='🔍 用店名找地址';if(!res){toast('找不到，請手動填地址');return;}fm.loc.value=res.addr||fm.loc.value;var k=nearest(res.ll,food?FREGLL:SREGLL);if(k)fm.reg.value=k;toast('找到「'+res.n+'」，請確認地址對不對');});});}
   var gi=$('#dlgform [name=gm]');if(gi){gi.addEventListener('input',function(){var r=parseLink(gi.value),fm=$('#dlgform'),msg=[];
     if(r.n&&!fm.n.value.trim()){fm.n.value=r.n;msg.push('已帶入店名');}
-    if(r.ll){var k=nearest(r.ll,food?FREGLL:SREGLL);if(k){fm.reg.value=k;msg.push('已判斷區域');}}
+    if(r.ll){var k=nearest(r.ll,food?FREGLL:SREGLL);if(k){fm.reg.value=k;msg.push('已判斷區域');}
+      if(!fm.loc.value.trim()){var nm=r.n;geoRev(r.ll,function(ad){if(!ad&&nm){geoFind(nm+' Bangkok',function(res){if(res&&res.addr&&!fm.loc.value.trim()){fm.loc.value=res.addr;var h=$('#gmhint');if(h)h.textContent=(h.textContent?h.textContent+'・':'')+'已帶入地址';}});return;}if(ad&&!fm.loc.value.trim()){fm.loc.value=ad;var h=$('#gmhint');if(h)h.textContent=(h.textContent?h.textContent+'・':'')+'已帶入地址';}});}}
     if(r.short)msg.push('這種短網址讀不到店名，請手動填店名和區域（連結會保留，點地圖一樣打得開）');
     else if(r.h&&!r.ll)msg.push('IG／Threads 只能帶入帳號名稱，區域和類別請自己選');
     $('#gmhint').textContent=msg.join('・');});}
