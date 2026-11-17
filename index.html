@@ -127,7 +127,9 @@ input,select,textarea{font:16px var(--font);color:var(--ink)}
   .dside{position:sticky;top:calc(var(--top) + var(--dsh) + 6px);order:2}
 }
 /* ---------- map ---------- */
-.mapcard{border:var(--line);border-radius:var(--r);overflow:hidden;background:#fff}
+.mapcard{border:var(--line);border-radius:var(--r);overflow:hidden;background:#fff;position:relative;z-index:0;isolation:isolate}
+#mapbox{position:relative;z-index:0;isolation:isolate;overflow:hidden}
+.maplibregl-cooperative-gesture-screen{font-size:15px!important}
 .mapbar{display:flex;flex-wrap:wrap;gap:6px;padding:10px;border-bottom:var(--line);background:var(--paper)}
 .mapbar select{height:36px;border:2px solid var(--ink);border-radius:99px;background:#fff;padding:0 10px;font-size:14px;max-width:100%}
 .mapbar select.on{background:var(--yama)}
@@ -1976,7 +1978,7 @@ function mlFail(){ML.st='fail';ML.ready=false;try{if(ML.map)ML.map.remove();}cat
 function mlInit(){
   var box=$('#mapbox');box.innerHTML='<div id="mlmap"></div>';
   try{
-    ML.map=new maplibregl.Map({container:'mlmap',style:'https://tiles.openfreemap.org/styles/positron',center:[100.55,13.75],zoom:10,cooperativeGestures:true,attributionControl:{compact:true}});
+    ML.map=new maplibregl.Map({container:'mlmap',style:'https://tiles.openfreemap.org/styles/positron',center:[100.55,13.75],zoom:10,cooperativeGestures:true,attributionControl:{compact:true},locale:{'CooperativeGesturesHandler.MobileHelpText':'用兩指移動地圖','CooperativeGesturesHandler.WindowsHelpText':'按住 Ctrl 再滾動來縮放地圖','CooperativeGesturesHandler.MacHelpText':'按住 ⌘ 再滾動來縮放地圖'}});
   }catch(e){mlFail();return;}
   ML.map.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
   ML.map.on('load',function(){
@@ -1994,6 +1996,7 @@ function mlInit(){
       ML.map.addLayer({id:'r-line',type:'line',source:'routes',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','color'],'line-width':4}});
     }catch(e){}
     ML.ready=true;mlUpdate();
+    try{var at=document.querySelector('#mlmap .maplibregl-ctrl-attrib');if(at){at.classList.remove('maplibregl-compact-show');at.removeAttribute('open');}}catch(e){}
   });
   ML.map.on('error',function(){if(!ML.ready){mlFail();}});
   setTimeout(function(){if(ML.map&&!ML.ready){mlFail();}},12000);
