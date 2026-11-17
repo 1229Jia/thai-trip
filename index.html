@@ -458,6 +458,14 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .ro .rot{flex:1;min-width:0;display:flex;flex-direction:column}.ro .rot b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ro .rot small{color:var(--muted);font-size:12px}
 .ro .roud{display:flex;gap:4px}.ro .roud .mini{min-width:34px;justify-content:center}
 .ro .robar{display:flex;gap:8px;margin-top:12px;position:sticky;bottom:10px}.ro .robar .btn{flex:1;justify-content:center}
+@media (max-width:720px){
+  .exintro{margin:2px 0 8px}
+  .chips.wrap{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;margin:0 -14px;padding:2px 14px 6px;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+  .chips.wrap .chip,.exbar .chip{min-height:32px;padding:0 11px;font-size:13px;border-width:1.5px}
+  .exf .flabel{margin-top:4px;margin-bottom:2px;font-size:12px}
+  .exbar{margin-top:6px;gap:6px}
+}
+#syncb{transition:opacity .4s}#syncb.hide{opacity:0;pointer-events:none}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -560,7 +568,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-explore" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="bag"></span>探索・逛街</h2>
-  <p class="small">店家依每天經過的地區分組，點卡片看詳細介紹。按 ♥ 收藏，店家會自動排進那天的行程、地圖和導航路線。</p>
+  <p class="small exintro">點卡片看介紹，按 ♥ 收藏會排進你自己的行程。</p>
   <input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家">
   <div class="exf"><span class="flabel">哪一天</span><div class="chips wrap" id="ex-days"></div>
   <span class="flabel">買什麼</span><div class="chips wrap" id="ex-cats"></div>
@@ -571,7 +579,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-food" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="bowl"></span>美食</h2>
-  <p class="small">依區域分組，點卡片看詳細介紹。按 ♥ 收藏，嵩越路、唐人街和芭達雅的店會自動排進當天行程。營業時間可能臨時變動，出發前請再確認。</p>
+  <p class="small exintro">點卡片看介紹，按 ♥ 收藏會排進你自己的行程。營業時間出發前再確認。</p>
   <input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳">
   <div class="exf"><div class="chips wrap" id="fo-cats"></div>
   <div class="exbar"><button class="chip" id="fo-dl" data-fodl aria-pressed="false" hidden>可外送</button><button class="chip" id="fo-fav" data-fofav aria-pressed="false">只看收藏</button><span class="small muted" id="fo-count"></span></div></div>
@@ -2463,7 +2471,7 @@ setInterval(function(){updateNow();if(VIEW==='itinerary'){$('#nowwrap').innerHTM
   var CFG={apiKey:"AIzaSyA4DeGrCmRtLCyTqbC3DyRKInSIhqUI-GQ",authDomain:"thai-trip-2026-2786f.firebaseapp.com",projectId:"thai-trip-2026-2786f",storageBucket:"thai-trip-2026-2786f.firebasestorage.app",messagingSenderId:"946860826582",appId:"1:946860826582:web:f305a3efe7515a4effce77"};
   var V='10.12.2',ready=false,ref=null,me=Math.random().toString(36).slice(2),lastSent='',pushT=null;
   function js(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){badge('離線・只存在這台裝置');};document.head.appendChild(s);}
-  function badge(t){var b=document.getElementById('syncb');if(!b){b=document.createElement('div');b.id='syncb';b.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:1100;font:12px/1 var(--font);background:rgba(255,255,255,.92);border:1px solid var(--hair);border-radius:99px;padding:6px 10px;color:var(--muted)';document.body.appendChild(b);}b.textContent=t;}
+  function badge(t){var b=document.getElementById('syncb');if(!b){b=document.createElement('div');b.id='syncb';b.style.cssText='position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:1100;font:12px/1 var(--font);background:rgba(255,255,255,.92);border:1px solid var(--hair);border-radius:99px;padding:6px 10px;color:var(--muted)';document.body.appendChild(b);}b.textContent=t;b.classList.remove('hide');clearTimeout(badge.h);if(/^✓/.test(t)){badge.h=setTimeout(function(){b.classList.add('hide');},2500);}}
   function base(t){var c=JSON.parse(JSON.stringify(t));delete c.pack;(c.days||[]).forEach(function(d){delete d.warn;d.items=(d.items||[]).filter(function(it){return !it.ref;});d.items.forEach(function(it){if(it.bs!=null){it.s=it.bs;it.e=it.be;delete it.bs;delete it.be;}});});return c;}
   function snap(){return JSON.stringify({trip:base(trip)});}
   function push(){if(!ready||!ref)return;clearTimeout(pushT);pushT=setTimeout(function(){var s=snap();if(s===lastSent)return;lastSent=s;badge('同步中…');
