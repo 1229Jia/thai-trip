@@ -497,7 +497,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .tag.f-queue{background:#F8E6E1;color:#8A3A2C}.tag.f-thai{background:#E4F0E6;color:#3D6B47}.tag.f-seafood{background:#E3ECF5;color:#2F5276}
 .tag.f-street{background:#FDF0D8;color:#86601B}.tag.f-cafe{background:#EDE4D8;color:#6A4E2E}.tag.f-dessert{background:#FCE5EC;color:#9A3557}.tag.f-night{background:#ECE8F6;color:#5A4B8A}
 /* ---------- 探索篩選精簡 ---------- */
-#v-explore .exf{margin-top:4px}
+#v-explore .exf,#v-food .exf{margin-top:4px}
 .exsearch{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .exsearch .search{flex:1;margin:0;min-height:44px}
 .fbtn{flex:none;min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--hair2);background:#fff;font-size:14px;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
@@ -532,6 +532,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .phpick #phprev img{width:72px;height:72px;object-fit:cover;border-radius:12px;display:block}
 .phbtn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1.5px dashed var(--hair2);border-radius:12px;color:var(--muted);font-size:14px;background:#fff}
 .phbtn svg{width:16px;height:16px}
+#fo-areas .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 </style></head>
 <body>
 <header class="top"><div class="in">
@@ -651,11 +652,17 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-food" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="bowl"></span>美食</h2>
-  <p class="small exintro">點卡片看介紹，按 ♥ 收藏會排進你自己的行程。營業時間出發前再確認。</p>
-  <input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳">
-  <div class="exf"><div class="chips wrap" id="fo-cats"></div>
+  <div class="exf">
+  <div class="exsearch"><input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳"><button class="fbtn" id="fo-more" data-fomore aria-expanded="false">篩選</button></div>
+  <div class="chips wrap" id="fo-areas"></div>
   <button class="addcu" data-cuadd="food">＋ 新增想吃的店</button>
-  <div class="exbar"><button class="chip" id="fo-dl" data-fodl aria-pressed="false" hidden>可外送</button><button class="chip" id="fo-fav" data-fofav aria-pressed="false">只看收藏</button><span class="small muted" id="fo-count"></span></div></div>
+  <div class="fpanel" id="fo-panel" hidden>
+    <span class="flabel">吃什麼</span><div class="chips pw" id="fo-cats"></div>
+    <span class="flabel">其他</span><div class="chips pw"><button class="chip" id="fo-dl" data-fodl aria-pressed="false">可外送</button><button class="chip" id="fo-fav" data-fofav aria-pressed="false">只看收藏</button></div>
+    <div class="fpbar"><button class="chip ghost" data-foreset>清除全部</button><button class="chip on" data-fomore>完成</button></div>
+  </div>
+  <div class="exstat" id="fo-stat" hidden><span id="fo-active"></span><button class="lnk" data-foreset>清除</button><span class="small muted" id="fo-count"></span></div>
+  </div>
   <div class="list" id="fo-list"></div>
 </section>
 
@@ -1809,7 +1816,7 @@ function renderStay(){
 /* =====================================================================
    單日行程
    ===================================================================== */
-var st={day:1,ex:{day:'all',cat:'all',sty:'all',q:'',fav:false,more:false},fo:{cat:'all',q:'',fav:false,dl:false},sv:'all',ls:'todo'};
+var st={day:1,ex:{day:'all',cat:'all',sty:'all',q:'',fav:false,more:false},fo:{cat:'all',q:'',fav:false,dl:false,area:'all',more:false},sv:'all',ls:'todo'};
 var MAPST={mode:'day',leg:null,item:null};
 function curDay(){return dayOf(st.day)||trip.days[0];}
 function renderStrip(){
@@ -2416,8 +2423,8 @@ function renderExplore(){
   var act=st.ex.day!=='all'||st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q;$('#ex-reset').hidden=!(st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q);
 }
 function renderFood(){
-  var q=st.fo.q.trim().toLowerCase(),list=FOODS.filter(function(f){return (!st.fo.fav||saved.has(f.id))&&(!st.fo.dl||f.dv)&&(st.fo.cat==='all'||f.c.indexOf(st.fo.cat)>-1)&&(!q||(f.n+' '+f.area+' '+f.d+' '+f.addr).toLowerCase().indexOf(q)>-1);});
-  $('#fo-count').textContent=list.length+' 個結果';var html='',used={};
+  var q=st.fo.q.trim().toLowerCase(),list=FOODS.filter(function(f){return (!st.fo.fav||saved.has(f.id))&&(st.fo.area==='all'||f.area===st.fo.area)&&(!st.fo.dl||f.dv)&&(st.fo.cat==='all'||f.c.indexOf(st.fo.cat)>-1)&&(!q||(f.n+' '+f.area+' '+f.d+' '+f.addr).toLowerCase().indexOf(q)>-1);});
+  $('#fo-count').textContent=list.length+' 間';var html='',used={};
   FAREA.concat(FOODS.map(function(f){return [f.area,f.area];})).forEach(function(A){if(used[A[0]])return;used[A[0]]=1;var al=list.filter(function(f){return f.area===A[0];});if(!al.length)return;
     html+='<div class="rgh"><b>'+esc(A[1])+'</b><span>'+al.length+' 家</span></div>'+al.map(foodCard).join('');});
   $('#fo-list').innerHTML=html||'<div class="empty">沒有符合的餐廳。</div>';
@@ -2425,6 +2432,12 @@ function renderFood(){
   var nf=FOODS.filter(function(x){return saved.has(x.id);}).length,nd=FOODS.filter(function(x){return x.dv;}).length;
   $('#fo-fav').setAttribute('aria-pressed',String(!!st.fo.fav));$('#fo-fav').innerHTML=ic('heart')+'只看收藏（'+nf+'）';
   $('#fo-dl').setAttribute('aria-pressed',String(!!st.fo.dl));$('#fo-dl').textContent='🛵 可外送（'+nd+'）';$('#fo-dl').hidden=!nd;
+  var au={},areas=[];FAREA.concat(FOODS.map(function(f){return [f.area,f.area];})).forEach(function(A){if(au[A[0]])return;au[A[0]]=1;if(FOODS.some(function(f){return f.area===A[0];}))areas.push(A);});
+  $('#fo-areas').innerHTML='<button class="chip" data-farea="all" aria-pressed="'+(st.fo.area==='all')+'">全部</button>'+areas.map(function(A){return '<button class="chip" data-farea="'+esc(A[0])+'" aria-pressed="'+(st.fo.area===A[0])+'">'+esc(A[1].replace(/（.*）/,''))+'</button>';}).join('');
+  var fl=[];if(st.fo.cat!=='all')fl.push(FCATZH[st.fo.cat]);if(st.fo.dl)fl.push('可外送');if(st.fo.fav)fl.push('只看收藏');if(st.fo.q)fl.push('「'+st.fo.q+'」');
+  var nfl=fl.length-(st.fo.q?1:0);
+  $('#fo-more').setAttribute('aria-expanded',String(!!st.fo.more));$('#fo-more').innerHTML='篩選'+(nfl?'<i>'+nfl+'</i>':'')+(st.fo.more?' ▴':' ▾');
+  $('#fo-panel').hidden=!st.fo.more;$('#fo-active').textContent=fl.join('・');$('#fo-stat').hidden=!fl.length;
 }
 var STABS=[['all','全部'],['spot','景點'],['shop','商店'],['food','餐廳'],['cafe','咖啡廳'],['other','其他']];
 function renderSaved(){
@@ -2537,7 +2550,7 @@ document.addEventListener('click',function(e){
     if(ro.dataset.rodone){var before=roItems(dd).map(function(x){return x.id;}).join(),changed=before!==RO.ids.join();var cl=changed?roApply(dd):[];RO=null;if(changed){saveTrip();}renderDay(false);
       toast(!changed?'順序沒有變':(cl&&cl.length?'已套用；「'+cl[0]+'」前面的行程會趕不上，請手動調整時間':'已套用新順序，時間已自動重排'));return;}
   }
-  var t=e.target.closest('[data-save],[data-go],[data-day],[data-exday],[data-exfav],[data-exmore],[data-exreset],[data-cat],[data-sty],[data-fcat],[data-fofav],[data-fodl],[data-stab],[data-edit],[data-editleg],[data-editcost],[data-additem],[data-mapitem],[data-mapleg],[data-mapday],[data-goitem],[data-popclose],[data-tddel],[data-pkdel],[data-ls]');
+  var t=e.target.closest('[data-save],[data-go],[data-day],[data-exday],[data-exfav],[data-exmore],[data-exreset],[data-cat],[data-sty],[data-fcat],[data-farea],[data-fomore],[data-foreset],[data-fofav],[data-fodl],[data-stab],[data-edit],[data-editleg],[data-editcost],[data-additem],[data-mapitem],[data-mapleg],[data-mapday],[data-goitem],[data-popclose],[data-tddel],[data-pkdel],[data-ls]');
   if(!t)return;
   if(t.dataset.save){toggleSave(t.dataset.save);return;}
   if(t.dataset.go){e.preventDefault();if(t.dataset.day){st.day=+t.dataset.day;}go(t.dataset.go);return;}
@@ -2549,6 +2562,9 @@ document.addEventListener('click',function(e){
   if(t.dataset.cat){st.ex.cat=t.dataset.cat;renderExplore();return;}
   if(t.dataset.sty){st.ex.sty=(t.id==='ex-men'&&st.ex.sty==='men')?'all':t.dataset.sty;renderExplore();return;}
   if(t.dataset.fcat){st.fo.cat=t.dataset.fcat;renderFood();return;}
+  if(t.dataset.farea){st.fo.area=t.dataset.farea;renderFood();return;}
+  if(t.dataset.fomore!=null){st.fo.more=!st.fo.more;renderFood();return;}
+  if(t.dataset.foreset!=null){st.fo.cat='all';st.fo.dl=false;st.fo.fav=false;st.fo.q='';var fq=$('#fo-q');if(fq)fq.value='';renderFood();return;}
   if(t.dataset.fofav!=null){st.fo.fav=!st.fo.fav;renderFood();return;}
   if(t.dataset.fodl!=null){st.fo.dl=!st.fo.dl;renderFood();return;}
   if(t.dataset.stab){st.sv=t.dataset.stab;renderSaved();return;}
