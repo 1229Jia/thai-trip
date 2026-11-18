@@ -556,6 +556,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .dlg header button{outline:none!important;-webkit-tap-highlight-color:transparent}.dlg header button:focus-visible{background:#EEF1F5;border-radius:10px}
 </style></head>
 <style>.favtip{display:flex;gap:8px;align-items:flex-start;margin:-4px 0 0;padding:9px 12px;border-radius:12px;background:#FBEDE8;color:var(--ink);font-size:13px;line-height:1.5}.favtip .fh{color:var(--hot);font-size:15px;line-height:1.3;flex:none}</style>
+<style>#fo-cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#fo-cats .fcat{display:flex;align-items:center;gap:4px;justify-content:flex-start;min-height:42px;padding:0 12px;border-radius:12px;border:1px solid transparent;font-size:14px}#fo-cats .fcat em{margin-left:auto;font-style:normal;font-size:12px;opacity:.7}#fo-cats .fcat[data-fcat=all]{background:#F1F3F6;color:var(--ink)}#fo-cats .f-queue{background:#F8E6E1;color:#8A3A2C}#fo-cats .f-thai{background:#E4F0E6;color:#3D6B47}#fo-cats .f-seafood{background:#E3ECF5;color:#2F5276}#fo-cats .f-street{background:#FDF0D8;color:#86601B}#fo-cats .f-cafe{background:#EDE4D8;color:#6A4E2E}#fo-cats .f-dessert{background:#FCE5EC;color:#9A3557}#fo-cats .f-night{background:#ECE8F6;color:#5A4B8A}#fo-cats .fcat[aria-pressed=true]{background:var(--hot);color:#fff;border-color:var(--hot)}#fo-cats .fcat[aria-pressed=true] em{opacity:.9}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -2504,7 +2505,8 @@ function renderFood(){
   var ol=list.filter(function(f){return fDay(f)==='other';});
   if(ol.length)html+='<div class="dgh" style="--c:#9AA3AE;--cl:#EEF0F3"><div><b>其他地區</b><small>不在每天的行程範圍內・'+ol.length+' 間</small></div></div>'+areaGroups(ol,'#9AA3AE');
   $('#fo-list').innerHTML=html||'<div class="empty">沒有符合的餐廳。</div>';
-  $$('#fo-cats .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.fcat===st.fo.cat));});
+  var FEM={queue:'🔥',thai:'🍛',seafood:'🦐',street:'🍢',cafe:'☕',dessert:'🍧',night:'🌙'},base=FOODS.filter(function(f){return (!st.fo.fav||saved.has(f.id))&&(st.fo.area==='all'||fDay(f)===st.fo.area)&&(!st.fo.dl||f.dv);});
+  $('#fo-cats').innerHTML='<button class="chip fcat" data-fcat="all" aria-pressed="'+(st.fo.cat==='all')+'">全部 <em>'+base.length+'</em></button>'+Object.keys(FCAT).map(function(k){var c=base.filter(function(f){return f.c.indexOf(k)>-1;}).length;if(!c&&st.fo.cat!==k)return '';return '<button class="chip fcat f-'+k+'" data-fcat="'+k+'" aria-pressed="'+(st.fo.cat===k)+'">'+FEM[k]+' '+esc(FCATZH[k])+' <em>'+c+'</em></button>';}).join('');
   var nf=FOODS.filter(function(x){return saved.has(x.id);}).length,nd=FOODS.filter(function(x){return x.dv;}).length;
   $('#fo-fav').setAttribute('aria-pressed',String(!!st.fo.fav));$('#fo-fav').innerHTML=ic('heart')+'只看收藏（'+nf+'）';
   $('#fo-dl').setAttribute('aria-pressed',String(!!st.fo.dl));$('#fo-dl').textContent='🛵 可外送（'+nd+'）';$('#fo-dl').hidden=!nd;
