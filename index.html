@@ -821,6 +821,20 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-costs" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="coin"></span>旅費</h2>
+  <div class="card">
+    <h3 class="sec" style="font-size:18px">新增費用</h3>
+    <form id="cForm" class="fgrid" style="margin-top:10px">
+      <label class="fld full">項目<input id="cfName" required placeholder="例如：Airbnb 住宿"></label>
+      <label class="fld">類別<select id="cfCat"></select></label>
+      <label class="fld">日期<select id="cfDay"></select></label>
+      <label class="fld">金額<input id="cfAmt" type="number" min="0" step="1" placeholder="空白＝待查"></label>
+      <label class="fld">幣別<select id="cfCur"><option value="THB">泰銖</option><option value="TWD">台幣</option></select></label>
+      <label class="fld">付款人<select id="cfPayer"></select></label><span></span>
+      <label class="chk"><input type="checkbox" id="cfPP">每人計價</label>
+      <label class="chk"><input type="checkbox" id="cfEst">估價</label>
+      <div class="full"><button class="btn" type="submit">加入</button></div>
+    </form>
+  </div>
   <div class="card" style="background:var(--yama-l)">
     <div class="big" id="cTotal"></div>
     <p class="small" id="cSub" style="margin-top:4px"></p>
@@ -839,20 +853,6 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
   <div class="card">
     <h3 class="sec" style="font-size:18px;flex-wrap:wrap"><span style="white-space:nowrap">明細</span><small>行程與交通的金額來自行程資料，改行程會自動更新</small></h3>
     <div style="overflow-x:auto;margin-top:8px"><table class="ctable" id="cTable"></table></div>
-  </div>
-  <div class="card">
-    <h3 class="sec" style="font-size:18px">新增其他費用</h3>
-    <form id="cForm" class="fgrid" style="margin-top:10px">
-      <label class="fld full">項目<input id="cfName" required placeholder="例如：Airbnb 住宿"></label>
-      <label class="fld">類別<select id="cfCat"></select></label>
-      <label class="fld">日期<select id="cfDay"></select></label>
-      <label class="fld">金額<input id="cfAmt" type="number" min="0" step="1" placeholder="空白＝待查"></label>
-      <label class="fld">幣別<select id="cfCur"><option value="THB">泰銖</option><option value="TWD">台幣</option></select></label>
-      <label class="fld">付款人<select id="cfPayer"></select></label><span></span>
-      <label class="chk"><input type="checkbox" id="cfPP">每人計價</label>
-      <label class="chk"><input type="checkbox" id="cfEst">估價</label>
-      <div class="full"><button class="btn" type="submit">加入</button></div>
-    </form>
   </div>
   <div class="card">
     <h3 class="sec" style="font-size:18px">成員</h3>
