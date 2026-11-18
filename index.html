@@ -557,6 +557,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 </style></head>
 <style>.favtip{display:flex;gap:8px;align-items:flex-start;margin:-4px 0 0;padding:9px 12px;border-radius:12px;background:#FBEDE8;color:var(--ink);font-size:13px;line-height:1.5}.favtip .fh{color:var(--hot);font-size:15px;line-height:1.3;flex:none}</style>
 <style>#fo-cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#fo-cats .fcat{display:flex;align-items:center;gap:4px;justify-content:flex-start;min-height:42px;padding:0 12px;border-radius:12px;border:1px solid transparent;font-size:14px}#fo-cats .fcat em{margin-left:auto;font-style:normal;font-size:12px;opacity:.7}#fo-cats .fcat[data-fcat=all]{background:#F1F3F6;color:var(--ink)}#fo-cats .f-queue{background:#F8E6E1;color:#8A3A2C}#fo-cats .f-thai{background:#E4F0E6;color:#3D6B47}#fo-cats .f-seafood{background:#E3ECF5;color:#2F5276}#fo-cats .f-street{background:#FDF0D8;color:#86601B}#fo-cats .f-cafe{background:#EDE4D8;color:#6A4E2E}#fo-cats .f-dessert{background:#FCE5EC;color:#9A3557}#fo-cats .f-night{background:#ECE8F6;color:#5A4B8A}#fo-cats .fcat[aria-pressed=true]{background:var(--hot);color:#fff;border-color:var(--hot)}#fo-cats .fcat[aria-pressed=true] em{opacity:.9}</style>
+<style>#v-explore h2.sec,#v-food h2.sec{display:flex;align-items:center}.addbtn{margin-left:auto;min-height:34px;padding:0 14px;border-radius:999px;border:1.5px solid var(--hot);background:#fff;color:var(--hot);font-size:14px;font-family:var(--font);font-weight:600;cursor:pointer}.addbtn:active{background:#FBEDE8}#v-explore .favtip,#v-food .favtip{margin:2px 0 4px;padding:0;background:none;color:var(--muted);font-size:12.5px;align-items:center;gap:5px}#v-explore .favtip .fh,#v-food .favtip .fh{font-size:13px}#v-explore .exsearch,#v-food .exsearch{margin-bottom:8px}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -657,12 +658,11 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 </section>
 
 <section id="v-explore" class="view narrow" hidden>
-  <h2 class="sec"><span data-ic="bag"></span>探索・逛街</h2>
-  <p class="favtip"><span class="fh">♥</span>點愛心，會自動加進那一天的行程並排好順序。只有你看得到，不影響其他人。</p>
+  <h2 class="sec"><span data-ic="bag"></span>探索・逛街<button class="addbtn" data-cuadd="shop" aria-label="新增想逛的店">＋ 新增</button></h2>
   <div class="exf">
   <div class="exsearch"><input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家"><button class="fbtn" id="ex-more" data-exmore aria-expanded="false">篩選</button></div>
   <div class="chips wrap" id="ex-days"></div>
-  <button class="addcu" data-cuadd="shop">＋ 新增想逛的店</button>
+  <p class="favtip"><span class="fh">♥</span>點愛心會自動排進當天行程，只有你看得到</p>
   <div class="fpanel" id="ex-panel" hidden>
     <span class="flabel">買什麼</span><div class="chips pw" id="ex-cats"></div>
     <span class="flabel">風格</span><div class="chips pw" id="ex-sty"></div>
@@ -675,12 +675,11 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 </section>
 
 <section id="v-food" class="view narrow" hidden>
-  <h2 class="sec"><span data-ic="bowl"></span>美食</h2>
-  <p class="favtip"><span class="fh">♥</span>點愛心，會自動加進那一天的行程並排好順序。只有你看得到，不影響其他人。</p>
+  <h2 class="sec"><span data-ic="bowl"></span>美食<button class="addbtn" data-cuadd="food" aria-label="新增想吃的店">＋ 新增</button></h2>
   <div class="exf">
   <div class="exsearch"><input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳"><button class="fbtn" id="fo-more" data-fomore aria-expanded="false">篩選</button></div>
   <div class="chips wrap" id="fo-areas"></div>
-  <button class="addcu" data-cuadd="food">＋ 新增想吃的店</button>
+  <p class="favtip"><span class="fh">♥</span>點愛心會自動排進當天行程，只有你看得到</p>
   <div class="fpanel" id="fo-panel" hidden>
     <span class="flabel">吃什麼</span><div class="chips pw" id="fo-cats"></div>
     <span class="flabel">其他</span><div class="chips pw"><button class="chip" id="fo-dl" data-fodl aria-pressed="false">可外送</button><button class="chip" id="fo-fav" data-fofav aria-pressed="false">只看收藏</button></div>
