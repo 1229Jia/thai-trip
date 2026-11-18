@@ -661,6 +661,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .pdet summary::after{content:" ▾"}.pdet[open] summary::after{content:" ▴"}.pdet .ptab{margin-top:8px}
 </style>
 <style>.cpp{display:grid;grid-template-columns:1fr 1fr;gap:6px}.cpp button{min-height:42px;padding:4px 8px;border-radius:12px;border:1px solid var(--hair2);background:#fff;color:var(--ink);font-size:14px;font-family:var(--font);cursor:pointer;line-height:1.3}.cpp button small{display:block;font-size:11px;color:var(--muted)}.cpp button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}.cpp button[aria-pressed=true] small{color:#C9D1DA}</style>
+<style>.mlock{margin-left:auto;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--hair2);background:#fff;color:var(--muted);font-size:13px;font-family:var(--font);cursor:pointer}.mlock[aria-pressed=true]{border-color:var(--hot);color:var(--hot);background:#FBEDE8}.mlist.locked .mchip{padding-right:12px}.mlist.locked .mchip button{display:none}#mForm[hidden]{display:none}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -888,7 +889,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
     <div style="overflow-x:auto;margin-top:8px"><table class="ctable" id="cTable"></table></div>
   </details>
   <div class="card">
-    <h3 class="sec" style="font-size:18px">成員</h3>
+    <h3 class="sec" style="font-size:18px">成員<button type="button" class="mlock" id="mLock" data-mlock></button></h3>
     <div class="mlist" id="mList"></div>
     <form id="mForm" class="mform"><input id="mInput" placeholder="輸入名字，例如：小明" maxlength="12" aria-label="成員名字"><button class="btn" type="submit">新增</button></form>
   </div>
@@ -2744,7 +2745,8 @@ function renderCAdd(){if(!renderCAdd.init){renderCAdd.init=1;try{var n=bkkNow();
   $('#cfPayC').innerHTML=m.length?m.map(function(n){return '<button type="button" class="cchip pay" data-cpay="'+esc(n)+'" aria-pressed="'+(n===pay)+'">'+esc(n)+'</button>';}).join(''):'<span class="small muted">先到最下面新增成員</span>';
   $('#cfDayC').innerHTML='<button type="button" class="cchip" data-cday="0" aria-pressed="'+(day===0)+'">不分日期</button>'+trip.days.map(function(d,i){return '<button type="button" class="cchip dchip" style="--c:'+dc(i)+';--cl:'+dcl(i)+'" data-cday="'+d.id+'" aria-pressed="'+(d.id===day)+'">D'+d.id+' '+esc(d.date)+'</button>';}).join('');
 }
-function renderMembers(){var m=MEM();$('#mList').innerHTML=m.length?m.map(function(n,i){return '<span class="mchip">'+esc(n)+'<button type="button" data-mdel="'+i+'" aria-label="移除 '+esc(n)+'">✕</button></span>';}).join(''):'<span class="small muted">還沒有成員，先把一起去的人加進來。</span>';}
+var MLOCK=true;
+function renderMembers(){var m=MEM();$('#mLock').innerHTML=MLOCK?'🔒 已鎖定':'🔓 編輯中';$('#mLock').setAttribute('aria-pressed',String(!MLOCK));$('#mForm').hidden=MLOCK;$('#mList').classList.toggle('locked',MLOCK);$('#mList').innerHTML=m.length?m.map(function(n,i){return '<span class="mchip">'+esc(n)+'<button type="button" data-mdel="'+i+'" aria-label="移除 '+esc(n)+'">✕</button></span>';}).join(''):'<span class="small muted">還沒有成員，先把一起去的人加進來。</span>';}
 function renderSettle(rows){renderMembers();var m=MEM(),box=$('#cSettle');
   if(m.length<2){box.innerHTML='<p class="small muted">新增至少 2 位成員，並在明細裡選「誰付的」，這裡就會算出誰該付給誰多少錢。</p>';return;}
   var paid={},share=0,nop=0,nopv=0;m.forEach(function(n){paid[n]=0;});
@@ -2783,6 +2785,7 @@ function go(v){if((location.hash||'').slice(1)===v){show(v);}else{location.hash=
 
 document.addEventListener('click',function(e){
   var cq=e.target.closest('[data-ccur],[data-ccat],[data-cpay],[data-cday],[data-cpp]');if(cq){var D=cq.dataset;if(D.cpp!=null)$('#cfPP').checked=D.cpp==='1';if(D.ccur)$('#cfCur').value=D.ccur;if(D.ccat)$('#cfCat').value=D.ccat;if(D.cpay!=null)$('#cfPayer').value=$('#cfPayer').value===D.cpay?'':D.cpay;if(D.cday!=null)$('#cfDay').value=D.cday;renderCAdd();return;}
+  if(e.target.closest('[data-mlock]')){MLOCK=!MLOCK;renderMembers();if(!MLOCK)toast('已解鎖，可以新增或刪除成員');return;}
   var md=e.target.closest('[data-mdel]');if(md){var mm=MEM(),nm=mm[+md.dataset.mdel];if(md.dataset.armed){trip.members=mm.filter(function(x,k){return k!==+md.dataset.mdel;});saveTrip();renderCosts();}else{md.dataset.armed=1;md.textContent='確定？';setTimeout(function(){if(md.isConnected){delete md.dataset.armed;md.textContent='✕';}},3000);}return;}
   var cu=e.target.closest('[data-cuadd],[data-cuedit]');
   if(cu){if(cu.dataset.cuadd)openCustEditor(cu.dataset.cuadd);else openCustEditor(cu.dataset.cukind,cu.dataset.cuedit);return;}
