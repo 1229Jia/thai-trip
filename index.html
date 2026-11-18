@@ -555,6 +555,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .dlg form{overflow-x:hidden}
 .dlg header button{outline:none!important;-webkit-tap-highlight-color:transparent}.dlg header button:focus-visible{background:#EEF1F5;border-radius:10px}
 </style></head>
+<style>.favtip{display:flex;gap:8px;align-items:flex-start;margin:-4px 0 0;padding:9px 12px;border-radius:12px;background:#FBEDE8;color:var(--ink);font-size:13px;line-height:1.5}.favtip .fh{color:var(--hot);font-size:15px;line-height:1.3;flex:none}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -656,6 +657,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-explore" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="bag"></span>探索・逛街</h2>
+  <p class="favtip"><span class="fh">♥</span>點愛心，會自動加進那一天的行程並排好順序。只有你看得到，不影響其他人。</p>
   <div class="exf">
   <div class="exsearch"><input id="ex-q" class="search" type="search" placeholder="搜尋店名、區域、商品" aria-label="搜尋店家"><button class="fbtn" id="ex-more" data-exmore aria-expanded="false">篩選</button></div>
   <div class="chips wrap" id="ex-days"></div>
@@ -673,6 +675,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 
 <section id="v-food" class="view narrow" hidden>
   <h2 class="sec"><span data-ic="bowl"></span>美食</h2>
+  <p class="favtip"><span class="fh">♥</span>點愛心，會自動加進那一天的行程並排好順序。只有你看得到，不影響其他人。</p>
   <div class="exf">
   <div class="exsearch"><input id="fo-q" class="search" type="search" placeholder="搜尋店名、區域、料理" aria-label="搜尋餐廳"><button class="fbtn" id="fo-more" data-fomore aria-expanded="false">篩選</button></div>
   <div class="chips wrap" id="fo-areas"></div>
@@ -2489,18 +2492,25 @@ function renderExplore(){
   $('#ex-active').textContent=fl.length?fl.join('・'):'';$('.exstat').hidden=!fl.length;
   var act=st.ex.day!=='all'||st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q;$('#ex-reset').hidden=!(st.ex.cat!=='all'||st.ex.sty!=='all'||st.ex.fav||st.ex.q);
 }
+var FDAYS=[[1,'暹羅'],[4,'芭達雅'],[5,'朱拉・嵩越路・唐人街'],[6,'水門・CentralWorld']];
+function fDay(f){var d=REGDAY[FOODREG[f.area]];return d?String(d):'other';}
 function renderFood(){
-  var q=st.fo.q.trim().toLowerCase(),list=FOODS.filter(function(f){return (!st.fo.fav||saved.has(f.id))&&(st.fo.area==='all'||f.area===st.fo.area)&&(!st.fo.dl||f.dv)&&(st.fo.cat==='all'||f.c.indexOf(st.fo.cat)>-1)&&(!q||(f.n+' '+f.area+' '+f.d+' '+f.addr).toLowerCase().indexOf(q)>-1);});
-  $('#fo-count').textContent=list.length+' 間';var html='',used={};
-  FAREA.concat(FOODS.map(function(f){return [f.area,f.area];})).forEach(function(A){if(used[A[0]])return;used[A[0]]=1;var al=list.filter(function(f){return f.area===A[0];});if(!al.length)return;
-    html+='<div class="rgh"><b>'+esc(A[1])+'</b><span>'+al.length+' 家</span></div>'+al.map(foodCard).join('');});
+  var q=st.fo.q.trim().toLowerCase(),list=FOODS.filter(function(f){return (!st.fo.fav||saved.has(f.id))&&(st.fo.area==='all'||fDay(f)===st.fo.area)&&(!st.fo.dl||f.dv)&&(st.fo.cat==='all'||f.c.indexOf(st.fo.cat)>-1)&&(!q||(f.n+' '+f.area+' '+f.d+' '+f.addr).toLowerCase().indexOf(q)>-1);});
+  $('#fo-count').textContent=list.length+' 間';var html='';
+  function areaGroups(fl,col){var used={},h='';FAREA.concat(FOODS.map(function(f){return [f.area,f.area];})).forEach(function(A){if(used[A[0]])return;used[A[0]]=1;var al=fl.filter(function(f){return f.area===A[0];});if(!al.length)return;
+    h+='<div class="rgh"'+(col?' style="--c:'+col+'"':'')+'><b>'+esc(A[1].replace(/（.*）/,''))+'</b><span>'+al.length+' 家</span></div>'+al.map(foodCard).join('');});return h;}
+  FDAYS.forEach(function(dd){var dl=list.filter(function(f){return fDay(f)===String(dd[0]);});if(!dl.length)return;var D=dayOf(dd[0]),i=dd[0]-1;
+    html+='<div class="dgh" style="--c:'+dc(i)+';--cl:'+dcl(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'')+areaGroups(dl,dc(i));});
+  var ol=list.filter(function(f){return fDay(f)==='other';});
+  if(ol.length)html+='<div class="dgh" style="--c:#9AA3AE;--cl:#EEF0F3"><div><b>其他地區</b><small>不在每天的行程範圍內・'+ol.length+' 間</small></div></div>'+areaGroups(ol,'#9AA3AE');
   $('#fo-list').innerHTML=html||'<div class="empty">沒有符合的餐廳。</div>';
   $$('#fo-cats .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.fcat===st.fo.cat));});
   var nf=FOODS.filter(function(x){return saved.has(x.id);}).length,nd=FOODS.filter(function(x){return x.dv;}).length;
   $('#fo-fav').setAttribute('aria-pressed',String(!!st.fo.fav));$('#fo-fav').innerHTML=ic('heart')+'只看收藏（'+nf+'）';
   $('#fo-dl').setAttribute('aria-pressed',String(!!st.fo.dl));$('#fo-dl').textContent='🛵 可外送（'+nd+'）';$('#fo-dl').hidden=!nd;
   var au={},areas=[];FAREA.concat(FOODS.map(function(f){return [f.area,f.area];})).forEach(function(A){if(au[A[0]])return;au[A[0]]=1;if(FOODS.some(function(f){return f.area===A[0];}))areas.push(A);});
-  $('#fo-areas').innerHTML='<button class="chip" data-farea="all" aria-pressed="'+(st.fo.area==='all')+'">全部</button>'+areas.map(function(A){return '<button class="chip" data-farea="'+esc(A[0])+'" aria-pressed="'+(st.fo.area===A[0])+'">'+esc(A[1].replace(/（.*）/,''))+'</button>';}).join('');
+  var hasO=FOODS.some(function(f){return fDay(f)==='other';});
+  $('#fo-areas').innerHTML='<button class="chip" data-farea="all" aria-pressed="'+(st.fo.area==='all')+'">全部</button>'+FDAYS.filter(function(dd){return FOODS.some(function(f){return fDay(f)===String(dd[0]);});}).map(function(dd){return '<button class="chip dchip" style="--c:'+dc(dd[0]-1)+';--cl:'+dcl(dd[0]-1)+'" data-farea="'+dd[0]+'" aria-pressed="'+(st.fo.area===String(dd[0]))+'">D'+dd[0]+' '+esc(dd[1])+'</button>';}).join('')+(hasO?'<button class="chip" data-farea="other" aria-pressed="'+(st.fo.area==='other')+'">其他地區</button>':'');
   var fl=[];if(st.fo.cat!=='all')fl.push(FCATZH[st.fo.cat]);if(st.fo.dl)fl.push('可外送');if(st.fo.fav)fl.push('只看收藏');if(st.fo.q)fl.push('「'+st.fo.q+'」');
   var nfl=fl.length-(st.fo.q?1:0);
   $('#fo-more').setAttribute('aria-expanded',String(!!st.fo.more));$('#fo-more').innerHTML='篩選'+(nfl?'<i>'+nfl+'</i>':'')+(st.fo.more?' ▴':' ▾');
@@ -2608,7 +2618,7 @@ document.addEventListener('click',function(e){
   var cu=e.target.closest('[data-cuadd],[data-cuedit]');
   if(cu){if(cu.dataset.cuadd)openCustEditor(cu.dataset.cuadd);else openCustEditor(cu.dataset.cukind,cu.dataset.cuedit);return;}
   var dp=e.target.closest('[data-dayprev]');
-  if(dp){var n=+dp.dataset.dayprev;if(EXDP.has(n))EXDP.delete(n);else EXDP.add(n);var y=window.scrollY;renderExplore();window.scrollTo(0,y);return;}
+  if(dp){var n=+dp.dataset.dayprev;if(EXDP.has(n))EXDP.delete(n);else EXDP.add(n);var y=window.scrollY;if(VIEW==='food')renderFood();else renderExplore();window.scrollTo(0,y);return;}
   var ro=e.target.closest('[data-reorder],[data-romove],[data-rodone],[data-rocancel]');
   if(ro){var dd=curDay();
     if(ro.dataset.reorder){RO={day:dd.id,ids:roItems(dd).map(function(x){return x.id;})};renderDay(false);var tl=$('#tlist');if(tl)scrollToEl(tl);return;}
