@@ -651,6 +651,15 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 </style>
 <style>.ttl-lab{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;letter-spacing:.05em}</style>
 <style>.prow b,.xrow b{font-weight:500}.prow .pos,.prow .neg{font-weight:500}</style>
+<style>
+.xfer{gap:0;border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.xrow{border-radius:0;background:#fff;padding:9px 12px;border-top:1px solid var(--hair);flex-wrap:nowrap}
+.xrow:first-child{border-top:0}
+.xrow .xn{font-size:15px;white-space:nowrap}.xrow .xn i{font-style:normal;color:var(--muted);margin:0 8px;font-size:13px}
+.xrow .xv{font-size:15px;white-space:nowrap}.xrow .xv small{display:inline;margin-left:6px}
+.pdet{margin-top:10px}.pdet summary{cursor:pointer;font-size:13px;color:var(--muted);list-style:none}.pdet summary::-webkit-details-marker{display:none}
+.pdet summary::after{content:" ▾"}.pdet[open] summary::after{content:" ▴"}.pdet .ptab{margin-top:8px}
+</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -873,10 +882,10 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
   </div>
   <details class="card cfold"><summary><h3 class="sec" style="font-size:18px">依類別</h3></summary><div class="bars" id="cByCat" style="margin-top:10px"></div></details>
   <details class="card cfold"><summary><h3 class="sec" style="font-size:18px">依日期</h3></summary><div class="bars" id="cByDay" style="margin-top:10px"></div></details>
-  <div class="card">
-    <h3 class="sec" style="font-size:18px;flex-wrap:wrap"><span style="white-space:nowrap">明細</span><small>行程與交通的金額來自行程資料，改行程會自動更新</small></h3>
+  <details class="card cfold"><summary><h3 class="sec" style="font-size:18px">明細 <small id="cCnt" style="font-size:13px"></small></h3></summary>
+    <p class="small muted" style="margin-top:6px">行程與交通的金額來自行程資料，改行程會自動更新</p>
     <div style="overflow-x:auto;margin-top:8px"><table class="ctable" id="cTable"></table></div>
-  </div>
+  </details>
   <div class="card">
     <h3 class="sec" style="font-size:18px">成員</h3>
     <div class="mlist" id="mList"></div>
@@ -2723,7 +2732,7 @@ function renderCosts(){
     return '<tr><td>'+(r.day?'D'+r.day:'—')+'</td><td>'+esc(r.n)+'<br><span class="small muted">'+r.src+(r.pp?'・每人':'')+(r.est?'・估價':'')+'</span>'+(r.amt!=null?'<div class="pyr">'+payerSel(r.payer,'class="payer" data-pi="'+i+'" aria-label="付款人"')+'</div>':'')+'</td><td>'+esc((CCAT[r.cat]||CCAT.other)[0])+'</td><td class="n">'+(r.amt==null?'<span class="tag t-tbc">待查</span>':(r.cur==='TWD'?'NT$':'฿')+money(r.amt)+(r.pp?'×'+npeople():'')+'<br><span class="small muted">NT$ '+money(v)+'</span>')+'</td><td><button class="mini" '+r.ed+'>'+ic('edit')+'</button></td></tr>';}).join('');
   var catSel='';Object.keys(CCAT).forEach(function(k){catSel+='<option value="'+k+'">'+CCAT[k][0]+'</option>';});
   renderCAdd();
-  CROWS=rows;renderSettle(rows);
+  CROWS=rows;renderSettle(rows);$('#cCnt').textContent=rows.length+' 筆';
 }
 var CROWS=[],CEM={stay:'🏨',transport:'🚕',ticket:'🎟️',food:'🍜',shop:'🛍️',other:'📦'};
 function renderCAdd(){if(!renderCAdd.init){renderCAdd.init=1;try{var n=bkkNow();if(n&&n.day)$('#cfDay').value=n.day;}catch(e){}}
@@ -2741,8 +2750,8 @@ function renderSettle(rows){renderMembers();var m=MEM(),box=$('#cSettle');
   var each=share/m.length,bal=m.map(function(n){return {n:n,b:paid[n]-each};});
   var cr=bal.filter(function(x){return x.b>0.5;}).map(function(x){return {n:x.n,b:x.b};}).sort(function(x,y){return y.b-x.b;}),db=bal.filter(function(x){return x.b<-0.5;}).map(function(x){return {n:x.n,b:-x.b};}).sort(function(x,y){return y.b-x.b;}),tr=[];
   var i=0,j=0;while(i<db.length&&j<cr.length){var v=Math.min(db[i].b,cr[j].b);tr.push({f:db[i].n,t:cr[j].n,v:v});db[i].b-=v;cr[j].b-=v;if(db[i].b<0.5)i++;if(cr[j].b<0.5)j++;}
-  var h='<div class="ptab"><div class="prow ph"><span>成員</span><span>已付</span><span>應付</span><span>差額</span></div>'+bal.map(function(x){return '<div class="prow"><b>'+esc(x.n)+'</b><span>'+money(paid[x.n])+'</span><span>'+money(each)+'</span><span class="'+(x.b>0.5?'pos':x.b<-0.5?'neg':'')+'">'+(x.b>0.5?'+':x.b<-0.5?'−':'')+money(Math.abs(x.b))+'</span></div>';}).join('')+'</div><p class="small muted" style="margin:4px 0 10px">金額為台幣；「應付」＝已指定付款人的費用 ÷ '+m.length+' 人。</p>';
-  h+=tr.length?'<div class="xfer">'+tr.map(function(t){return '<div class="xrow"><b>'+esc(t.f)+'</b><span class="ar">→ 付給 →</span><b>'+esc(t.t)+'</b><span class="xv">NT$ '+money(t.v)+'<small>≈ ฿'+money(t.v/trip.rate)+'</small></span></div>';}).join('')+'</div>':'<p class="small">目前大家付的剛好平均，不用互相轉帳 👍</p>';
+  var h=tr.length?'<div class="xfer">'+tr.map(function(t){return '<div class="xrow"><span class="xn">'+esc(t.f)+'<i>→</i>'+esc(t.t)+'</span><span class="xv">NT$ '+money(t.v)+'<small>฿'+money(t.v/trip.rate)+'</small></span></div>';}).join('')+'</div>':'<p class="small">目前大家付的剛好平均，不用互相轉帳 👍</p>';
+  h+='<details class="pdet"><summary>每人已付／應付明細</summary><div class="ptab"><div class="prow ph"><span>成員</span><span>已付</span><span>應付</span><span>差額</span></div>'+bal.map(function(x){return '<div class="prow"><b>'+esc(x.n)+'</b><span>'+money(paid[x.n])+'</span><span>'+money(each)+'</span><span class="'+(x.b>0.5?'pos':x.b<-0.5?'neg':'')+'">'+(x.b>0.5?'+':x.b<-0.5?'−':'')+money(Math.abs(x.b))+'</span></div>';}).join('')+'</div><p class="small muted" style="margin:4px 0 0">金額為台幣；應付＝已指定付款人的費用 ÷ '+m.length+' 人。</p></details>';
   if(nop)h+='<p class="small" style="margin-top:8px;color:#8A3A2C">還有 '+nop+' 筆（NT$ '+money(nopv)+'）沒選付款人，沒算進來。</p>';
   box.innerHTML=h;}
 
