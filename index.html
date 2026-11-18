@@ -1765,6 +1765,8 @@ function load(){
       old.forEach(function(o){if(o.g==='我的')trip.todos.push({id:o.id,g:'我的',t:o.t,done:o.done});});}}catch(e){}
   }
 }
+var MEMBERS0=['韋','崡','霖','媗','陸','鈺','翰','鈞','洋'];
+function initMembers(){if(trip.memInit)return false;var m=(trip.members||[]).slice();MEMBERS0.forEach(function(n){if(m.indexOf(n)<0)m.push(n);});trip.members=m;trip.memInit=1;return true;}
 function clearPresetCosts(){try{if(localStorage.getItem('tdiary-costclear-v1'))return;}catch(e){}
   trip.costs=(trip.costs||[]).filter(function(c){return ['c1','c2','c3','c4','c5'].indexOf(c.id)<0;});
   trip.days.forEach(function(d){d.items.forEach(function(it){if((it.ref==='sp-wararun'||/wararun/i.test(it.id||''))&&it.cost===200||(/joe/i.test((it.ref||'')+(it.id||''))&&it.cost===60)){delete it.cost;delete it.pp;delete it.costEst;}});});
@@ -2821,7 +2823,7 @@ window.addEventListener('scroll',onScroll,{passive:true});
 window.addEventListener('resize',function(){if(VIEW==='itinerary'){setDsh();placeArt(false);FOCUS=-1;onScroll();}});
 
 /* ---------- init ---------- */
-load();applyCust();clearPresetCosts();clearTbcTodos();clearLuggageTodo();saveTrip();syncExtras();
+load();applyCust();if(!LIVE)initMembers();clearPresetCosts();clearTbcTodos();clearLuggageTodo();saveTrip();syncExtras();
 $('#logo').innerHTML=v40('tuktuk','a-nudge','嘟嘟車');
 $$('[data-ic]').forEach(function(el){el.outerHTML=ic(el.dataset.ic);});
 $('#heroart').innerHTML='<img class="heroimg" src="'+DAYIMG.home+'" alt="曼谷大皇宮與昭披耶河插畫">';
@@ -2883,7 +2885,7 @@ setInterval(function(){updateNow();if(VIEW==='itinerary'){$('#nowwrap').innerHTM
       CLOUD={putPhoto:function(id,d){db.collection('photos').doc(id).set({d:d}).catch(function(){badge('照片上傳失敗');});},delPhoto:function(id){db.collection('photos').doc(id).delete().catch(function(){});},getPhoto:function(id,cb){db.collection('photos').doc(id).get().then(function(s){cb(s.exists?s.data().d:null);}).catch(function(){cb(null);});}};
       refreshLists();}catch(e){badge('離線・只存在這台裝置');return;}
     ref.get().then(function(d){
-      if(d.exists&&d.data().data){apply(d.data().data);ready=true;badge('✓ 已同步');}
+      if(d.exists&&d.data().data){apply(d.data().data);ready=true;badge('✓ 已同步');if(initMembers()){saveTrip();refresh();}}
       else{ready=true;push();}
       ref.onSnapshot(function(d){if(!d.exists||d.metadata.hasPendingWrites)return;var x=d.data();if(x&&x.data&&x.by!==me&&x.data!==lastSent){apply(x.data);badge('✓ 已更新（別人剛改過）');}});
     }).catch(function(){badge('無法連線資料庫・只存在這台裝置');});
