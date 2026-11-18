@@ -660,6 +660,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .pdet{margin-top:10px}.pdet summary{cursor:pointer;font-size:13px;color:var(--muted);list-style:none}.pdet summary::-webkit-details-marker{display:none}
 .pdet summary::after{content:" ▾"}.pdet[open] summary::after{content:" ▴"}.pdet .ptab{margin-top:8px}
 </style>
+<style>.cpp{display:grid;grid-template-columns:1fr 1fr;gap:6px}.cpp button{min-height:42px;padding:4px 8px;border-radius:12px;border:1px solid var(--hair2);background:#fff;color:var(--ink);font-size:14px;font-family:var(--font);cursor:pointer;line-height:1.3}.cpp button small{display:block;font-size:11px;color:var(--muted)}.cpp button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}.cpp button[aria-pressed=true] small{color:#C9D1DA}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -860,8 +861,8 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
       <input id="cfName" class="cname" required placeholder="買了什麼？例如：晚餐、包車、按摩" aria-label="項目">
       <div class="clab">類別</div><div class="cchips" id="cfCatC"></div>
       <div class="clab">誰付的</div><div class="cchips" id="cfPayC"></div>
-      <div class="clab">哪一天</div><div class="cchips" id="cfDayC"></div>
-      <div class="copts"><label class="ctog"><input type="checkbox" id="cfPP"><span>每人各付這個金額</span></label><label class="ctog"><input type="checkbox" id="cfEst"><span>估價</span></label></div>
+      <div id="cfDayC" hidden></div>
+      <div class="clab">這個金額是</div><div class="cpp" role="group"><button type="button" data-cpp="0">全部人的總額</button><button type="button" data-cpp="1">一個人的價錢 <small id="cppN"></small></button></div><input type="checkbox" id="cfPP" hidden><input type="checkbox" id="cfEst" hidden>
       <input type="hidden" id="cfCat" value="food"><input type="hidden" id="cfDay" value="0"><input type="hidden" id="cfCur" value="THB"><input type="hidden" id="cfPayer" value="">
       <button class="btn cgo" type="submit">＋ 加入費用</button>
     </form>
@@ -2463,10 +2464,10 @@ function openCostEditor(cid){
   var catSel={};Object.keys(CCAT).forEach(function(k){catSel[k]=CCAT[k];});
   var body='<div class="fgrid"><label class="fld full">項目<input name="n" value="'+esc(c.n)+'"></label><label class="fld">類別<select name="cat">'+opts(catSel,c.cat)+'</select></label><label class="fld">日期<select name="day">'+dayOpts(c.day||0,true)+'</select></label>'+
     '<label class="fld">金額<input type="number" min="0" step="1" name="amt" value="'+(c.amt!=null?c.amt:'')+'" placeholder="待查"></label><label class="fld">幣別<select name="cur"><option value="THB"'+(c.cur==='THB'?' selected':'')+'>泰銖</option><option value="TWD"'+(c.cur==='TWD'?' selected':'')+'>台幣</option></select></label>'+
-    '<label class="fld">付款人'+payerSel(c.payer,'name="payer"')+'</label><span></span><label class="chk"><input type="checkbox" name="pp"'+(c.pp?' checked':'')+'>每人計價</label><label class="chk"><input type="checkbox" name="est"'+(c.est?' checked':'')+'>估價</label></div>';
+    '<label class="fld">付款人'+payerSel(c.payer,'name="payer"')+'</label><label class="fld">這個金額是<select name="pp"><option value="">全部人的總額</option><option value="1"'+(c.pp?' selected':'')+'>一個人的價錢（×'+npeople()+'）</option></select></label></div>';
   openDlg('編輯費用',body,'<button type="button" class="btn c" data-dlgdel="1">刪除</button><span class="sp"></span><button type="button" class="btn w" data-dlgclose="1">取消</button><button type="submit" class="btn">儲存</button>',function(fd,act){
     if(act==='del'){trip.costs=trip.costs.filter(function(x){return x!==c;});saveTrip();renderCosts();return true;}
-    c.n=fd.get('n').trim()||c.n;c.cat=fd.get('cat');c.day=+fd.get('day');var a=fd.get('amt');c.amt=a===''?null:+a;c.cur=fd.get('cur');c.pp=fd.get('pp')?1:0;c.est=fd.get('est')?1:0;if(fd.get('payer'))c.payer=fd.get('payer');else delete c.payer;
+    c.n=fd.get('n').trim()||c.n;c.cat=fd.get('cat');c.day=+fd.get('day');var a=fd.get('amt');c.amt=a===''?null:+a;c.cur=fd.get('cur');c.pp=fd.get('pp')?1:0;c.est=0;if(fd.get('payer'))c.payer=fd.get('payer');else delete c.payer;
     saveTrip();renderCosts();return true;
   });
 }
@@ -2729,7 +2730,7 @@ function renderCosts(){
   var mxd=Math.max.apply(null,Object.keys(byDay).map(function(k){return byDay[k];}).concat([1]));
   $('#cByDay').innerHTML=[0].concat(trip.days.map(function(d){return d.id;})).map(function(k){var v=byDay[k]||0,d=dayOf(k);return '<div class="bar"><span>'+(k?'第 '+k+' 天':'不分日期')+'</span><i style="--c:'+(k?dc(k-1):'var(--yama-l)')+';width:'+(v/mxd*100)+'%"></i><span>NT$ '+money(v)+'</span></div>';}).join('');
   $('#cTable').innerHTML='<tr><th>日期</th><th>項目</th><th>類別</th><th style="text-align:right">金額</th><th></th></tr>'+rows.map(function(r,i){var v=twd(r);
-    return '<tr><td>'+(r.day?'D'+r.day:'—')+'</td><td>'+esc(r.n)+'<br><span class="small muted">'+r.src+(r.pp?'・每人':'')+(r.est?'・估價':'')+'</span>'+(r.amt!=null?'<div class="pyr">'+payerSel(r.payer,'class="payer" data-pi="'+i+'" aria-label="付款人"')+'</div>':'')+'</td><td>'+esc((CCAT[r.cat]||CCAT.other)[0])+'</td><td class="n">'+(r.amt==null?'<span class="tag t-tbc">待查</span>':(r.cur==='TWD'?'NT$':'฿')+money(r.amt)+(r.pp?'×'+npeople():'')+'<br><span class="small muted">NT$ '+money(v)+'</span>')+'</td><td><button class="mini" '+r.ed+'>'+ic('edit')+'</button></td></tr>';}).join('');
+    return '<tr><td>'+(r.day?'D'+r.day:'—')+'</td><td>'+esc(r.n)+'<br><span class="small muted">'+r.src+(r.pp?'・一人價 ×'+npeople():'')+(r.est?'・估價':'')+'</span>'+(r.amt!=null?'<div class="pyr">'+payerSel(r.payer,'class="payer" data-pi="'+i+'" aria-label="付款人"')+'</div>':'')+'</td><td>'+esc((CCAT[r.cat]||CCAT.other)[0])+'</td><td class="n">'+(r.amt==null?'<span class="tag t-tbc">待查</span>':(r.cur==='TWD'?'NT$':'฿')+money(r.amt)+(r.pp?'×'+npeople():'')+'<br><span class="small muted">NT$ '+money(v)+'</span>')+'</td><td><button class="mini" '+r.ed+'>'+ic('edit')+'</button></td></tr>';}).join('');
   var catSel='';Object.keys(CCAT).forEach(function(k){catSel+='<option value="'+k+'">'+CCAT[k][0]+'</option>';});
   renderCAdd();
   CROWS=rows;renderSettle(rows);$('#cCnt').textContent=rows.length+' 筆';
@@ -2738,6 +2739,7 @@ var CROWS=[],CEM={stay:'🏨',transport:'🚕',ticket:'🎟️',food:'🍜',shop
 function renderCAdd(){if(!renderCAdd.init){renderCAdd.init=1;try{var n=bkkNow();if(n&&n.day)$('#cfDay').value=n.day;}catch(e){}}
   var cat=$('#cfCat').value,day=+$('#cfDay').value,cur=$('#cfCur').value,pay=$('#cfPayer').value,m=MEM();
   $$('[data-ccur]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.ccur===cur));});
+  var pp=$('#cfPP').checked;$$('[data-cpp]').forEach(function(b){b.setAttribute('aria-pressed',String((b.dataset.cpp==='1')===pp));});$('#cppN').textContent='（會 ×'+npeople()+' 人）';
   $('#cfCatC').innerHTML=Object.keys(CCAT).map(function(k){return '<button type="button" class="cchip" data-ccat="'+k+'" aria-pressed="'+(k===cat)+'">'+CEM[k]+' '+esc(CCAT[k][0].replace('・體驗',''))+'</button>';}).join('');
   $('#cfPayC').innerHTML=m.length?m.map(function(n){return '<button type="button" class="cchip pay" data-cpay="'+esc(n)+'" aria-pressed="'+(n===pay)+'">'+esc(n)+'</button>';}).join(''):'<span class="small muted">先到最下面新增成員</span>';
   $('#cfDayC').innerHTML='<button type="button" class="cchip" data-cday="0" aria-pressed="'+(day===0)+'">不分日期</button>'+trip.days.map(function(d,i){return '<button type="button" class="cchip dchip" style="--c:'+dc(i)+';--cl:'+dcl(i)+'" data-cday="'+d.id+'" aria-pressed="'+(d.id===day)+'">D'+d.id+' '+esc(d.date)+'</button>';}).join('');
@@ -2780,7 +2782,7 @@ function route(){var h=(location.hash||'').slice(1);if(h==='todo'){h='lists';}if
 function go(v){if((location.hash||'').slice(1)===v){show(v);}else{location.hash=v;}}
 
 document.addEventListener('click',function(e){
-  var cq=e.target.closest('[data-ccur],[data-ccat],[data-cpay],[data-cday]');if(cq){var D=cq.dataset;if(D.ccur)$('#cfCur').value=D.ccur;if(D.ccat)$('#cfCat').value=D.ccat;if(D.cpay!=null)$('#cfPayer').value=$('#cfPayer').value===D.cpay?'':D.cpay;if(D.cday!=null)$('#cfDay').value=D.cday;renderCAdd();return;}
+  var cq=e.target.closest('[data-ccur],[data-ccat],[data-cpay],[data-cday],[data-cpp]');if(cq){var D=cq.dataset;if(D.cpp!=null)$('#cfPP').checked=D.cpp==='1';if(D.ccur)$('#cfCur').value=D.ccur;if(D.ccat)$('#cfCat').value=D.ccat;if(D.cpay!=null)$('#cfPayer').value=$('#cfPayer').value===D.cpay?'':D.cpay;if(D.cday!=null)$('#cfDay').value=D.cday;renderCAdd();return;}
   var md=e.target.closest('[data-mdel]');if(md){var mm=MEM(),nm=mm[+md.dataset.mdel];if(md.dataset.armed){trip.members=mm.filter(function(x,k){return k!==+md.dataset.mdel;});saveTrip();renderCosts();}else{md.dataset.armed=1;md.textContent='確定？';setTimeout(function(){if(md.isConnected){delete md.dataset.armed;md.textContent='✕';}},3000);}return;}
   var cu=e.target.closest('[data-cuadd],[data-cuedit]');
   if(cu){if(cu.dataset.cuadd)openCustEditor(cu.dataset.cuadd);else openCustEditor(cu.dataset.cukind,cu.dataset.cuedit);return;}
