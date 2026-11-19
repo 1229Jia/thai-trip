@@ -662,6 +662,23 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 </style>
 <style>.cpp{display:grid;grid-template-columns:1fr 1fr;gap:6px}.cpp button{min-height:42px;padding:4px 8px;border-radius:12px;border:1px solid var(--hair2);background:#fff;color:var(--ink);font-size:14px;font-family:var(--font);cursor:pointer;line-height:1.3}.cpp button small{display:block;font-size:11px;color:var(--muted)}.cpp button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}.cpp button[aria-pressed=true] small{color:#C9D1DA}</style>
 <style>.mlock{margin-left:auto;min-height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--hair2);background:#fff;color:var(--muted);font-size:13px;font-family:var(--font);cursor:pointer}.mlock[aria-pressed=true]{border-color:var(--hot);color:var(--hot);background:#FBEDE8}.mlist.locked .mchip{padding-right:12px}.mlist.locked .mchip button{display:none}#mForm[hidden]{display:none}</style>
+<style>
+.nest{margin:10px 0 4px;border:1px solid #F0D5CC;border-radius:14px;background:#FFF8F5;overflow:hidden}
+.nest .nh{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 12px;font-size:14px;color:var(--hot)}
+.nest .nh svg{width:16px;height:16px}.nest .nh span{margin-left:auto;font-size:12px;color:var(--muted)}
+.nest.over .nh span{color:#C0392B;font-weight:600}
+.nest ol{list-style:none;margin:0;padding:0}
+.nest li{display:flex;align-items:center;gap:8px;padding:8px 10px 8px 12px;border-top:1px solid #F3E2DC}
+.nest .nck{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid #D9B3A7;background:#fff;color:#fff;font-size:13px;line-height:1;cursor:pointer;padding:0}
+.nest .nck[aria-pressed=true]{background:var(--hot);border-color:var(--hot)}
+.nest .nn{flex:1;min-width:0}.nest .nn b{display:block;font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nest .nn small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nest li.done .nn b{text-decoration:line-through;color:var(--muted)}
+.nest .nlk{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;color:var(--muted)}
+.nest .nlk svg{width:16px;height:16px}
+.nest li .heart,.nest li [data-save]{flex:none}
+</style>
+<style>.nest li .heart{width:34px;height:34px;min-width:34px;min-height:34px}.nest li .heart svg{width:16px;height:16px}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -1822,6 +1839,8 @@ function fdur(n){n=Math.round(n);if(n<60)return n+' 分鐘';var h=Math.floor(n/6
 function snap(n){return Math.round(n/15)*15;}
 function hav(a,b){var R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dg=(b[1]-a[1])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dg/2)*Math.sin(dg/2);return 2*R*Math.asin(Math.sqrt(x));}
 function sorted(d){return d.items.slice().sort(function(a,b){return tm(a.s)-tm(b.s)||tm(a.e)-tm(b.e);});}
+function mainItems(d){return sorted(d).filter(function(x){return !x.nest;});}
+function nestOf(d,aid){return d.items.filter(function(x){return x.nest&&x.anchor===aid;}).sort(function(a,b){return (a.ord||0)-(b.ord||0);});}
 function dayOf(id){return trip.days.filter(function(d){return d.id===id;})[0];}
 function findItem(id){var r=null;trip.days.forEach(function(d){d.items.forEach(function(it){if(it.id===id){r={d:d,it:it};}});});return r;}
 function isPoint(it){return tm(it.e)<=tm(it.s);}
@@ -1871,7 +1890,7 @@ function legOf(d,a,b){
   return {key:key,a:a,b:b,mode:mode,segs:segs,dur:dur,auto:o.dur==null&&!o.segs,km:km,cost:cost,est:est,incl:!!ac.incl&&(o.cost==null||o.cost===''),note:o.note,tbc:o.tbc,s:tm(a.e),e:tm(a.e)+dur,o:o};
 }
 function dayEntries(d){
-  var its=sorted(d),out=[];
+  var its=mainItems(d),out=[];
   its.forEach(function(it,i){out.push({t:'item',it:it,n:i+1});var nx=its[i+1];if(nx&&it.k!=='flight'&&nx.k!=='flight'){out.push({t:'leg',L:legOf(d,it,nx)});}});
   return out;
 }
@@ -1968,13 +1987,13 @@ function syncExtras(){
 }
 function replan(d){
   d.warn=[];
-  d.items.forEach(function(it){if(it.bs!=null){it.s=it.bs;it.e=it.be;delete it.bs;delete it.be;}});
+  d.items.forEach(function(it){if(it.bs!=null){it.s=it.bs;it.e=it.be;delete it.bs;delete it.be;}delete it.nest;});
   var anchors={};d.items.forEach(function(x){if(x.ref&&!x.manual){(anchors[x.anchor]=anchors[x.anchor]||[]).push(x);}});
-  var placeChain=function(an,start){
+  var placeChain=function(an,start,nest){
     var pool=anchors[an.id].slice(),cur=an.ll,t=start,k=0;
     while(pool.length){
       var bi=0,bd=1e9;pool.forEach(function(x,i){var dd=(cur&&x.ll)?hav(cur,x.ll):1e6+i;if(dd<bd){bd=dd;bi=i;}});
-      var x=pool.splice(bi,1)[0],w=walkMin(cur,x.ll);t+=w;x.walk=w;x.ord=++k;x.s=fm(t);t+=(x.dur||30);x.e=fm(t);if(x.ll)cur=x.ll;
+      var x=pool.splice(bi,1)[0],w=walkMin(cur,x.ll);t+=w;x.walk=w;x.ord=++k;if(nest)x.nest=1;x.s=fm(t);t+=(x.dur||30);x.e=fm(t);if(x.ll)cur=x.ll;
       if(t>=1439){d.warn.push({late:1,n:x.n});}
     }
     return t;
@@ -1991,7 +2010,7 @@ function replan(d){
     }
     var ne=oe+push;
     prevOrigE=oe;prevNewE=ne;
-    if(anchors[it.id]){prevNewE=Math.max(ne,placeChain(it,ne));}
+    if(anchors[it.id]){var ce=placeChain(it,ns,true);it.need=ce-ns;if(ce>ne+2){d.warn.push({nest:1,n:it.n,over:ce-ne,need:ce-ns});}}
   });
   Object.keys(anchors).forEach(function(aid){if(!base.some(function(b){return b.id===aid;})){placeChain({id:aid,ll:null},720);}});
 }
@@ -2101,9 +2120,13 @@ function itemCard(it,n,d,cur){
   return '<li class="tc cat-'+it.cat+(it.ref?' ex':'')+(ph?' hasph':'')+(sv?' hassv':'')+'" id="it-'+esc(it.id)+'" data-s="'+s+'" data-e="'+Math.max(e,s)+'">'+
     (ph?photoHtml(ph,it.n):'')+(sv?svHtml(sv):'')+
     '<div class="tch"><div class="tcb"><div class="tm">'+timeRow+'</div><div class="tags">'+tags+'</div><h4><span class="small muted">'+n+'.</span> '+esc(it.n)+'</h4></div><div class="side">'+icon(it.mo||'frame')+(hid?heart(hid):'')+'</div></div>'+
-    (meta?'<div class="meta">'+meta+'</div>':'')+(it.note?'<div class="tip">'+ic('bulb')+'<span>'+esc(it.note)+'</span></div>':'')+
+    (meta?'<div class="meta">'+meta+'</div>':'')+(it.note?'<div class="tip">'+ic('bulb')+'<span>'+esc(it.note)+'</span></div>':'')+nestHtml(d,it)+
     '<div class="btns">'+btns+'</div></li>';
 }
+var NDONE={};try{NDONE=JSON.parse(localStorage.getItem('tdiary-nestdone')||'{}');}catch(e){}
+function nestHtml(d,it){if(!d)return '';var ns=nestOf(d,it.id);if(!ns.length)return '';var span=tm(it.e)-tm(it.s),need=it.need||0,over=need>span+2,dn=ns.filter(function(x){return NDONE[x.ref];}).length;
+  return '<div class="nest'+(over?' over':'')+'"><div class="nh">'+ic('heart')+'<b>收藏的店 '+ns.length+' 間</b><span>'+(dn?'已逛 '+dn+'・':'')+'預估 '+fdur(need)+(over?'，超過約 '+fdur(need-span):'')+'</span></div><ol>'+
+  ns.map(function(x){var o=ALL[x.ref],sub=o?(o.kind==='shop'?(o.o.loc||''):(o.o.addr||'')):'';return '<li class="'+(NDONE[x.ref]?'done':'')+'"><button class="nck" data-nck="'+esc(x.ref)+'" aria-pressed="'+!!NDONE[x.ref]+'" aria-label="逛過了">'+(NDONE[x.ref]?'✓':'')+'</button><div class="nn"><b>'+esc(x.n)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><a class="nlk" href="'+esc(mapsUrl(itemQ(x)))+'" target="_blank" rel="noopener" aria-label="Google 地圖">'+ic('pin')+'</a>'+heart(x.ref)+'</li>';}).join('')+'</ol></div>';}
 function segsHtml(L){
   var allWalk=L.segs.every(function(x){return x.m==='walk';});
   if(allWalk){return '<span class="sg" style="background:'+WA+'">'+ic('walk')+'步行 共 '+fdur(L.dur)+'</span>';}
@@ -2140,10 +2163,10 @@ function renderDayHead(d){
   var i=trip.days.indexOf(d),r=dayRange(d);
   var DH={1:'曼谷暹羅商圈',2:'大城府古寺',3:'鄭王廟',4:'芭達雅 Terminal 21',5:'曼谷購物街景',6:'素萬那普機場'};
   $('#dhead').innerHTML='<span class="tag" style="background:'+dc(i)+'">第 '+d.id+' 天・'+d.date+'（'+d.dow.slice(1)+'）</span><h2>'+esc(d.zh)+'</h2><p>'+esc(d.en)+'・'+fm(r.s)+'–'+fm(r.e)+'・'+d.items.length+' 站</p>';
-  var wn=(d.warn||[]).map(function(w){return w.late?'收藏排進來後，「'+esc(w.n)+'」會被推到半夜之後，請刪減收藏或調整時間':'收藏的店排進來後，會超過「'+esc(w.n)+'」的 '+w.t+' 約 '+fdur(w.over)+'，請刪減收藏或調整時間';});
+  var wn=(d.warn||[]).map(function(w){return w.nest?'「'+esc(w.n)+'」裡收藏的店預估要逛 '+fdur(w.need)+'（含走路），比安排的時間多約 '+fdur(w.over)+'，可以刪減收藏或拉長這段時間':w.late?'收藏排進來後，「'+esc(w.n)+'」會被推到半夜之後，請刪減收藏或調整時間':'收藏的店排進來後，會超過「'+esc(w.n)+'」的 '+w.t+' 約 '+fdur(w.over)+'，請刪減收藏或調整時間';});
   var nex=d.items.filter(function(x){return x.ref;}).length;
   $('#dnote').innerHTML=(d.note?'<div class="tip" style="margin-bottom:12px">'+ic('bulb')+'<span>'+esc(d.note)+'</span></div>':'')+
-    (nex?'<div class="tip" style="margin-bottom:12px;background:var(--waka-l)">'+ic('walk')+'<span>已排入 '+nex+' 間收藏，依距離由近到遠走一圈；暫定時間的行程已自動往後推。店家位置是商場或街段層級的估計。</span></div>':'')+
+    (nex?'<div class="tip" style="margin-bottom:12px;background:var(--waka-l)">'+ic('walk')+'<span>已把 '+nex+' 間收藏放進所屬區塊的逛街清單，依距離由近到遠排好，不會推後其他行程。店家位置是商場或街段層級的估計。</span></div>':'')+
     wn.map(function(t){return '<div class="tip tbc" style="margin-bottom:12px">'+ic('warn')+'<span>'+t+'</span></div>';}).join('');
   var links=routeLinks(d);
   $('#dtools').innerHTML=links.map(function(u,j){return '<a class="btn'+(j?' w':'')+'" href="'+esc(u)+'" target="_blank" rel="noopener">'+ic('nav')+(links.length>1?'導航 '+(j+1)+'/'+links.length:'Google 導航')+'</a>';}).join('')+
@@ -2156,7 +2179,7 @@ function pct(m){return ((m-AX.s)/(AX.e-AX.s)*100).toFixed(3)+'%';}
 function renderAxis(d){
   var r=dayRange(d);dayEntries(d).forEach(function(x){if(x.t==='leg')r.e=Math.max(r.e,x.L.e);});AX={s:r.s,e:r.e};
   var h='<div class="rail"></div>';
-  sorted(d).forEach(function(it){if(isPoint(it))return;var C=CATS[it.cat]||CATS.other;h+='<div class="seg" style="top:'+pct(tm(it.s))+';height:calc('+pct(tm(it.e))+' - '+pct(tm(it.s))+');background:'+C.c+';border:1.5px solid '+INK+'"></div>';});
+  mainItems(d).forEach(function(it){if(isPoint(it))return;var C=CATS[it.cat]||CATS.other;h+='<div class="seg" style="top:'+pct(tm(it.s))+';height:calc('+pct(tm(it.e))+' - '+pct(tm(it.s))+');background:'+C.c+';border:1.5px solid '+INK+'"></div>';});
   for(var m=Math.ceil(AX.s/60)*60;m<AX.e;m+=60){var f=(m-AX.s)/(AX.e-AX.s);h+='<div class="tick" style="top:'+pct(m)+'"></div>';if(f>0.07&&f<0.93&&(m/60)%2===0){h+='<div class="lab" style="top:'+pct(m)+'">'+fm(m)+'</div>';}}
   h+='<div class="lab se" style="top:0">'+fm(AX.s)+'</div><div class="lab se" style="top:100%">'+fm(AX.e)+'</div><div class="now" id="axnow" hidden><span></span></div><div class="dot" id="axdot" style="top:0"></div>';
   $('#axis').innerHTML=h;updateNow();
@@ -2300,7 +2323,7 @@ function fetchRoute(L){
 function legCoords(L){var r=(L.mode==='car'||L.mode==='taxi'||L.mode==='walk')?RC[rcKey(L.mode,L.a.ll,L.b.ll)]:null;return r&&r.g?r.g:[[L.a.ll[1],L.a.ll[0]],[L.b.ll[1],L.b.ll[0]]];}
 function mlUpdate(){
   if(!ML.ready||!ML.map)return;
-  var d=curDay(),its=sorted(d),legs=dayEntries(d).filter(function(x){return x.t==='leg'&&x.L.a.ll&&x.L.b.ll;}).map(function(x){return x.L;});
+  var d=curDay(),its=mainItems(d),legs=dayEntries(d).filter(function(x){return x.t==='leg'&&x.L.a.ll&&x.L.b.ll;}).map(function(x){return x.L;});
   legs.forEach(function(L){if(L.mode==='car'||L.mode==='taxi'||L.mode==='walk'){fetchRoute(L);}});
   var feats=legs.map(function(L){return {type:'Feature',properties:{key:L.key,color:(MODES[L.mode]||MODES.car).c},geometry:{type:'LineString',coordinates:legCoords(L)}};});
   try{ML.map.getSource('routes').setData({type:'FeatureCollection',features:feats});}catch(e){}
@@ -2338,7 +2361,7 @@ var TILES=window.__TILES||(window.__TILES={});
 function mx(lon,z){return (lon+180)/360*256*Math.pow(2,z);}
 function my(lat,z){var r=lat*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*256*Math.pow(2,z);}
 function schematic(d){
-  var its=sorted(d),pts=[];its.forEach(function(it,i){if(it.ll)pts.push({i:i,ll:it.ll,it:it});});
+  var its=mainItems(d),pts=[];its.forEach(function(it,i){if(it.ll)pts.push({i:i,ll:it.ll,it:it});});
   var W=640,H=360,P=48;if(!pts.length)return '<svg viewBox="0 0 640 360"></svg>';
   var focusPts=pts,legs=dayEntries(d).filter(function(x){return x.t==='leg'&&x.L.a.ll&&x.L.b.ll;}).map(function(x){return x.L;});
   var bbC=null;
@@ -2491,7 +2514,7 @@ $('#dlgform').addEventListener('click',function(e){
    探索・美食・收藏
    ===================================================================== */
 function addNote(id){var pl=planOf(id);if(!pl)return '';var r=refItem(id);
-  if(saved.has(id)&&r){return '<p class="addnote">♥ 已排進第 '+r.d.id+' 天 '+r.it.s+'，「'+esc(anchorName(pl.anchor))+'」之後順路第 '+(r.it.ord||1)+' 站'+(r.it.walk?'，前一站走過來約 '+r.it.walk+' 分鐘':'')+'</p>';}
+  if(saved.has(id)&&r){return '<p class="addnote">♥ 已放進第 '+r.d.id+' 天「'+esc(anchorName(pl.anchor))+'」的逛街清單，順路第 '+(r.it.ord||1)+' 間'+(r.it.walk?'，前一站走過來約 '+r.it.walk+' 分鐘':'')+'</p>';}
   return '';}
 var EXOPEN=new Set();
 function shortH(h){h=String(h||'');return h.replace(/（.*?）/g,'').replace(/^依商場\s*/,'');}
@@ -2511,7 +2534,7 @@ function shopCard(s){
         '<div class="m1">'+esc(s.type==='zone'?'逛街區域':(s.loc||r.zh))+'</div>'+
         '<div class="m1">'+ic('clock')+'<span>'+esc(shortH(s.h))+'</span></div>'+
         '<div class="tags">'+s.c.map(function(k){return '<span class="tag k-'+k+'">'+esc(CATZH[k])+'</span>';}).join('')+sty.map(function(t){return '<span class="tag t-sty">'+esc(t)+'</span>';}).join('')+(s.cu?'<span class="tag t-cu">👥 '+esc(s.by||'朋友')+' 推薦</span>':'')+flag+'</div>'+
-        (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
+        (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天「'+esc(anchorName(rf.it.anchor))+'」清單第 '+(rf.it.ord||1)+' 間</div>':'')+
       '</div></summary>'+
       '<div class="body">'+(hasPh?pimg(s.id):(cph?'<div class="pimg"><img alt="" src="'+cph+'"></div>':''))+'<p class="d">'+esc(s.d)+'</p><dl class="kv"><dt>位置</dt><dd>'+esc(s.loc)+'</dd>'+(s.p&&s.p!=='待確認'?'<dt>價格</dt><dd>'+esc(s.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(s.h)+'</dd>'+(s.ph?'<dt>電話</dt><dd>'+esc(s.ph)+'</dd>':'')+'</dl>'+
       '<div class="row" style="margin-top:10px">'+(s.ev?'<span class="tag t-tbc">活動品牌，未確認常設</span>':'')+links.join('')+'</div>'+custBar(s)+addNote(s.id)+'</div>'+
@@ -2530,7 +2553,7 @@ function foodCard(f){
         '<div class="m1">'+esc(f.dsh||(f.d||'').split('，')[0].split('。')[0])+'</div>'+
         '<div class="m1">'+ic('clock')+'<span>'+esc(shortH(f.h))+'</span></div>'+
         '<div class="tags">'+f.c.map(function(k){return '<span class="tag f-'+k+'">'+esc(FCATZH[k])+'</span>';}).join('')+(f.dv?'<span class="tag t-dl">🛵 可外送</span>':'')+(f.cu?'<span class="tag t-cu">👥 '+esc(f.by||'朋友')+' 推薦</span>':'')+flag+'</div>'+
-        (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天 '+rf.it.s+' 順路第 '+(rf.it.ord||1)+' 站</div>':'')+
+        (rf?'<div class="planned">♥ 第 '+rf.d.id+' 天「'+esc(anchorName(rf.it.anchor))+'」清單第 '+(rf.it.ord||1)+' 間</div>':'')+
       '</div></summary>'+
       '<div class="body">'+(hasPh?pimg(f.id):(cph?'<div class="pimg"><img alt="" src="'+cph+'"></div>':''))+'<p class="d">'+esc(f.d)+'</p><dl class="kv"><dt>地址</dt><dd>'+esc(f.addr)+'</dd>'+(f.p&&f.p!=='待確認'?'<dt>價格</dt><dd>'+esc(f.p)+'</dd>':'')+'<dt>營業時間</dt><dd>'+esc(f.h)+'</dd>'+(f.dv?'<dt>外送</dt><dd>'+esc(f.dv===true?'可外送':f.dv)+'</dd>':'')+'</dl>'+
       '<div class="row" style="margin-top:10px">'+(f.web?'<a class="mini" href="'+esc(f.web)+'" target="_blank" rel="noopener">'+ic('link')+'資料來源</a>':'')+'<a class="mini" href="'+esc(mapsUrl(f.n+' '+(f.area==='Pattaya'?'Pattaya':'Bangkok')))+'" target="_blank" rel="noopener">'+ic('pin')+'地圖</a></div>'+custBar(f)+addNote(f.id)+'</div>'+
@@ -2674,7 +2697,7 @@ function updateBadges(){var n=Array.from(saved).filter(function(i){return ALL[i]
 function toggleSave(id){
   if(saved.has(id)){saved.delete(id);}else{saved.add(id);}persistSaved();syncExtras();
   var pl=planOf(id),nm=(ALL[id]&&ALL[id].o.n)||'',r=refItem(id);
-  if(pl){var dw=dayOf(pl.day).warn||[];toast(saved.has(id)&&r?'♥「'+nm+'」排進第 '+r.d.id+' 天 '+r.it.s+'（順路第 '+(r.it.ord||1)+' 站）'+(dw.length?'・注意：當天會超時':''):'已從第 '+pl.day+' 天移除「'+nm+'」，時間已重排');}
+  if(pl){var dw=dayOf(pl.day).warn||[];toast(saved.has(id)&&r?'♥「'+nm+'」加進第 '+r.d.id+' 天「'+anchorName(pl.anchor)+'」清單'+(dw.some(function(w){return w.nest;})?'・注意：這區時間不太夠':''):'已從第 '+pl.day+' 天的清單移除「'+nm+'」');}
   else if(saved.has(id)){toast('♥ 已收藏「'+nm+'」');}
   var y=window.scrollY;refresh(true);window.scrollTo(0,y);
 }
@@ -2789,6 +2812,7 @@ function go(v){if((location.hash||'').slice(1)===v){show(v);}else{location.hash=
 document.addEventListener('click',function(e){
   var cq=e.target.closest('[data-ccur],[data-ccat],[data-cpay],[data-cday],[data-cpp]');if(cq){var D=cq.dataset;if(D.cpp!=null)$('#cfPP').checked=D.cpp==='1';if(D.ccur)$('#cfCur').value=D.ccur;if(D.ccat)$('#cfCat').value=D.ccat;if(D.cpay!=null)$('#cfPayer').value=$('#cfPayer').value===D.cpay?'':D.cpay;if(D.cday!=null)$('#cfDay').value=D.cday;renderCAdd();return;}
   if(e.target.closest('[data-mlock]')){MLOCK=!MLOCK;renderMembers();if(!MLOCK)toast('已解鎖，可以新增或刪除成員');return;}
+  var nk=e.target.closest('[data-nck]');if(nk){var k=nk.dataset.nck;if(NDONE[k])delete NDONE[k];else NDONE[k]=1;try{localStorage.setItem('tdiary-nestdone',JSON.stringify(NDONE));}catch(x){}var y=window.scrollY;refresh();window.scrollTo(0,y);return;}
   var md=e.target.closest('[data-mdel]');if(md){var mm=MEM(),nm=mm[+md.dataset.mdel];if(md.dataset.armed){trip.members=mm.filter(function(x,k){return k!==+md.dataset.mdel;});saveTrip();renderCosts();}else{md.dataset.armed=1;md.textContent='確定？';setTimeout(function(){if(md.isConnected){delete md.dataset.armed;md.textContent='✕';}},3000);}return;}
   var cu=e.target.closest('[data-cuadd],[data-cuedit]');
   if(cu){if(cu.dataset.cuadd)openCustEditor(cu.dataset.cuadd);else openCustEditor(cu.dataset.cukind,cu.dataset.cuedit);return;}
