@@ -680,6 +680,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 </style>
 <style>.nest li .heart{width:34px;height:34px;min-width:34px;min-height:34px}.nest li .heart svg{width:16px;height:16px}</style>
 <style>.mgh{display:flex;align-items:center;gap:8px;margin:14px 2px 8px;font-size:13px;font-weight:600;color:var(--ink)}.mgh::after{content:"";flex:1;height:1px;background:var(--hair)}.mgh em{font-style:normal;font-weight:400;color:var(--muted);font-size:12px}</style>
+<style>.mgh2{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 8px;padding:12px 14px;border:1px solid var(--hair);border-radius:14px;background:#fff;font-family:var(--font);cursor:pointer;text-align:left}.mgh2 b{font-size:15px;font-weight:600;color:var(--ink)}.mgh2 em{font-style:normal;font-size:12px;color:var(--muted)}.mgh2 .mfv{font-size:12px;color:var(--hot);background:#FBEDE8;border-radius:999px;padding:2px 8px}.mgh2 i{margin-left:auto;font-style:normal;font-size:12px;color:var(--muted)}.mgh2[aria-expanded=true]{border-color:var(--ink)}.mbody{margin:0 0 14px}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -2644,6 +2645,7 @@ function refreshLists(){if(VIEW==='explore')renderExplore();if(VIEW==='food')ren
 function custBar(o){return o.cu?'<div class="row" style="margin-top:8px"><button class="mini" data-cuedit="'+esc(o.cu)+'" data-cukind="'+(o.id.charAt(0)==='f'?'food':'shop')+'">'+ic('edit')+'編輯</button></div>':'';}
 var FAREA=[['Siam','暹羅（D1）'],['Chula','朱拉隆功（D5）'],['Pratunam','水門・CentralWorld（D6）'],['Lumphini','Lumphini・Silom'],['Song Wat','嵩越路'],['Yaowarat','耀華力'],['Chinatown','唐人街'],['舊城區','舊城區'],['Khlong San','Khlong San（ICONSIAM 對岸）'],['Dusit','Dusit'],['Ekkamai','Ekkamai（民宿附近）'],['Phrom Phong','Phrom Phong'],['Pattaya','芭達雅']];
 function spotCard(o){var s=o.o,d=o.d;return '<article class="card place"><div class="ph">'+icon(s.mo||'frame')+'<div class="pt"><span class="rg">第 '+d.id+' 天・'+d.date+'・行程景點</span><h3>'+esc(s.n)+'</h3></div>'+heart(s.id)+'</div>'+(s.a?'<p class="d">'+esc(s.a)+'</p>':'')+'</article>';}
+var EXMALL=new Set();
 function renderExplore(){
   var q=st.ex.q.trim().toLowerCase();
   var list=SHOPS.filter(function(s){return (!st.ex.fav||saved.has(s.id))&&(st.ex.day==='all'||REGDAY[s.r]===+st.ex.day)&&(st.ex.cat==='all'||s.c.indexOf(st.ex.cat)>-1)&&(st.ex.sty==='all'||(STY[st.ex.sty]||[]).indexOf(s.id.slice(2))>-1)&&
@@ -2653,7 +2655,8 @@ function renderExplore(){
     var dl=list.filter(function(s){return REGDAY[s.r]===dd[0];});if(!dl.length)return;var D=dayOf(dd[0]),i=dd[0]-1;
     html+='<div class="dgh" style="--c:'+dc(i)+';--cl:'+dcl(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'');
     Object.keys(REG).forEach(function(rk){var rl=dl.filter(function(s){return s.r===rk;});if(!rl.length)return;html+='<div class="rgh" style="--c:'+dc(i)+'"><b>'+esc(REG[rk].zh)+'</b><span>'+rl.length+' 家</span></div>';
-      if(rk==='siam'){MALLS.map(function(M){return M[0];}).concat(['SQ']).forEach(function(mk){var ml=rl.filter(function(s){return mallOf({kind:'shop',o:s})===mk;});if(!ml.length)return;html+='<div class="mgh"><span>'+esc(mallName(mk))+'</span><em>'+ml.length+'</em></div>'+ml.map(shopCard).join('');});}
+      if(rk==='siam'){var open1=q||st.ex.fav;MALLS.map(function(M){return M[0];}).concat(['SQ']).forEach(function(mk){var ml=rl.filter(function(s){return mallOf({kind:'shop',o:s})===mk;});if(!ml.length)return;var op=open1||EXMALL.has(mk),fv=ml.filter(function(s){return saved.has(s.id);}).length;
+        html+='<button class="mgh2" data-mall="'+mk+'" aria-expanded="'+op+'"><b>'+esc(mallName(mk))+'</b><em>'+ml.length+' 間</em>'+(fv?'<span class="mfv">♥ '+fv+'</span>':'')+'<i>'+(op?'收起 ▴':'展開 ▾')+'</i></button>'+(op?'<div class="mbody">'+ml.map(shopCard).join('')+'</div>':'');});}
       else html+=rl.map(shopCard).join('');});
   });
   $('#ex-list').innerHTML=html||'<div class="empty">沒有符合的店家，換個日期或分類試試。</div>';
@@ -2821,6 +2824,7 @@ document.addEventListener('click',function(e){
   var cq=e.target.closest('[data-ccur],[data-ccat],[data-cpay],[data-cday],[data-cpp]');if(cq){var D=cq.dataset;if(D.cpp!=null)$('#cfPP').checked=D.cpp==='1';if(D.ccur)$('#cfCur').value=D.ccur;if(D.ccat)$('#cfCat').value=D.ccat;if(D.cpay!=null)$('#cfPayer').value=$('#cfPayer').value===D.cpay?'':D.cpay;if(D.cday!=null)$('#cfDay').value=D.cday;renderCAdd();return;}
   if(e.target.closest('[data-mlock]')){MLOCK=!MLOCK;renderMembers();if(!MLOCK)toast('已解鎖，可以新增或刪除成員');return;}
   var nk=e.target.closest('[data-nck]');if(nk){var k=nk.dataset.nck;if(NDONE[k])delete NDONE[k];else NDONE[k]=1;try{localStorage.setItem('tdiary-nestdone',JSON.stringify(NDONE));}catch(x){}var y=window.scrollY;refresh();window.scrollTo(0,y);return;}
+  var mg=e.target.closest('[data-mall]');if(mg){var k=mg.dataset.mall;if(EXMALL.has(k))EXMALL.delete(k);else EXMALL.add(k);var y=window.scrollY;renderExplore();window.scrollTo(0,y);return;}
   var md=e.target.closest('[data-mdel]');if(md){var mm=MEM(),nm=mm[+md.dataset.mdel];if(md.dataset.armed){trip.members=mm.filter(function(x,k){return k!==+md.dataset.mdel;});saveTrip();renderCosts();}else{md.dataset.armed=1;md.textContent='確定？';setTimeout(function(){if(md.isConnected){delete md.dataset.armed;md.textContent='✕';}},3000);}return;}
   var cu=e.target.closest('[data-cuadd],[data-cuedit]');
   if(cu){if(cu.dataset.cuadd)openCustEditor(cu.dataset.cuadd);else openCustEditor(cu.dataset.cukind,cu.dataset.cuedit);return;}
