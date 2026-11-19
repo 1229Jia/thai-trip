@@ -1849,9 +1849,7 @@ function fdur(n){n=Math.round(n);if(n<60)return n+' 分鐘';var h=Math.floor(n/6
 function snap(n){return Math.round(n/15)*15;}
 function hav(a,b){var R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dg=(b[1]-a[1])*r,x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dg/2)*Math.sin(dg/2);return 2*R*Math.asin(Math.sqrt(x));}
 function sorted(d){return d.items.slice().sort(function(a,b){return tm(a.s)-tm(b.s)||tm(a.e)-tm(b.e);});}
-function isSub(d,x){if(x.ref||x.id===ANCHOR.siam||typeof MALLS==='undefined')return false;if(!d.items.some(function(y){return y.id===ANCHOR.siam;}))return false;return MALLS.some(function(M){return M[3].test(x.n||'');});}
-function subsOf(d,it){if(!d||it.id!==ANCHOR.siam)return [];return sorted(d).filter(function(x){return isSub(d,x);});}
-function mainItems(d){return sorted(d).filter(function(x){return !x.nest&&!isSub(d,x);});}
+function mainItems(d){return sorted(d).filter(function(x){return !x.nest;});}
 function nestOf(d,aid){return d.items.filter(function(x){return x.nest&&x.anchor===aid;}).sort(function(a,b){return (a.ord||0)-(b.ord||0);});}
 function dayOf(id){return trip.days.filter(function(d){return d.id===id;})[0];}
 function findItem(id){var r=null;trip.days.forEach(function(d){d.items.forEach(function(it){if(it.id===id){r={d:d,it:it};}});});return r;}
@@ -2142,7 +2140,7 @@ function itemCard(it,n,d,cur){
   return '<li class="tc cat-'+it.cat+(it.ref?' ex':'')+(ph?' hasph':'')+(sv?' hassv':'')+'" id="it-'+esc(it.id)+'" data-s="'+s+'" data-e="'+Math.max(e,s)+'">'+
     (ph?photoHtml(ph,it.n):'')+(sv?svHtml(sv):'')+
     '<div class="tch"><div class="tcb"><div class="tm">'+timeRow+'</div><div class="tags">'+tags+'</div><h4><span class="small muted">'+n+'.</span> '+esc(it.n)+'</h4></div><div class="side">'+icon(it.mo||'frame')+(hid?heart(hid):'')+'</div></div>'+
-    (meta?'<div class="meta">'+meta+'</div>':'')+(it.note?'<div class="tip">'+ic('bulb')+'<span>'+esc(it.note)+'</span></div>':'')+(function(){var sb=subsOf(d,it);return sb.length?'<ul class="subtl">'+sb.map(function(c,k){return itemCard(c,n+'-'+(k+1),d,false);}).join('')+'</ul>':'';})()+nestHtml(d,it)+
+    (meta?'<div class="meta">'+meta+'</div>':'')+(it.note?'<div class="tip">'+ic('bulb')+'<span>'+esc(it.note)+'</span></div>':'')+nestHtml(d,it)+
     '<div class="btns">'+btns+'</div></li>';
 }
 var NDONE={};try{NDONE=JSON.parse(localStorage.getItem('tdiary-nestdone')||'{}');}catch(e){}
