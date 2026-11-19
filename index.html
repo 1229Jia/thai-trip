@@ -1821,13 +1821,12 @@ function load(){
   }
 }
 var MEMBERS0=['韋','崡','霖','媗','陸','鈺','翰','鈞','洋'];
-function mergeParagon(){if(trip.mergedSP)return false;trip.mergedSP=1;var d=null,sq=null,pg=null;
+function mergeParagon(){if(!trip.mergedSP||trip.unSP)return false;trip.unSP=1;var d=trip.days[0],sq=null;
   trip.days.forEach(function(dd){dd.items.forEach(function(it){if(it.id==='sp-siam'){d=dd;sq=it;}});});
-  if(!d||!sq)return true;pg=d.items.filter(function(it){return !it.ref&&it!==sq&&/Siam Paragon|百麗宮|百丽宫/i.test(it.n||'');})[0];
-  if(!pg)return true;var pe=tm(pg.be||pg.e),se=tm(sq.be||sq.e);
-  if(pe>se){if(sq.be!=null)sq.be=pg.be||pg.e;sq.e=pg.e;}
-  if(!/Paragon/i.test(sq.note||''))sq.note=(sq.note?sq.note+'。':'')+'包含 Siam Paragon、Siam Center、Siam Discovery、Siam Square One 等商場';
-  d.items=d.items.filter(function(it){return it!==pg;});return true;}
+  if(sq){if(sq.e==='15:00')sq.e='14:30';if(sq.be==='15:00')sq.be='14:30';if(sq.note)sq.note=sq.note.replace('。包含 Siam Paragon、Siam Center、Siam Discovery、Siam Square One 等商場','').replace('包含 Siam Paragon、Siam Center、Siam Discovery、Siam Square One 等商場','');}
+  var has=trip.days.some(function(dd){return dd.items.some(function(it){return it.id==='umwme9dh752o'||(!it.ref&&/Siam Paragon/i.test(it.n||''));});});
+  if(!has&&d)d.items.push({id:'umwme9dh752o',n:'Siam Paragon',cat:'shop',s:'14:13',e:'15:00',mo:'frame',a:'991 Rama I Rd, Pathum Wan, Bangkok 10330泰國'});
+  return true;}
 function initMembers(){if(trip.memInit)return false;var m=(trip.members||[]).slice();MEMBERS0.forEach(function(n){if(m.indexOf(n)<0)m.push(n);});trip.members=m;trip.memInit=1;return true;}
 function clearPresetCosts(){try{if(localStorage.getItem('tdiary-costclear-v1'))return;}catch(e){}
   trip.costs=(trip.costs||[]).filter(function(c){return ['c1','c2','c3','c4','c5'].indexOf(c.id)<0;});
