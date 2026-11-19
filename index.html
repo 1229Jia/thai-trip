@@ -681,6 +681,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 <style>.nest li .heart{width:34px;height:34px;min-width:34px;min-height:34px}.nest li .heart svg{width:16px;height:16px}</style>
 <style>.mgh{display:flex;align-items:center;gap:8px;margin:14px 2px 8px;font-size:13px;font-weight:600;color:var(--ink)}.mgh::after{content:"";flex:1;height:1px;background:var(--hair)}.mgh em{font-style:normal;font-weight:400;color:var(--muted);font-size:12px}</style>
 <style>.mgh2{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 8px;padding:12px 14px;border:1px solid var(--hair);border-radius:14px;background:#fff;font-family:var(--font);cursor:pointer;text-align:left}.mgh2 b{font-size:15px;font-weight:600;color:var(--ink)}.mgh2 em{font-style:normal;font-size:12px;color:var(--muted)}.mgh2 .mfv{font-size:12px;color:var(--hot);background:#FBEDE8;border-radius:999px;padding:2px 8px}.mgh2 i{margin-left:auto;font-style:normal;font-size:12px;color:var(--muted)}.mgh2[aria-expanded=true]{border-color:var(--ink)}.mbody{margin:0 0 14px}</style>
+<style>.nest li.nsub{display:flex;gap:6px;align-items:center;padding:7px 12px;background:#FBEDE8;font-size:12px;font-weight:600;color:var(--hot)}.nest li.nsub em{font-style:normal;font-weight:400;color:var(--muted)}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -1932,8 +1933,7 @@ function mallCands(o){if(!o||regOf(o)!=='siam')return [];var txt=(o.kind==='shop
   var sq=/Siam Square(?! One)|Soi Siam|暹羅廣場/gi,m2;while((m2=sq.exec(txt))){c.push([m2.index,'SQ']);}
   return c.sort(function(x,y){return x[0]-y[0];}).map(function(x){return x[1];});}
 function planOf(id){var o=ALL[id];if(!o||o.kind==='spot')return null;var r=regOf(o);if(!r||!REGDAY[r])return null;
-  var cs=mallCands(o),ma=null,mk=null;for(var i=0;i<cs.length;i++){if(cs[i]==='SQ')break;var x=mallAnchor(REGDAY[r],cs[i]);if(x){ma=x;mk=cs[i];break;}}
-  return {day:REGDAY[r],anchor:ma||ANCHOR[r],reg:r,mall:mk};}
+  return {day:REGDAY[r],anchor:ANCHOR[r],reg:r,mall:mallOf(o)};}
 function anchorName(aid){var f=findItem(aid);return f?f.it.n.split(' ')[0]:'';}
 function extraQ(o){var r=REG[regOf(o)];return o.o.n+' '+(o.kind==='shop'?r.map:(o.o.addr!=='待確認'?o.o.addr:r.map));}
 function refItem(id){var r=null;trip.days.forEach(function(d){d.items.forEach(function(it){if(it.ref===id){r={d:d,it:it};}});});return r;}
@@ -2139,7 +2139,10 @@ function itemCard(it,n,d,cur){
 var NDONE={};try{NDONE=JSON.parse(localStorage.getItem('tdiary-nestdone')||'{}');}catch(e){}
 function nestHtml(d,it){if(!d)return '';var ns=nestOf(d,it.id);if(!ns.length)return '';var span=tm(it.e)-tm(it.s),need=it.need||0,over=need>span+2,dn=ns.filter(function(x){return NDONE[x.ref];}).length;
   return '<div class="nest'+(over?' over':'')+'"><div class="nh">'+ic('heart')+'<b>收藏的店 '+ns.length+' 間</b><span>'+(dn?'已逛 '+dn+'・':'')+'預估 '+fdur(need)+(over?'，超過約 '+fdur(need-span):'')+'</span></div><ol>'+
-  ns.map(function(x){var o=ALL[x.ref],sub=o?(o.kind==='shop'?(o.o.loc||''):(o.o.addr||'')):'';return '<li class="'+(NDONE[x.ref]?'done':'')+'"><button class="nck" data-nck="'+esc(x.ref)+'" aria-pressed="'+!!NDONE[x.ref]+'" aria-label="逛過了">'+(NDONE[x.ref]?'✓':'')+'</button><div class="nn"><b>'+esc(x.n)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><a class="nlk" href="'+esc(mapsUrl(itemQ(x)))+'" target="_blank" rel="noopener" aria-label="Google 地圖">'+ic('pin')+'</a>'+heart(x.ref)+'</li>';}).join('')+'</ol></div>';}
+  (function(){var grp=it.id===ANCHOR.siam,order=[],by={};ns.forEach(function(x){var k=grp?(mallOf(ALL[x.ref])||'SQ'):'_';if(!by[k]){by[k]=[];order.push(k);}by[k].push(x);});
+   if(grp)order=MALLS.map(function(M){return M[0];}).concat(['SQ']).filter(function(k){return by[k];});
+   return order.map(function(k){return (grp?'<li class="nsub">'+esc(mallName(k))+'<em>'+by[k].length+'</em></li>':'')+by[k].map(nestLi).join('');}).join('');})()+'</ol></div>';}
+function nestLi(x){var o=ALL[x.ref],sub=o?(o.kind==='shop'?(o.o.loc||''):(o.o.addr||'')):'';return '<li class="'+(NDONE[x.ref]?'done':'')+'"><button class="nck" data-nck="'+esc(x.ref)+'" aria-pressed="'+!!NDONE[x.ref]+'" aria-label="逛過了">'+(NDONE[x.ref]?'✓':'')+'</button><div class="nn"><b>'+esc(x.n)+'</b>'+(sub?'<small>'+esc(sub)+'</small>':'')+'</div><a class="nlk" href="'+esc(mapsUrl(itemQ(x)))+'" target="_blank" rel="noopener" aria-label="Google 地圖">'+ic('pin')+'</a>'+heart(x.ref)+'</li>';}
 function segsHtml(L){
   var allWalk=L.segs.every(function(x){return x.m==='walk';});
   if(allWalk){return '<span class="sg" style="background:'+WA+'">'+ic('walk')+'步行 共 '+fdur(L.dur)+'</span>';}
