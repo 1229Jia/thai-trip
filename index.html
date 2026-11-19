@@ -679,6 +679,7 @@ dialog{border:1px solid var(--hair);box-shadow:0 24px 60px rgba(31,42,54,.18)}
 .nest li .heart,.nest li [data-save]{flex:none}
 </style>
 <style>.nest li .heart{width:34px;height:34px;min-width:34px;min-height:34px}.nest li .heart svg{width:16px;height:16px}</style>
+<style>.mgh{display:flex;align-items:center;gap:8px;margin:14px 2px 8px;font-size:13px;font-weight:600;color:var(--ink)}.mgh::after{content:"";flex:1;height:1px;background:var(--hair)}.mgh em{font-style:normal;font-weight:400;color:var(--muted);font-size:12px}</style>
 <body>
 <header class="top"><div class="in">
   <div class="brand"><span class="logo" id="logo"></span><span>曼谷・芭達雅 6 日</span><span class="cd" id="cdchip"></span></div>
@@ -1925,7 +1926,7 @@ var FOODREG={'Siam':'siam','Chula':'songwat','Song Wat':'songwat','Yaowarat':'so
 var EXDAYS=[[1,'暹羅・ICONSIAM'],[3,'洽圖洽・河濱夜市'],[4,'芭達雅'],[5,'嵩越路'],[6,'CentralWorld']];
 var MCAT={cloth:'dress',bag:'bag',shoe:'shoe',vint:'hanger',acc:'jewel',frag:'perfume',life:'vase',art:'frame',coll:'record',toy:'toy'};
 function regOf(o){return o.kind==='shop'?o.o.r:(o.kind==='food'?FOODREG[o.o.area]:null);}
-function planOf(id){var o=ALL[id];if(!o||o.kind==='spot')return null;var r=regOf(o);if(!r||!REGDAY[r])return null;return {day:REGDAY[r],anchor:ANCHOR[r],reg:r};}
+function planOf(id){var o=ALL[id];if(!o||o.kind==='spot')return null;var r=regOf(o);if(!r||!REGDAY[r])return null;var mk=mallOf(o),ma=mk?mallAnchor(REGDAY[r],mk):null;return {day:REGDAY[r],anchor:ma||ANCHOR[r],reg:r,mall:mk};}
 function anchorName(aid){var f=findItem(aid);return f?f.it.n.split(' ')[0]:'';}
 function extraQ(o){var r=REG[regOf(o)];return o.o.n+' '+(o.kind==='shop'?r.map:(o.o.addr!=='待確認'?o.o.addr:r.map));}
 function refItem(id){var r=null;trip.days.forEach(function(d){d.items.forEach(function(it){if(it.ref===id){r={d:d,it:it};}});});return r;}
@@ -1940,6 +1941,11 @@ function songWatLL(n){
   for(var i=0;i<SWA.length-1;i++){var a=SWA[i],b=SWA[i+1];if(n<=a[0]&&n>=b[0]){var f=(a[0]-n)/(a[0]-b[0]);return [a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f];}}
   return n>1608?[SWA[0][1],SWA[0][2]]:[SWA[3][1],SWA[3][2]];
 }
+var MALLS=[['SP','Siam Paragon',/Paragon/i,/Paragon|百麗宮|百丽宫/i],['SC','Siam Center',/Siam Center|Absolute Siam/i,/Siam Center|暹羅中心/i],['SD','Siam Discovery',/Siam Discovery/i,/Siam Discovery/i],['SQ1','Siam Square One',/Siam Square One|SQ1/i,/Siam Square One/i],['LIDO','LIDO Connect',/LIDO/i,/LIDO/i]];
+function mallOf(o){if(!o||regOf(o)!=='siam')return null;var txt=(o.kind==='shop'?o.o.loc:o.o.addr)||'',best=null,bi=1e9;
+  MALLS.forEach(function(M){var m=M[2].exec(txt);if(m&&m.index<bi){bi=m.index;best=M;}});return best?best[0]:'SQ';}
+function mallName(k){var M=MALLS.filter(function(x){return x[0]===k;})[0];return M?M[1]:'Siam Square 街區';}
+function mallAnchor(day,k){var M=MALLS.filter(function(x){return x[0]===k;})[0],d=dayOf(day);if(!M||!d)return null;var f=d.items.filter(function(x){return !x.ref&&M[3].test(x.n||'');})[0];return f?f.id:null;}
 function placeLL(o){
   var txt=(o.kind==='shop'?o.o.loc:o.o.addr)||'',r=regOf(o),m;
   if(o.o.ll)return o.o.ll;
@@ -1952,8 +1958,7 @@ function placeLL(o){
     return songWatLL(1000);
   }
   if(r==='siam'){
-    if(/Siam Discovery/i.test(txt))return PLACE.SD;if(/Paragon/i.test(txt))return PLACE.SP;if(/Siam Square One/i.test(txt))return PLACE.SQ1;if(/LIDO/i.test(txt))return PLACE.LIDO;
-    if(/Siam Center|Absolute Siam/i.test(txt)&&!/Soi/.test(txt.split('Siam Center')[0]))return PLACE.SC;
+    var mk=mallOf(o);if(mk&&mk!=='SQ'&&PLACE[mk])return PLACE[mk];
     if((m=/Siam Square Soi\s*(\d+)|Soi Siam Square\s*(\d+)/i.exec(txt))){var k=+(m[1]||m[2]);if(SQSOI[k])return SQSOI[k];}
     return PLACE.SQ;
   }
@@ -1988,6 +1993,7 @@ function syncExtras(){
 function replan(d){
   d.warn=[];
   d.items.forEach(function(it){if(it.bs!=null){it.s=it.bs;it.e=it.be;delete it.bs;delete it.be;}delete it.nest;});
+  d.items.forEach(function(x){if(x.ref){var pl=planOf(x.ref);if(pl&&pl.day===d.id)x.anchor=pl.anchor;}});
   var anchors={};d.items.forEach(function(x){if(x.ref&&!x.manual){(anchors[x.anchor]=anchors[x.anchor]||[]).push(x);}});
   var placeChain=function(an,start,nest){
     var pool=anchors[an.id].slice(),cur=an.ll,t=start,k=0;
@@ -2646,7 +2652,9 @@ function renderExplore(){
   EXDAYS.forEach(function(dd){
     var dl=list.filter(function(s){return REGDAY[s.r]===dd[0];});if(!dl.length)return;var D=dayOf(dd[0]),i=dd[0]-1;
     html+='<div class="dgh" style="--c:'+dc(i)+';--cl:'+dcl(i)+'"><div><b>第 '+dd[0]+' 天・'+esc(dd[1])+'</b><small>'+D.date+'（'+D.dow.slice(1)+'）・'+dl.length+' 間</small></div><button class="mini" data-dayprev="'+dd[0]+'" aria-expanded="'+EXDP.has(dd[0])+'">'+(EXDP.has(dd[0])?'收起 ▴':'看行程 ▾')+'</button></div>'+(EXDP.has(dd[0])?dayPrev(D):'');
-    Object.keys(REG).forEach(function(rk){var rl=dl.filter(function(s){return s.r===rk;});if(!rl.length)return;html+='<div class="rgh" style="--c:'+dc(i)+'"><b>'+esc(REG[rk].zh)+'</b><span>'+rl.length+' 家</span></div>'+rl.map(shopCard).join('');});
+    Object.keys(REG).forEach(function(rk){var rl=dl.filter(function(s){return s.r===rk;});if(!rl.length)return;html+='<div class="rgh" style="--c:'+dc(i)+'"><b>'+esc(REG[rk].zh)+'</b><span>'+rl.length+' 家</span></div>';
+      if(rk==='siam'){MALLS.map(function(M){return M[0];}).concat(['SQ']).forEach(function(mk){var ml=rl.filter(function(s){return mallOf({kind:'shop',o:s})===mk;});if(!ml.length)return;html+='<div class="mgh"><span>'+esc(mallName(mk))+'</span><em>'+ml.length+'</em></div>'+ml.map(shopCard).join('');});}
+      else html+=rl.map(shopCard).join('');});
   });
   $('#ex-list').innerHTML=html||'<div class="empty">沒有符合的店家，換個日期或分類試試。</div>';
   $$('#ex-days .chip').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.exday===String(st.ex.day)));});
