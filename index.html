@@ -1953,10 +1953,12 @@ function walkMin(a,b){if(!a||!b)return 5;return Math.max(2,Math.round(hav(a,b)*1
 /* ---------- 收藏 → 依距離排進行程，後面行程往後推 ---------- */
 function syncExtras(){
   trip.days.forEach(function(d){d.items=d.items.filter(function(it){return !it.ref||saved.has(it.ref);});});
+  var mig=false;try{mig=!localStorage.getItem('tdiary-dur10');}catch(e){}
+  if(mig){trip.days.forEach(function(d){d.items.forEach(function(it){if(it.ref&&it.cat==='shop'&&!it.manual&&it.dur===30)it.dur=10;});});try{localStorage.setItem('tdiary-dur10','1');}catch(e){}}
   Array.from(saved).forEach(function(id){
     var pl=planOf(id);if(!pl||refItem(id))return;
     var d=dayOf(pl.day);if(!d)return;var o=ALL[id];
-    var it={id:'x-'+id,ref:id,anchor:pl.anchor,n:o.o.n,cat:o.kind==='food'?'food':'shop',s:'12:00',e:'12:30',ta:1,dur:o.kind==='food'?45:30,
+    var it={id:'x-'+id,ref:id,anchor:pl.anchor,n:o.o.n,cat:o.kind==='food'?'food':'shop',s:'12:00',e:o.kind==='food'?'12:45':'12:10',ta:1,dur:o.kind==='food'?45:10,
       a:o.kind==='shop'?o.o.loc:o.o.addr,q:extraQ(o),mo:o.kind==='food'?'bowl':(o.o.type==='zone'?'market':MCAT[o.o.c[0]])};
     if(o.o.h&&o.o.h!=='待確認')it.hr=o.o.h;
     var ll=placeLL(o);if(ll)it.ll=ll;
