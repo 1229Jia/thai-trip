@@ -1927,7 +1927,13 @@ var FOODREG={'Siam':'siam','Chula':'songwat','Song Wat':'songwat','Yaowarat':'so
 var EXDAYS=[[1,'暹羅・ICONSIAM'],[3,'洽圖洽・河濱夜市'],[4,'芭達雅'],[5,'嵩越路'],[6,'CentralWorld']];
 var MCAT={cloth:'dress',bag:'bag',shoe:'shoe',vint:'hanger',acc:'jewel',frag:'perfume',life:'vase',art:'frame',coll:'record',toy:'toy'};
 function regOf(o){return o.kind==='shop'?o.o.r:(o.kind==='food'?FOODREG[o.o.area]:null);}
-function planOf(id){var o=ALL[id];if(!o||o.kind==='spot')return null;var r=regOf(o);if(!r||!REGDAY[r])return null;var mk=mallOf(o),ma=mk?mallAnchor(REGDAY[r],mk):null;return {day:REGDAY[r],anchor:ma||ANCHOR[r],reg:r,mall:mk};}
+function mallCands(o){if(!o||regOf(o)!=='siam')return [];var txt=(o.kind==='shop'?o.o.loc:o.o.addr)||'',c=[];
+  MALLS.forEach(function(M){var re=new RegExp(M[2].source,'gi'),m;while((m=re.exec(txt))){c.push([m.index,M[0]]);}});
+  var sq=/Siam Square(?! One)|Soi Siam|暹羅廣場/gi,m2;while((m2=sq.exec(txt))){c.push([m2.index,'SQ']);}
+  return c.sort(function(x,y){return x[0]-y[0];}).map(function(x){return x[1];});}
+function planOf(id){var o=ALL[id];if(!o||o.kind==='spot')return null;var r=regOf(o);if(!r||!REGDAY[r])return null;
+  var cs=mallCands(o),ma=null,mk=null;for(var i=0;i<cs.length;i++){if(cs[i]==='SQ')break;var x=mallAnchor(REGDAY[r],cs[i]);if(x){ma=x;mk=cs[i];break;}}
+  return {day:REGDAY[r],anchor:ma||ANCHOR[r],reg:r,mall:mk};}
 function anchorName(aid){var f=findItem(aid);return f?f.it.n.split(' ')[0]:'';}
 function extraQ(o){var r=REG[regOf(o)];return o.o.n+' '+(o.kind==='shop'?r.map:(o.o.addr!=='待確認'?o.o.addr:r.map));}
 function refItem(id){var r=null;trip.days.forEach(function(d){d.items.forEach(function(it){if(it.ref===id){r={d:d,it:it};}});});return r;}
