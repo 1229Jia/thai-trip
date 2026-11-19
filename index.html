@@ -2416,8 +2416,8 @@ function openItemEditor(id,newDay){
     '<label class="fld full">名稱<input name="n" required value="'+esc(it.n)+'"></label>'+
     '<label class="fld">日期<select name="day">'+dayOpts(d.id)+'</select></label>'+
     '<label class="fld">類別<select name="cat">'+opts(catSel,it.cat)+'</select></label>'+
-    '<label class="fld">開始<input type="time" name="s" step="300" value="'+esc(it.s)+'" required></label>'+
-    '<label class="fld">結束<input type="time" name="e" step="300" value="'+esc(it.e)+'"></label>'+
+    '<label class="fld">開始<input type="time" name="s" step="60" value="'+esc(it.s)+'" required></label>'+
+    '<label class="fld">結束<input type="time" name="e" step="60" value="'+esc(it.e)+'"></label>'+
     '<label class="fld full">地址<input name="a" value="'+esc(it.a||'')+'"></label>'+
     '<label class="fld full">營業時間<input name="hr" value="'+esc(it.hr||'')+'"></label>'+
     '<label class="fld full">備註<textarea name="note">'+esc(it.note||'')+'</textarea></label>'+
